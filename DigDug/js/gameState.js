@@ -15,6 +15,8 @@ class gameState extends Phaser.Scene
         this.load.setPath('assets/images/');
         this.load.image('foreground', 'foreground.png');
         this.load.image('player', 'digDugGuy.png');
+        this.load.image('maskDigBottom', 'diggedFromBottom.png');
+        this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
     }
 
     create()
@@ -52,7 +54,62 @@ class gameState extends Phaser.Scene
         this.lastMoveX = 0;
         this.lastMoveY = 0;
 
+        
+        const mask = this.make.image(
+            {
+                x: 0,
+                y: 0,
+                key: 'maskDigBottom',
+                add: false
+            }
+        )
+
+/*
+        const bitmapMask = new Phaser.Display.Masks.BitmapMask(this, mask);
+        bitmapMask.invertAlpha = true;
+        this.foreground.mask = bitmapMask;
+        this.input.on('pointerdown', 
+            function (pointer) 
+            {
+                var mask2 = this.make.image(
+                    {
+                        x: pointer.x,
+                        y: pointer.y,
+                        key: 'maskDigBottom',
+                        add: false
+                    }
+                )
+        
+                const bitmapMask2 = new Phaser.Display.Masks.BitmapMask(this, mask2);
+                bitmapMask2.invertAlpha = true;
+                this.foreground.mask = bitmapMask2;
+            },
+            this
+        );
+  */      
+        
+        var renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
+                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT);
+        var mask2 = renderTexture.createBitmapMask();
+        mask2.invertAlpha = true;
+        
+        this.foreground.setMask(mask2);
+
+        this.input.on('pointerdown',
+            function(pointer)
+            {
+                renderTexture.draw('maskDigBottom', pointer.x-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET -8, 
+                                                    pointer.y-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET - 8);
+                renderTexture.alpha = 0.5;
+                //var mask3 = renderTexture.createBitmapMask();
+                //mask3.invertAlpha = true;
+                //this.foreground.setMask(mask3);
+            },
+            this
+        );
+
     }
+
 
 
     update()
@@ -115,7 +172,7 @@ class gameState extends Phaser.Scene
 
     addSquareToMask()
     {
-        shapeMask.fillRect(this.player.x - gamePrefs.HALF_CELL_SIZE, this.player.y - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
+        shapeMask.fillRect(this.player.x - gamePrefs.HALF_CELL_SIZE+1, this.player.y - gamePrefs.HALF_CELL_SIZE+1, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
     }
 
     canMoveHorizontaly()
