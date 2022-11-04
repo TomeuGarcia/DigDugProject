@@ -15,9 +15,9 @@ var gamePrefs =
 var config = 
 {
     type: Phaser.AUTO,
-    width: 256, // window.innerWidth
-    height: 256,  // window.innerHeight
-    scene:[gameState], // levels/screens/scenes array
+    width: 256, // window.innerWidth  //menu --> width: 480,
+    height: 256,  // window.innerHeight //menu --> height: 360,
+    scene:[menu, gameState], // levels/screens/scenes array
     render:
     {
         pixelArt: true
