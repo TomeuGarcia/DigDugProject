@@ -57,8 +57,8 @@ class gameState extends Phaser.Scene
         
         const mask = this.make.image(
             {
-                x: 0,
-                y: 0,
+                x: 100,
+                y: 100,
                 key: 'maskDigBottom',
                 add: false
             }
@@ -88,26 +88,58 @@ class gameState extends Phaser.Scene
         );
   */      
         
+        
         var renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
                                                    gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT);
-        var mask2 = renderTexture.createBitmapMask();
-        mask2.invertAlpha = true;
+        //var mask2 = renderTexture.createBitmapMask();
+        //mask2.invertAlpha = true;
         
-        this.foreground.setMask(mask2);
+        //this.foreground.setMask(mask2);
 
         this.input.on('pointerdown',
             function(pointer)
             {
                 renderTexture.draw('maskDigBottom', pointer.x-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET -8, 
                                                     pointer.y-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET - 8);
-                renderTexture.alpha = 0.5;
-                //var mask3 = renderTexture.createBitmapMask();
-                //mask3.invertAlpha = true;
-                //this.foreground.setMask(mask3);
+                
+                var maskSprite = this.add.sprite(pointer.x, pointer.y, renderTexture);
+
+                var mask3 = maskSprite.createBitmapMask();
+                mask3.invertAlpha = true;
+                this.foreground.setMask(mask3);
             },
             this
         );
+        
 
+        /*
+        this.maskContainer = this.add.container(0,0);
+        this.maskContainer.add(mask);
+
+        this.input.on('pointerdown',
+            function(pointer)
+            {
+                const mask2 = this.make.image(
+                    {
+                        x: pointer.x,
+                        y: pointer.y,
+                        key: 'maskDigBottom',
+                        add: false
+                    }
+                )
+
+                this.maskContainer.add(mask2);                        
+                var bitmapMask = new Phaser.Display.Masks.BitmapMask(this, this.maskContainer);
+                bitmapMask.invertAlpha = true;
+                this.foreground.setMask(bitmapMask);
+            }, 
+            this
+        );
+
+        var bitmapMask = new Phaser.Display.Masks.BitmapMask(this, mask);
+        bitmapMask.invertAlpha = true;
+        this.foreground.mask = bitmapMask;
+            */
     }
 
 
