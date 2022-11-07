@@ -20,6 +20,16 @@ class menu extends Phaser.Scene{
 		this.pointer = this.add.sprite(config.width/2 - 45, config.height/2 + 5, 'pointer').setOrigin(.5).setScale(.7);
 
 		// Player 1 score
+		this.firstPlayerScoreText = this.add.text(
+			20, 
+			25, 
+			"1UP", 
+			{
+				fontFamily: 'Arial Black',
+				fill: '#fc1c03',
+				stroke: '#fc1c03'
+			}
+		).setOrigin(0).setScale(.8);
 		this.firstPlayerScore = this.add.text(
 			config.width/2 - 60, 
 			40, 
@@ -32,6 +42,16 @@ class menu extends Phaser.Scene{
 		).setOrigin(0).setScale(.7);
 
 		// High-score
+		this.highScoreText = this.add.text(
+			config.width/2, 
+			33, 
+			"HIGH-SCORE", 
+			{
+				fontFamily: 'Arial Black',
+				fill: '#fc1c03',
+				stroke: '#fc1c03'
+			}
+		).setOrigin(.5).setScale(.8);
 		this.highScore = this.add.text(
 			config.width/2, 
 			40, 
@@ -44,6 +64,16 @@ class menu extends Phaser.Scene{
 		).setOrigin(0).setScale(.7);
 
 		// Player 2 score
+		this.secondPlayerScoreText = this.add.text(
+			config.width/2 + 60, 
+			25, 
+			"2UP", 
+			{
+				fontFamily: 'Arial Black',
+				fill: '#fc1c03',
+				stroke: '#fc1c03'
+			}
+		).setOrigin(0).setScale(.8);
 		this.secondPlayerScore = this.add.text(
 			config.width/2 + 100, 
 			40, 
