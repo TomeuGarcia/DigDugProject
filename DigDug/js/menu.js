@@ -7,7 +7,7 @@ class menu extends Phaser.Scene{
 	preload()
 	{
 		this.load.setPath('assets/images/');
-        this.load.image('menu', 'mainMenu_Clean.png');
+        this.load.image('menu', 'mainMenu_Cleaner.png');
 		this.load.image('pointer', 'mainMenuPointer.png');
 	}
 
@@ -31,7 +31,7 @@ class menu extends Phaser.Scene{
 			}
 		).setOrigin(0).setScale(.8);
 		this.firstPlayerScore = this.add.text(
-			config.width/2 - 60, 
+			config.width/2 - 70, 
 			40, 
 			"00", 
 			{
@@ -43,7 +43,7 @@ class menu extends Phaser.Scene{
 
 		// High-score
 		this.highScoreText = this.add.text(
-			config.width/2, 
+			config.width/2 - 5, 
 			33, 
 			"HIGH-SCORE", 
 			{
@@ -84,6 +84,28 @@ class menu extends Phaser.Scene{
 				stroke: '#FFFFFF'
 			}
 		).setOrigin(0).setScale(.7);
+
+		// Dates & all rights reserved
+		this.dates = this.add.text(
+			config.width/2 + 5, 
+			config.height - 45, 
+			"1982 1985 NAMCO LTD.", 
+			{
+				fontFamily: 'Arial Black',
+				fill: '#FFFFFF',
+				stroke: '#FFFFFF'
+			}
+		).setOrigin(.5).setScale(.7);
+		this.rights = this.add.text(
+			config.width/2 + 5, 
+			config.height - 25, 
+			"ALL RIGHTS RESERVED", 
+			{
+				fontFamily: 'Arial Black',
+				fill: '#FFFFFF',
+				stroke: '#FFFFFF'
+			}
+		).setOrigin(.5).setScale(.7);
 
 		// == BUTTONS ==
 		// 1 player button
