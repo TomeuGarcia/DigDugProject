@@ -99,6 +99,7 @@ class gameState extends Phaser.Scene
         this.input.on('pointerdown',
             function(pointer)
             {
+                /*
                 renderTexture.draw('maskDigBottom', pointer.x-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET -8, 
                                                     pointer.y-gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET - 8);
                 
@@ -107,6 +108,7 @@ class gameState extends Phaser.Scene
                 var mask3 = maskSprite.createBitmapMask();
                 mask3.invertAlpha = true;
                 this.foreground.setMask(mask3);
+                */
             },
             this
         );
