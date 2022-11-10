@@ -53,37 +53,19 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     doPatrol()
     {
-        if (this.body.blocked.right)
+        if (this.body.blocked.right || this.body.blocked.left)
         {
-            this.directionX = -1;
+            this.directionX *= -1;
             this.directionY = 0;
             this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
             this.body.setVelocityY(0);
             this.flipX = !this.flipX;
             this.flipY = false;
         }
-        else if (this.body.blocked.left)
-        {
-            this.directionX = 1;
-            this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-            this.body.setVelocityY(0);
-            this.flipX = !this.flipX;
-            this.flipY = false;
-        }
-        else if (this.body.blocked.down)
+        else if (this.body.blocked.down || this.body.blocked.up)
         {
             this.directionX = 0;
-            this.directionY = -1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-            this.flipX = false;
-            this.flipY = !this.flipY;
-        }
-        else if (this.body.blocked.up)
-        {
-            this.directionX = 0;
-            this.directionY = 1;
+            this.directionY *= -1;
             this.body.setVelocityX(0);
             this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
             this.flipX = false;
