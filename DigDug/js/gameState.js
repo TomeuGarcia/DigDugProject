@@ -1,5 +1,9 @@
 var shapeMask;
 
+const MapContent = {
+    Ground: 1,
+    Empty: 0
+}
 
 class gameState extends Phaser.Scene
 {
@@ -25,29 +29,47 @@ class gameState extends Phaser.Scene
         shapeMask.fillStyle(0xffffff);
         shapeMask.beginPath();
 
-        this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
 
-        this.foreground = this.add.tileSprite(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
-                                              gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT, 
+        this.mapPixelOffset = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
+            gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
+        
+        this.mapCellOffset = this.pix2cell(this.mapPixelOffset.x, this.mapPixelOffset.y);
+
+
+
+        this.foreground = this.add.tileSprite(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.NUM_CELL_TOP_AIR), 
+                                              gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT-1), 
                                               'foreground').setOrigin(0);
-        this.foreground.setMask(this.mask);
 
-        this.player = this.physics.add.sprite(gamePrefs.HALF_CELL_SIZE, gamePrefs.HALF_CELL_SIZE, 'player').setScale(1).setOrigin(.5);
+        this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
+        this.foreground.setMask(this.mask);
+                                            
+
+        this.player = this.physics.add.sprite(this.mapPixelOffset.x, this.mapPixelOffset.y, 'player').setScale(1).setOrigin(.5);
         this.player.body.collideWorldBounds = true;
         this.addSquareToMask();
 
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
 
+
+        // Initialize Map (hardcoded)
         this.grid = new Array(gamePrefs.NUM_CELL_HEIGHT);
         for (var row = 0; row < gamePrefs.NUM_CELL_HEIGHT; ++row)
         {
             this.grid[row] = new Array(gamePrefs.NUM_CELL_WIDTH);
             for (var col = 0; col < gamePrefs.NUM_CELL_WIDTH; ++col)
             {
-                this.grid[row][col] = 1;
+                if (row <= 0){
+                    this.grid[row][col] = MapContent.Empty;
+                }
+                else {
+                    this.grid[row][col] = MapContent.Ground;
+                }
             }
         }
 
+
+
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
 
         this.moveX = 0;
         this.moveY = 0;
@@ -55,41 +77,8 @@ class gameState extends Phaser.Scene
         this.lastMoveY = 0;
 
         
-        const mask = this.make.image(
-            {
-                x: 100,
-                y: 100,
-                key: 'maskDigBottom',
-                add: false
-            }
-        )
 
-/*
-        const bitmapMask = new Phaser.Display.Masks.BitmapMask(this, mask);
-        bitmapMask.invertAlpha = true;
-        this.foreground.mask = bitmapMask;
-        this.input.on('pointerdown', 
-            function (pointer) 
-            {
-                var mask2 = this.make.image(
-                    {
-                        x: pointer.x,
-                        y: pointer.y,
-                        key: 'maskDigBottom',
-                        add: false
-                    }
-                )
-        
-                const bitmapMask2 = new Phaser.Display.Masks.BitmapMask(this, mask2);
-                bitmapMask2.invertAlpha = true;
-                this.foreground.mask = bitmapMask2;
-            },
-            this
-        );
-  */      
-        
-        
-        var renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
+        this.renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
                                                    gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT);
         //var mask2 = renderTexture.createBitmapMask();
         //mask2.invertAlpha = true;
@@ -112,36 +101,7 @@ class gameState extends Phaser.Scene
             },
             this
         );
-        
 
-        /*
-        this.maskContainer = this.add.container(0,0);
-        this.maskContainer.add(mask);
-
-        this.input.on('pointerdown',
-            function(pointer)
-            {
-                const mask2 = this.make.image(
-                    {
-                        x: pointer.x,
-                        y: pointer.y,
-                        key: 'maskDigBottom',
-                        add: false
-                    }
-                )
-
-                this.maskContainer.add(mask2);                        
-                var bitmapMask = new Phaser.Display.Masks.BitmapMask(this, this.maskContainer);
-                bitmapMask.invertAlpha = true;
-                this.foreground.setMask(bitmapMask);
-            }, 
-            this
-        );
-
-        var bitmapMask = new Phaser.Display.Masks.BitmapMask(this, mask);
-        bitmapMask.invertAlpha = true;
-        this.foreground.mask = bitmapMask;
-            */
     }
 
 
@@ -151,9 +111,22 @@ class gameState extends Phaser.Scene
         this.getInputs();
         this.movePlayer();
 
-        //var v = this.pix2cell(60,60);
-        //console.log(v.x);
-        //console.log(v.y);
+
+        
+        // Testing
+        console.clear();      
+        const playerCellPos = this.pix2cell(this.player.x -  this.mapPixelOffset.x + gamePrefs.HALF_CELL_SIZE, this.player.y -  this.mapPixelOffset.y + gamePrefs.HALF_CELL_SIZE);
+        
+        if (playerCellPos.x >= 0 && playerCellPos.y >= 0)
+        {
+            const gridTile = this.grid[playerCellPos.y][playerCellPos.x];
+            console.log(gridTile);
+            if (gridTile == MapContent.Ground)
+            {
+                this.grid[playerCellPos.y][playerCellPos.x] = MapContent.Empty;
+            }
+        }
+
     }
 
 
@@ -226,7 +199,14 @@ class gameState extends Phaser.Scene
 
     pix2cell(pixelX, pixelY)
     {
-        return new Phaser.Math.Vector2(pixelX/gamePrefs.CELL_SIZE, pixelY/gamePrefs.CELL_SIZE);
+        return new Phaser.Math.Vector2(Phaser.Math.FloorTo(pixelX/gamePrefs.CELL_SIZE), 
+                                       Phaser.Math.FloorTo(pixelY/gamePrefs.CELL_SIZE));
+    }
+
+    cell2pix(cellX, cellY)
+    {
+        return new Phaser.Math.Vector2((cellX * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE, 
+                                       (cellY * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE);
     }
 
 }

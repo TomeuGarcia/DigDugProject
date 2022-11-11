@@ -7,9 +7,10 @@ var gamePrefs =
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
     NUM_CELL_WIDTH: 12,
-    NUM_CELL_HEIGHT: 12,
+    NUM_CELL_HEIGHT: 13,
     NUM_CELL_LEFT_OFFSET: 1,
-    NUM_CELL_TOP_OFFSET: 3
+    NUM_CELL_TOP_OFFSET: 2,
+    NUM_CELL_TOP_AIR: 1
 }
 
 var config = 
