@@ -157,7 +157,7 @@ class menu extends Phaser.Scene{
 
 	changeScene()
 	{
-		this.scene.start('gameState');
+		this.scene.start('level1');
 	}
 
 	update()
