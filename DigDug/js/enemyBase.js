@@ -1,3 +1,18 @@
+const EnemyStates = {
+    PATROL: 0, 
+    GHOST: 1, 
+    INFLATED: 2, 
+    DYING: 3
+}
+
+const MoveDirection = {
+    RIGHT: 0,
+    UP: 1,
+    LEFT: 2,
+    DOWN: 3,
+    COUNT: 4
+}
+
 class enemyBase extends Phaser.GameObjects.Sprite
 {
     constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy')
@@ -9,8 +24,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         
-        this.states = { PATROL, GHOST, INFLATED, DYING };
-        this.currentState = this.states.PATROL;
+        this.currentState = EnemyStates.PATROL;
+        this.moveDirection = MoveDirection.RIGHT;
 
         this.directionX = 1;
         this.directionY = 0;
@@ -26,21 +41,28 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
 
     preUpdate(time,delta)
-    {        
+    {
+        super.preUpdate(time, delta);
+
+        this.doCurrentState();
+    }
+
+    doCurrentState()
+    {
         switch (this.currentState) {
-            case PATROL:
-                doPatrol();
+            case EnemyStates.PATROL:
+                this.doPatrol();
                 break;
 
-            case GHOST:
-                doGhost();
+            case EnemyStates.GHOST:
+                this.doGhost();
                 break;
 
-            case INFLATED:
-                doInflated();
+            case EnemyStates.INFLATED:
+                this.doInflated();
                 break;
 
-            case DYING:
+            case EnemyStates.DYING:
                 this.doDie();
                 break;
         
@@ -48,12 +70,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
                 break;
         }
 
-        super.preUpdate(time, delta);
+
     }
 
     doPatrol()
     {
-        if (this.body.blocked.right || this.body.blocked.left)
+        if ((this.body.blocked.right || this.body.blocked.left) && 
+            (this.moveDirection == MoveDirection.RIGHT || this.moveDirection == MoveDirection.LEFT))
         {
             this.directionX *= -1;
             this.directionY = 0;
@@ -61,8 +84,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.body.setVelocityY(0);
             this.flipX = !this.flipX;
             this.flipY = false;
+
+            this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT;
         }
-        else if (this.body.blocked.down || this.body.blocked.up)
+        else if ((this.body.blocked.down || this.body.blocked.up) && 
+                (this.moveDirection == MoveDirection.UP || this.moveDirection == MoveDirection.DOWN))
         {
             this.directionX = 0;
             this.directionY *= -1;
@@ -70,6 +96,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
             this.flipX = false;
             this.flipY = !this.flipY;
+            
+            this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT;
         }
     }
 
