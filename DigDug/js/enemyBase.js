@@ -21,15 +21,19 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
+        this.body.collideWorldBounds = true;
+        this.body.allowGravity = false;
 
         this.scene = _scene;
-        this.body.allowGravity = false;
+        this.points = 100;
         
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.RIGHT;
 
         this.directionX = 1;
         this.directionY = 0;
+        this.body.setVelocityX(20 * this.directionX);
+        //this.body.setVelocityY(20 * this.directionY);
 
         // Overlap with player
         _scene.physics.add.overlap(
@@ -53,6 +57,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
+                console.log("position: ", this.x, " ", this.y);
+                //console.log("patroling ", this.directionX, " ", this.directionY, " position: ", this.x, " ", this.y);
                 break;
 
             case EnemyStates.GHOST:
@@ -84,7 +90,17 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.flipX = !this.flipX;
             this.flipY = false;
 
-            this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT;
+            console.log("prev direction ", this.moveDirection);
+            if (this.moveDirection == MoveDirection.RIGHT)
+            {
+                this.moveDirection = MoveDirection.LEFT;
+            }
+            else if (this.moveDirection == MoveDirection.LEFT)
+            {
+                this.moveDirection = MoveDirection.RIGHT;
+            }
+            //this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT; // DOESN'T WORK
+            console.log("curr direction ", this.moveDirection);
         }
         else if ((this.body.blocked.down || this.body.blocked.up) && 
                 (this.moveDirection == MoveDirection.UP || this.moveDirection == MoveDirection.DOWN))
@@ -96,13 +112,23 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.flipX = false;
             this.flipY = !this.flipY;
             
-            this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT;
+            console.log("prev direction ", this.moveDirection);
+            if (this.moveDirection == MoveDirection.UP)
+            {
+                this.moveDirection = MoveDirection.DOWN;
+            }
+            else if (this.moveDirection == MoveDirection.DOWN)
+            {
+                this.moveDirection = MoveDirection.UP;
+            }
+            //this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT; // DOESN'T WORK
+            console.log("curr direction ", this.moveDirection);
         }
     }
 
     doGhost()
     {
-        // Reomve gravity & collisions
+        // Reomve collisions
 
         // Check if it leaves an area with collions
 
@@ -120,9 +146,20 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doDie()
     {
         // Add points
+        this.scene.score += this.points;
+        console.log("Score: " + this.scene.score);
+
+        // Reset points value
+        this.points = 100;
 
         // Remove from scene
         this.destroy();
+    }
+
+    killedByRock()
+    {
+        this.points = 200;
+        this.currentState = EnemyStates.DYING;
     }
 
     hit(_jumper, _hero)
