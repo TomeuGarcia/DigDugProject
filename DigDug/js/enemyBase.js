@@ -23,6 +23,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         _scene.physics.world.enable(this);
 
         this.scene = _scene;
+        this.body.allowGravity = false;
         
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.RIGHT;
@@ -69,8 +70,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
             default:
                 break;
         }
-
-
     }
 
     doPatrol()
@@ -123,7 +122,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Add points
 
         // Remove from scene
-
+        this.destroy();
     }
 
     hit(_jumper, _hero)
