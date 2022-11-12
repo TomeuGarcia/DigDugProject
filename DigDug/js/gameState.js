@@ -1,9 +1,5 @@
 var shapeMask;
 
-const MapContent = {
-    Ground: 1,
-    Empty: 0
-}
 
 class gameState extends Phaser.Scene
 {

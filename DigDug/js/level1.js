@@ -23,6 +23,7 @@ class level1 extends Phaser.Scene
 
         this.load.setPath('assets/tilesets/');
         this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
+        this.load.json('levelJSON', 'testLevel1.json');
     }
 
     create()
@@ -53,6 +54,7 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
+
     }
 
     //// CREATE start
@@ -71,6 +73,29 @@ class level1 extends Phaser.Scene
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
 
+        
+        const levelGroundLayer = this.cache.json.get('levelJSON').layers[0];
+        this.levelWidth = levelGroundLayer.width;
+        this.levelHeight = levelGroundLayer.height;
+        this.levelArray = [];
+        for (var i = 0; i < this.levelHeight; ++i)
+        {
+            this.levelArray.push([]);
+            for (var j = 0; j < this.levelWidth; ++j)
+            {
+                if (levelGroundLayer.data[(i*this.levelWidth) + j] == 0)
+                {
+                    this.levelArray[i].push(MapContent.Empty)
+                }
+                else
+                {
+                    const x = i % this.levelWidth;
+                    const y = i / this.levelHeight;
+    
+                    this.levelArray[i].push(MapContent.Ground);                    
+                }
+            }
+        }   
     }
 
     setupDigging()
@@ -179,6 +204,7 @@ class level1 extends Phaser.Scene
             if (tile.collides)
             {
                 tile.setCollision(false, false, false, false, true);
+                this.player.isDigging = true;
             }
         }
 
@@ -195,6 +221,17 @@ class level1 extends Phaser.Scene
     {
         return new Phaser.Math.Vector2((cellX * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE, 
                                        (cellY * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE);
+    }
+
+
+    isGroundCell(cellX, cellY)
+    {
+        return this.levelArray[cellY][cellX] == MapContent.Ground;
+    }
+
+    removeGroundCell(cellX, cellY)
+    {
+        this.levelArray[cellY][cellX] = MapContent.Empty;
     }
 
 }

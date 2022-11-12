@@ -14,6 +14,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
+        _scene.add.existing(this);
+        _scene.physics.world.enable(this);
+
         this.scene = _scene;
         this.cursorKeys = _cursors;
         this.moveX = 0;
@@ -24,8 +27,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerMovement = PlayerMovement.NONE;
         this.lastPlayerMovement = PlayerMovement.NONE;
 
-        _scene.add.existing(this);
-        _scene.physics.world.enable(this);
+        this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
+        this.isDigging = false;
     }
 
 
@@ -45,8 +48,13 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         {
             this.rotateSprite();           
 
-            this.anims.play('playerRun', true);
+            this.checkDigging();
+
+            if (this.isDigging) this.anims.play('playerRunDigging', true);
+            else this.anims.play('playerRun', true);
         }
+
+
     }
 
 
@@ -72,9 +80,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         this.lastPlayerMovement = this.playerMovement;
 
-        if (this.scene.canMoveHorizontaly())
+        const canMoveVertically = this.scene.canMoveVertically();
+        const canMoveHorizontaly = this.scene.canMoveHorizontaly();
+
+        if (canMoveHorizontaly)
         {
-            if (this.moveX == 0 && this.moveY != 0 && !this.scene.canMoveVertically())
+            if (this.moveX == 0 && this.moveY != 0 && !canMoveVertically)
             {
                 this.body.setVelocityX(this.lastMoveX);
             }
@@ -83,16 +94,15 @@ class playerPrefab extends Phaser.GameObjects.Sprite
                 // Move normaly
                 this.body.setVelocityX(this.moveX);
             }
-            this.digHere();
 
             if (this.moveX > 0) this.playerMovement = PlayerMovement.RIGHT
             else if (this.moveX < 0) this.playerMovement = PlayerMovement.LEFT
         }
 
 
-        if (this.scene.canMoveVertically())
+        if (canMoveVertically)
         {
-            if (this.moveY == 0 && this.moveX != 0 && !this.scene.canMoveHorizontaly())
+            if (this.moveY == 0 && this.moveX != 0 && !canMoveHorizontaly)
             {
                 this.body.setVelocityY(this.lastMoveY);
             }
@@ -101,11 +111,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
                 // Move normaly
                 this.body.setVelocityY(this.moveY);
             }
-            this.digHere();
 
             if (this.moveY > 0) this.playerMovement = PlayerMovement.DOWN
             else if (this.moveY < 0) this.playerMovement = PlayerMovement.UP
         }
+
+        this.digHere();
     }
 
 
@@ -173,5 +184,26 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         return this.playerMovement == PlayerMovement.UP &&  this.lastPlayerMovement != PlayerMovement.UP;
     }
+
+
+    checkDigging()
+    {
+        const newCell = this.scene.pix2cell(this.body.x, this.body.y);
+        if (this.currentCell.x != newCell.x || this.currentCell.y != newCell.y) // Are different cells
+        {
+            this.currentCell = newCell;
+
+            const standingOnGround = this.scene.isGroundCell(newCell.x, newCell.y);
+            if (standingOnGround)
+            {
+                this.scene.removeGroundCell(newCell.x, newCell.y);
+            }
+            else
+            {
+                this.isDigging = false;
+            }
+        }
+    }
+
 
 }
