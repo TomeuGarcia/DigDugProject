@@ -19,6 +19,7 @@ class gameState extends Phaser.Scene
         this.load.setPath('assets/images/');
         this.load.image('foreground', 'foreground.png');
         this.load.image('player', 'digDugGuy.png');
+        this.load.image('pooka', 'pooka.png');
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
     }
@@ -49,7 +50,10 @@ class gameState extends Phaser.Scene
         this.player.body.collideWorldBounds = true;
         this.addSquareToMask();
 
-
+        // == ENEMY TESTING ==
+        this.pooka = new enemyBase(this, config.width/2, config.height/2, 'pooka').setOrigin(.5); // Generate enemy
+        this.score = 0;
+        // == == ==
 
         // Initialize Map (hardcoded)
         this.grid = new Array(gamePrefs.NUM_CELL_HEIGHT);
@@ -67,16 +71,12 @@ class gameState extends Phaser.Scene
             }
         }
 
-
-
         this.cursorKeys = this.input.keyboard.createCursorKeys();
 
         this.moveX = 0;
         this.moveY = 0;
         this.lastMoveX = 0;
-        this.lastMoveY = 0;
-
-        
+        this.lastMoveY = 0;        
 
         this.renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
                                                    gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT);
@@ -105,22 +105,25 @@ class gameState extends Phaser.Scene
     }
 
 
-
     update()
     {
         this.getInputs();
         this.movePlayer();
 
-
+        // == TESTING ENEMY DIE ==
+        if (this.cursorKeys.space.isDown) {
+            this.pooka.killedByRock();
+        }
+        // == == ==
         
         // Testing
-        console.clear();      
+        //console.clear();      
         const playerCellPos = this.pix2cell(this.player.x -  this.mapPixelOffset.x + gamePrefs.HALF_CELL_SIZE, this.player.y -  this.mapPixelOffset.y + gamePrefs.HALF_CELL_SIZE);
         
         if (playerCellPos.x >= 0 && playerCellPos.y >= 0)
         {
             const gridTile = this.grid[playerCellPos.y][playerCellPos.x];
-            console.log(gridTile);
+            //console.log(gridTile);
             if (gridTile == MapContent.Ground)
             {
                 this.grid[playerCellPos.y][playerCellPos.x] = MapContent.Empty;
