@@ -17,6 +17,8 @@ class level1 extends Phaser.Scene
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
 
+        this.load.image('pooka', 'pooka.png'); // Pooka enemy
+
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
 
         this.load.setPath('assets/tilesets/');
@@ -30,12 +32,27 @@ class level1 extends Phaser.Scene
 
         this.initPlayer();
 
+        this.score = 0; // Testing
+        this.spaceDown = false; // Testing
+        this.initEnemies();
+
         this.loadAnimations();
     }
 
     update()
     {
         ////// nothing
+
+        // TESTING INFLATE
+        if (this.cursorKeys.space.isDown && !this.spaceDown)
+        {
+            this.spaceDown = true;
+            this.inflatePooka();
+        }
+        else if (this.cursorKeys.space.isUp)
+        {
+            this.spaceDown = false;
+        }
     }
 
     //// CREATE start
@@ -52,7 +69,7 @@ class level1 extends Phaser.Scene
         this.map.createLayer('layer_surface', 'test_level_1');
 
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
-        this.map.setCollisionByExclusion(0, true, true, 'layer_ground');
+        this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
 
     }
 
@@ -88,6 +105,11 @@ class level1 extends Phaser.Scene
         );
     }
 
+    initEnemies()
+    {        
+        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(1).setOrigin(.5);
+    }
+
     loadAnimations()
     {
         this.anims.create
@@ -116,6 +138,20 @@ class level1 extends Phaser.Scene
     }
     //// CREATE end
 
+
+    inflatePooka()
+    {
+        if (!this.pooka.isInInflatedState())
+        {
+            this.pooka.addInflation();
+            this.pooka.setInfaltedState();
+        }
+        else
+        {
+            this.pooka.addInflation();
+        }
+    }
+
     
     //// OTHER
     canMoveHorizontaly()
@@ -137,7 +173,7 @@ class level1 extends Phaser.Scene
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
         const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
-
+        
         if (tile)
         {
             if (tile.collides)

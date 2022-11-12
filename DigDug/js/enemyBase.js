@@ -46,6 +46,18 @@ class enemyBase extends Phaser.GameObjects.Sprite
             null,
             this
         );
+        
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.borders
+        );
+
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.digGround
+        );
     }
 
     preUpdate(time,delta)
@@ -90,42 +102,48 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if ((this.body.blocked.right || this.body.blocked.left) && 
             (this.moveDirection == MoveDirection.RIGHT || this.moveDirection == MoveDirection.LEFT))
         {
-            this.directionX *= -1;
-            this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-            this.body.setVelocityY(0);
-            this.flipX = !this.flipX;
-            this.flipY = false;
-
             if (this.moveDirection == MoveDirection.RIGHT)
             {
-                this.moveDirection = MoveDirection.LEFT;
+                this.moveDirection = MoveDirection.UP;
+                
+                this.directionX = 0;
+                this.directionY = -1;
+                this.body.setVelocityX(0);
+                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                this.flipX = !this.flipX;
             }
             else if (this.moveDirection == MoveDirection.LEFT)
             {
-                this.moveDirection = MoveDirection.RIGHT;
+                this.moveDirection = MoveDirection.DOWN;
+
+                this.directionX = 0;
+                this.directionY = 1;
+                this.body.setVelocityX(0);
+                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                this.flipX = !this.flipX;
             }
-            //this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT; // DOESN'T WORK
         }
         else if ((this.body.blocked.down || this.body.blocked.up) && 
                 (this.moveDirection == MoveDirection.UP || this.moveDirection == MoveDirection.DOWN))
         {
-            this.directionX = 0;
-            this.directionY *= -1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-            this.flipX = false;
-            this.flipY = !this.flipY;
-            
             if (this.moveDirection == MoveDirection.UP)
             {
-                this.moveDirection = MoveDirection.DOWN;
+                this.moveDirection = MoveDirection.LEFT;
+
+                this.directionX = -1;
+                this.directionY = 0;
+                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                this.body.setVelocityY(0);
             }
             else if (this.moveDirection == MoveDirection.DOWN)
             {
-                this.moveDirection = MoveDirection.UP;
+                this.moveDirection = MoveDirection.RIGHT;
+
+                this.directionX = 1;
+                this.directionY = 0;
+                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                this.body.setVelocityY(0);
             }
-            //this.moveDirection = (this.moveDirection + 1) % MoveDirection.COUNT; // DOESN'T WORK
         }
     }
     // == == ==
@@ -143,28 +161,45 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == INFLATED ==
     doInflated()
     {
-        // Remove movement & start countdown
+        // Remove movement
         this.body.setVelocityX(0);
         this.body.setVelocityY(0);
 
         // Check inflated amount
         if (this.inflatedAmount >= MAX_INFLATED)
         {
+            this.deflateTimer.remove();
+
             // Die
             this.currentState = EnemyStates.DYING;
         }
         else if (this.inflatedAmount <= 0)
         {    
-            // Reset patrol
             this.inflatedAmount = 0;
+            this.deflateTimer.remove();
+
+            // Reset patrol
             this.resetMovement();
             this.currentState = EnemyStates.PATROL;
         }
     }
 
+    isInInflatedState()
+    {
+        return this.currentState == EnemyStates.INFLATED;
+    }
+
     setInfaltedState()
     {
         this.currentState = EnemyStates.INFLATED;
+
+        // Start countdown
+        this.deflateTimer = this.scene.time.addEvent({
+            delay: 2000,
+            callback: this.decreaseInflation,
+            callbackScope: this,
+            repeat: -1
+        })
     }
 
     addInflation()
@@ -202,14 +237,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     resetMovement()
     {
         switch (this.moveDirection) {
-            case this.MoveDirection.RIGHT:
-            case this.MoveDirection.LEFT:
+            case MoveDirection.RIGHT:
+            case MoveDirection.LEFT:
                 this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
                 this.body.setVelocityY(0);
                 break;
 
-            case this.MoveDirection.DOWN:
-            case this.MoveDirection.UP:
+            case MoveDirection.DOWN:
+            case MoveDirection.UP:
                 this.body.setVelocityX(0);
                 this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
                 break;

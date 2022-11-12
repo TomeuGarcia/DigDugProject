@@ -17,6 +17,8 @@ class level1_enemies extends Phaser.Scene
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
 
+        this.load.image('pooka', 'pooka.png'); // Pooka enemy
+
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
 
         this.load.setPath('assets/tilesets/');
@@ -25,12 +27,17 @@ class level1_enemies extends Phaser.Scene
 
     create()
     {
+        this.score = 0;
+        this.spaceDown = false;
+
         this.loadMap();
         this.setupDigging();
         
         this.initPlayer();
 
         this.initInputs();
+
+        this.initEnemies();
     }
 
     update()
@@ -53,8 +60,7 @@ class level1_enemies extends Phaser.Scene
         this.map.createLayer('layer_surface', 'test_level_1');
 
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
-        this.map.setCollisionByExclusion(0, true, true, 'layer_ground');
-
+        this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
     }
 
     setupDigging()
@@ -96,6 +102,11 @@ class level1_enemies extends Phaser.Scene
         this.lastMoveX = 0;
         this.lastMoveY = 0;
     }
+
+    initEnemies()
+    {        
+        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(1).setOrigin(.5);
+    }
     //// CREATE end
 
 
@@ -113,6 +124,17 @@ class level1_enemies extends Phaser.Scene
 
         if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
         if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
+
+        // TESTIN INFLATE
+        if (this.cursorKeys.space.isDown && !this.spaceDown)
+        {
+            this.spaceDown = true;
+            this.inflatePooka();
+        }
+        else if (this.cursorKeys.space.isUp)
+        {
+            this.spaceDown = false;
+        }
     }
 
     movePlayer()
@@ -160,6 +182,19 @@ class level1_enemies extends Phaser.Scene
             this.dig();
         }
         
+    }
+
+    inflatePooka()
+    {
+        if (!this.pooka.isInInflatedState())
+        {
+            this.pooka.addInflation();
+            this.pooka.setInfaltedState();
+        }
+        else
+        {
+            this.pooka.addInflation();
+        }
     }
     //// UPDATE end
 
