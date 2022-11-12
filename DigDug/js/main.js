@@ -41,5 +41,10 @@ var config =
 
 }
 
+const MapContent = {
+    Empty: 0,
+    Ground: 1
+}
+
 
 var game = new Phaser.Game(config);
