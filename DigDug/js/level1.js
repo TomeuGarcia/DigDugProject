@@ -12,8 +12,8 @@ class level1 extends Phaser.Scene
         this.cameras.main.setBackgroundColor("#00A");
 
         this.load.setPath('assets/images/');
-        this.load.image('foreground', 'foreground.png');
-        this.load.image('player', 'digDugGuy.png');
+        
+        this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
 
@@ -27,16 +27,15 @@ class level1 extends Phaser.Scene
     {
         this.loadMap();
         this.setupDigging();
-        
+
         this.initPlayer();
 
-        this.initInputs();
+        this.loadAnimations();
     }
 
     update()
     {
-        this.getInputs();
-        this.movePlayer();
+        ////// nothing
     }
 
     //// CREATE start
@@ -74,12 +73,14 @@ class level1 extends Phaser.Scene
 
     initPlayer()
     {
-        this.mapPixelOffset = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
-            gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
+        const playerStart = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
+                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
 
-        this.player = this.physics.add.sprite(this.mapPixelOffset.x, this.mapPixelOffset.y, 'player').setScale(1).setOrigin(.5);
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
+
+        this.player = new playerPrefab(this, playerStart.x, playerStart.y, 'player', this.cursorKeys).setScale(1).setOrigin(.5);
+
         this.player.body.collideWorldBounds = true;
-
         this.physics.add.collider
         (
             this.player,
@@ -87,103 +88,36 @@ class level1 extends Phaser.Scene
         );
     }
 
-    initInputs()
+    loadAnimations()
     {
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.anims.create
+        ({
+            key: 'playerRun',
+            frames: this.anims.generateFrameNumbers('player', {start: 0, end: 1}),
+            frameRate: 10,
+            repeat: -1
+        })
 
-        this.moveX = 0;
-        this.moveY = 0;
-        this.lastMoveX = 0;
-        this.lastMoveY = 0;
+        this.anims.create
+        ({
+            key: 'playerRunDigging',
+            frames: this.anims.generateFrameNumbers('player', {start: 2, end: 3}),
+            frameRate: 10,
+            repeat: -1
+        })
+
+        this.anims.create
+        ({
+            key: 'playerDying',
+            frames: this.anims.generateFrameNumbers('player', {start: 9, end: 13}),
+            frameRate: 10,
+            repeat: -1
+        })
     }
     //// CREATE end
 
-
-    //// UPDATE start
-    getInputs()
-    {
-        if (this.moveX != 0) this.lastMoveX = this.moveX;
-        if (this.moveY != 0) this.lastMoveY = this.moveY;
-
-        this.moveX = 0;
-        this.moveY = 0;
-
-        if (this.cursorKeys.right.isDown) this.moveX += gamePrefs.PLAYER_MOVE_SPEED;
-        if (this.cursorKeys.left.isDown) this.moveX -= gamePrefs.PLAYER_MOVE_SPEED;
-
-        if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
-        if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
-    }
-
-    movePlayer()
-    {
-        if (this.canMoveHorizontaly())
-        {
-            if (this.moveX == 0 && this.moveY != 0 && !this.canMoveVertically())
-            {
-                this.player.setVelocityX(this.lastMoveX * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.x += this.lastMoveX;
-                //this.player.body.position.x += this.lastMoveX;
-            }
-            else
-            {
-                // Move normal
-                this.player.setVelocityX(this.moveX * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.x += this.moveX;
-                //this.player.body.position.x += this.moveX;
-            }
-            this.dig();
-
-            if (this.moveX != 0) 
-            {
-                this.player.setVelocityY(0);
-                return;
-            }
-        }
-
-
-        if (this.canMoveVertically())
-        {
-            if (this.moveY == 0 && this.moveX != 0 && !this.canMoveHorizontaly())
-            {
-                this.player.setVelocityY(this.lastMoveY * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.y += this.lastMoveY;
-                //this.player.body.position.y += this.lastMoveY;
-            }
-            else
-            {
-                // Move normal
-                this.player.setVelocityY(this.moveY * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.y += this.moveY;
-                //this.player.body.position.y += this.moveY;
-            }
-            this.dig();
-        }
-        
-    }
-    //// UPDATE end
-
     
     //// OTHER
-    dig()
-    {
-        const playerX = this.player.body.x+1;
-        const playerY = this.player.body.y+1;
-
-        const cellPos = this.pix2cell(playerX, playerY);
-        const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
-
-        if (tile)
-        {
-            if (tile.collides)
-            {
-                tile.setCollision(false, false, false, false, true);
-            }
-        }
-
-        shapeMask.fillRect(playerX, playerY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
-    }
-
     canMoveHorizontaly()
     {
         return this.canMove(parseInt(this.player.body.y) + gamePrefs.HALF_CELL_SIZE);
@@ -197,6 +131,22 @@ class level1 extends Phaser.Scene
     canMove(pixel)
     {
         return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
+    }
+
+    dig(pixPos)
+    {
+        const cellPos = this.pix2cell(pixPos.x, pixPos.y);
+        const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
+
+        if (tile)
+        {
+            if (tile.collides)
+            {
+                tile.setCollision(false, false, false, false, true);
+            }
+        }
+
+        shapeMask.fillRect(pixPos.x, pixPos.y, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
     }
 
     pix2cell(pixelX, pixelY)
