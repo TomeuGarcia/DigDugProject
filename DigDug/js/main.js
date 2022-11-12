@@ -3,7 +3,7 @@
 
 var gamePrefs =
 {
-    PLAYER_MOVE_SPEED: 6,
+    PLAYER_MOVE_SPEED: 36,
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
     NUM_CELL_WIDTH: 14,
