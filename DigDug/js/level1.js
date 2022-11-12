@@ -1,11 +1,5 @@
 var shapeMask;
 
-/*
-const MapContent = {
-    Ground: 1,
-    Empty: 0
-}*/
-
 class level1 extends Phaser.Scene
 {
     constructor()
@@ -15,7 +9,7 @@ class level1 extends Phaser.Scene
 
     preload()
     {
-        this.cameras.main.setBackgroundColor("#009");
+        this.cameras.main.setBackgroundColor("#00A");
 
         this.load.setPath('assets/images/');
         this.load.image('foreground', 'foreground.png');
@@ -31,6 +25,24 @@ class level1 extends Phaser.Scene
 
     create()
     {
+        this.loadMap();
+        this.setupDigging();
+        
+        this.initPlayer();
+
+        this.initInputs();
+    }
+
+
+
+    update()
+    {
+        this.getInputs();
+        this.movePlayer();
+    }
+
+    loadMap()
+    {
         // Draw Level
         // Load the JSON
         this.map = this.add.tilemap('testLevel1');
@@ -41,109 +53,49 @@ class level1 extends Phaser.Scene
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
         this.map.createLayer('layer_surface', 'test_level_1');
 
-        //this.map.setCollisionBetween(1,11,true,true,'layer_borders');
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
+        this.map.setCollisionByExclusion(0, true, true, 'layer_ground');
 
+    }
 
-        this.mapPixelOffset = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
-            gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
-        
-        this.mapCellOffset = this.pix2cell(this.mapPixelOffset.x, this.mapPixelOffset.y);
-
-
-        
+    setupDigging()
+    {
         shapeMask = this.make.graphics();
         shapeMask.fillStyle(0xffffff);
         shapeMask.beginPath();
 
+        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH+2), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT+2));
 
-        this.foreground = this.add.tileSprite(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.NUM_CELL_TOP_AIR), 
-                                              gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT-1), 
-                                              'foreground').setOrigin(0);
-  
-  
         this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
-        //this.foreground.setMask(this.mask);
-          
-        this.digGround.tileset.forEach(
-            item => item.mask = this.mask
-        )
-        //this.digGround.mask = this.mask;
-                                            
+        this.renderTexture.mask = this.mask;
+
+        this.renderTexture.draw(this.digGround);
+        this.digGround.alpha = 0.0; // make layer invisible
+    }
+
+    initPlayer()
+    {
+        this.mapPixelOffset = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
+            gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
 
         this.player = this.physics.add.sprite(this.mapPixelOffset.x, this.mapPixelOffset.y, 'player').setScale(1).setOrigin(.5);
         this.player.body.collideWorldBounds = true;
-        this.addSquareToMask();
 
         this.physics.add.collider
         (
             this.player,
             this.borders
         );
+    }
 
-
-
-        // Initialize Map (hardcoded)
-        this.grid = new Array(gamePrefs.NUM_CELL_HEIGHT);
-        for (var row = 0; row < gamePrefs.NUM_CELL_HEIGHT; ++row)
-        {
-            this.grid[row] = new Array(gamePrefs.NUM_CELL_WIDTH);
-            for (var col = 0; col < gamePrefs.NUM_CELL_WIDTH; ++col)
-            {
-                if (row <= 0){
-                    this.grid[row][col] = MapContent.Empty;
-                }
-                else {
-                    this.grid[row][col] = MapContent.Ground;
-                }
-            }
-        }
-
-
-
+    initInputs()
+    {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
 
         this.moveX = 0;
         this.moveY = 0;
         this.lastMoveX = 0;
         this.lastMoveY = 0;
-
-        
-
-        this.renderTexture = this.add.renderTexture(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET, 
-                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_WIDTH, gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_HEIGHT);
-        //var mask2 = renderTexture.createBitmapMask();
-        //mask2.invertAlpha = true;
-        
-        //this.foreground.setMask(mask2);
-
-        
-
-    }
-
-
-
-    update()
-    {
-        this.getInputs();
-        this.movePlayer();
-
-
-        
-        // Testing
-        console.clear();      
-        const playerCellPos = this.pix2cell(this.player.x -  this.mapPixelOffset.x + gamePrefs.HALF_CELL_SIZE, this.player.y -  this.mapPixelOffset.y + gamePrefs.HALF_CELL_SIZE);
-        
-        if (playerCellPos.x >= 0 && playerCellPos.y >= 0)
-        {
-            const gridTile = this.grid[playerCellPos.y][playerCellPos.x];
-            console.log(gridTile);
-            if (gridTile == MapContent.Ground)
-            {
-                this.grid[playerCellPos.y][playerCellPos.x] = MapContent.Empty;
-            }
-        }
-
     }
 
 
@@ -164,54 +116,85 @@ class level1 extends Phaser.Scene
 
     movePlayer()
     {
+
+        const speed = 40;
         if (this.canMoveHorizontaly())
         {
             if (this.moveX == 0 && this.moveY != 0 && !this.canMoveVertically())
             {
-                this.player.x += this.lastMoveX;
+                this.player.setVelocityX(this.lastMoveX * speed);
+                //this.player.x += this.lastMoveX;
+                //this.player.body.position.x += this.lastMoveX;
             }
             else
             {
                 // Move normal
-                this.player.x += this.moveX;
+                this.player.setVelocityX(this.moveX * speed);
+                //this.player.x += this.moveX;
+                //this.player.body.position.x += this.moveX;
             }
-            this.addSquareToMask();
+            this.dig();
+
+            if (this.moveX != 0) 
+            {
+                this.player.setVelocityY(0);
+                return;
+            }
         }
+
 
         if (this.canMoveVertically())
         {
             if (this.moveY == 0 && this.moveX != 0 && !this.canMoveHorizontaly())
             {
-                this.player.y += this.lastMoveY;
+                this.player.setVelocityY(this.lastMoveY * speed);
+                //this.player.y += this.lastMoveY;
+                //this.player.body.position.y += this.lastMoveY;
             }
             else
             {
                 // Move normal
-                this.player.y += this.moveY;
+                this.player.setVelocityY(this.moveY * speed);
+                //this.player.y += this.moveY;
+                //this.player.body.position.y += this.moveY;
             }
-            this.addSquareToMask();
+            this.dig();
         }
         
     }
 
-    addSquareToMask()
+    dig()
     {
-        //shapeMask.fillRect(this.player.x - gamePrefs.HALF_CELL_SIZE+1, this.player.y - gamePrefs.HALF_CELL_SIZE+1, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
+        const playerX = this.player.body.x+1;
+        const playerY = this.player.body.y+1;
+
+        const cellPos = this.pix2cell(playerX, playerY);
+        const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
+
+        if (tile)
+        {
+            if (tile.collides)
+            {
+                tile.setCollision(false, false, false, false, true);
+            }
+        }
+
+        shapeMask.fillRect(playerX, playerY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
     }
 
     canMoveHorizontaly()
     {
-        return this.canMove(this.player.y);
+        return this.canMove(parseInt(this.player.body.y) + gamePrefs.HALF_CELL_SIZE);
     }
 
     canMoveVertically()
     {
-        return this.canMove(this.player.x);
+        return this.canMove(parseInt(this.player.body.x) + gamePrefs.HALF_CELL_SIZE);
     }
 
     canMove(pixel)
     {
-        return (pixel % gamePrefs.CELL_SIZE) == (gamePrefs.CELL_SIZE / 2);
+        return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
     }
 
     pix2cell(pixelX, pixelY)
