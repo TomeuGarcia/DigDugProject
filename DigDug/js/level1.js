@@ -33,14 +33,13 @@ class level1 extends Phaser.Scene
         this.initInputs();
     }
 
-
-
     update()
     {
         this.getInputs();
         this.movePlayer();
     }
 
+    //// CREATE start
     loadMap()
     {
         // Draw Level
@@ -97,8 +96,10 @@ class level1 extends Phaser.Scene
         this.lastMoveX = 0;
         this.lastMoveY = 0;
     }
+    //// CREATE end
 
 
+    //// UPDATE start
     getInputs()
     {
         if (this.moveX != 0) this.lastMoveX = this.moveX;
@@ -116,20 +117,18 @@ class level1 extends Phaser.Scene
 
     movePlayer()
     {
-
-        const speed = 40;
         if (this.canMoveHorizontaly())
         {
             if (this.moveX == 0 && this.moveY != 0 && !this.canMoveVertically())
             {
-                this.player.setVelocityX(this.lastMoveX * speed);
+                this.player.setVelocityX(this.lastMoveX * gamePrefs.PLAYER_MOVE_SPEED);
                 //this.player.x += this.lastMoveX;
                 //this.player.body.position.x += this.lastMoveX;
             }
             else
             {
                 // Move normal
-                this.player.setVelocityX(this.moveX * speed);
+                this.player.setVelocityX(this.moveX * gamePrefs.PLAYER_MOVE_SPEED);
                 //this.player.x += this.moveX;
                 //this.player.body.position.x += this.moveX;
             }
@@ -147,14 +146,14 @@ class level1 extends Phaser.Scene
         {
             if (this.moveY == 0 && this.moveX != 0 && !this.canMoveHorizontaly())
             {
-                this.player.setVelocityY(this.lastMoveY * speed);
+                this.player.setVelocityY(this.lastMoveY * gamePrefs.PLAYER_MOVE_SPEED);
                 //this.player.y += this.lastMoveY;
                 //this.player.body.position.y += this.lastMoveY;
             }
             else
             {
                 // Move normal
-                this.player.setVelocityY(this.moveY * speed);
+                this.player.setVelocityY(this.moveY * gamePrefs.PLAYER_MOVE_SPEED);
                 //this.player.y += this.moveY;
                 //this.player.body.position.y += this.moveY;
             }
@@ -162,7 +161,10 @@ class level1 extends Phaser.Scene
         }
         
     }
+    //// UPDATE end
 
+    
+    //// OTHER
     dig()
     {
         const playerX = this.player.body.x+1;
