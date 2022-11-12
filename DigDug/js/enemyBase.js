@@ -31,9 +31,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.inflatedAmount = 0;
         
         this.currentState = EnemyStates.PATROL;
-        this.moveDirection = MoveDirection.RIGHT;
+        this.moveDirection = MoveDirection.LEFT;
 
-        this.directionX = 1;
+        this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(20 * this.directionX);
         //this.body.setVelocityY(20 * this.directionY);
@@ -65,8 +65,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
-                console.log("position: ", this.x, " ", this.y);
-                //console.log("patroling ", this.directionX, " ", this.directionY, " position: ", this.x, " ", this.y);
                 break;
 
             case EnemyStates.GHOST:

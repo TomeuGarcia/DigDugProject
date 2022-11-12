@@ -10,7 +10,8 @@ var gamePrefs =
     NUM_CELL_HEIGHT: 13,
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
-    NUM_CELL_TOP_AIR: 1
+    NUM_CELL_TOP_AIR: 1, 
+    ENEMY_SPEED: 20
 }
 
 var config = 
