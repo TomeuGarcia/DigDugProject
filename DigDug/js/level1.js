@@ -68,7 +68,6 @@ class level1 extends Phaser.Scene
         // Draw the layers
         this.borders = this.map.createLayer('layer_borders', 'test_level_1');
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
-        this.map.createLayer('layer_surface', 'test_level_1');
 
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
@@ -187,14 +186,14 @@ class level1 extends Phaser.Scene
 
     
     //// OTHER
-    canMoveHorizontaly()
+    canMoveHorizontaly(body)
     {
-        return this.canMove(parseInt(this.player.body.y) + gamePrefs.HALF_CELL_SIZE);
+        return this.canMove(parseInt(body.y) + gamePrefs.HALF_CELL_SIZE);
     }
 
-    canMoveVertically()
+    canMoveVertically(body)
     {
-        return this.canMove(parseInt(this.player.body.x) + gamePrefs.HALF_CELL_SIZE);
+        return this.canMove(parseInt(body.x) + gamePrefs.HALF_CELL_SIZE);
     }
 
     canMove(pixel)
@@ -216,7 +215,18 @@ class level1 extends Phaser.Scene
             }
         }
 
-        shapeMask.fillRect(pixPos.x, pixPos.y, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
+        // remove decimal part
+        var desiredX = ~~pixPos.x;
+        var desiredY = ~~pixPos.y;
+        if (desiredX % gamePrefs.CELL_SIZE != 1){
+            desiredX--;
+        }
+        if (desiredY % gamePrefs.CELL_SIZE != 1){
+            desiredY--;
+        }
+
+        //shapeMask.fillRect(desiredX, desiredY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
+        shapeMask.fillRect(desiredX-1, desiredY-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
     }
 
     pix2cell(pixelX, pixelY)
