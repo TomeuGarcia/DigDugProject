@@ -131,8 +131,7 @@ class level1 extends Phaser.Scene
     }
 
     initEnemies()
-    {        
-        //this.pooka = new enemyBase(this, config.width/2, config.height/2, 'pooka').setScale(1).setOrigin(.5);
+    {
         this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(0.9).setOrigin(.5);
     }
 
@@ -154,12 +153,20 @@ class level1 extends Phaser.Scene
             repeat: -1
         })
 
+        this.anims.create // Only plays when the player presses (if not it stays on frame 4)
+        ({
+            key: 'playerPumping',
+            frames: this.anims.generateFrameNumbers('player', {start: 4, end: 5}),
+            frameRate: 10,
+            repeat: 0
+        })
+
         this.anims.create
         ({
             key: 'playerDying',
-            frames: this.anims.generateFrameNumbers('player', {start: 9, end: 13}),
+            frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
             frameRate: 10,
-            repeat: -1
+            repeat: 0
         })
     }
     //// CREATE end

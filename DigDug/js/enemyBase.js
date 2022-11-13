@@ -72,7 +72,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     hit(_jumper, _hero)
     {
         // Kill player
-        console.log("HIT PLAYER");
+        _hero.anims.play('playerDying', true);
     }
 
     doCurrentState()
@@ -217,7 +217,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (rand <= 3)
         {
-            console.log("GHOST");
             this.currentState = EnemyStates.GHOST;
         }
     }
