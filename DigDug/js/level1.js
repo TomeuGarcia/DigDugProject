@@ -132,7 +132,8 @@ class level1 extends Phaser.Scene
 
     initEnemies()
     {        
-        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(1).setOrigin(.5);
+        //this.pooka = new enemyBase(this, config.width/2, config.height/2, 'pooka').setScale(1).setOrigin(.5);
+        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(0.9).setOrigin(.5);
     }
 
     loadAnimations()

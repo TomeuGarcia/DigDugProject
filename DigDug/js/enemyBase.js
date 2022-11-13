@@ -29,7 +29,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.scene = _scene;
         this.points = 100;
         this.inflatedAmount = 0;
+        this.canUnGhost = false;
         
+        //this.currentState = EnemyStates.GHOST;
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
 
@@ -53,7 +55,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             _scene.borders
         );
 
-        _scene.physics.add.collider
+        this.groundCollider = _scene.physics.add.collider
         (
             this,
             _scene.digGround
@@ -70,6 +72,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     hit(_jumper, _hero)
     {
         // Kill player
+        console.log("HIT PLAYER");
     }
 
     doCurrentState()
@@ -105,6 +108,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             if (this.moveDirection == MoveDirection.RIGHT)
             {
                 this.moveDirection = MoveDirection.UP;
+                this.trySwitchToGhost();
                 
                 this.directionX = 0;
                 this.directionY = -1;
@@ -115,6 +119,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             else if (this.moveDirection == MoveDirection.LEFT)
             {
                 this.moveDirection = MoveDirection.DOWN;
+                this.trySwitchToGhost();
 
                 this.directionX = 0;
                 this.directionY = 1;
@@ -129,6 +134,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             if (this.moveDirection == MoveDirection.UP)
             {
                 this.moveDirection = MoveDirection.LEFT;
+                this.trySwitchToGhost();
 
                 this.directionX = -1;
                 this.directionY = 0;
@@ -138,6 +144,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             else if (this.moveDirection == MoveDirection.DOWN)
             {
                 this.moveDirection = MoveDirection.RIGHT;
+                this.trySwitchToGhost();
 
                 this.directionX = 1;
                 this.directionY = 0;
@@ -152,9 +159,67 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doGhost()
     {
         // Reomve collisions
+        this.scene.physics.world.removeCollider(this.groundCollider);
+
+        // UnGhost timer        
+        this.unGhostTimer = this.scene.time.addEvent({
+            delay: 2000,
+            callback: this.canRetrunNormal,
+            callbackScope: this,
+        })
+
+        // Chase player
+        if (this.body.x < this.scene.player.x)
+        {
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED);
+        }
+        else if (this.body.x > this.scene.player.x)
+        {
+            this.body.setVelocityX(-gamePrefs.ENEMY_SPEED);
+        }
+        else
+        {
+            this.body.setVelocityX(0);
+        }
+
+        if (this.body.y < this.scene.player.y)
+        {
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED);
+        }
+        else if (this.body.y > this.scene.player.y)
+        {
+            this.body.setVelocityY(-gamePrefs.ENEMY_SPEED);
+        }
+        else
+        {
+            this.body.setVelocityY(0);
+        }
 
         // Check if it leaves an area with collions
+        if (!this.checkOverlap(this, this.scene.digGround) && this.canUnGhost)
+        {
+            // Reset collisions & state
+            this.canUnGhost = false;
+            this.resetColliders();
+            this.resetMovement();
+            this.currentState = EnemyStates.PATROL;
+        }
+    }
 
+    canRetrunNormal()
+    {
+        this.canUnGhost = true;
+    }
+
+    trySwitchToGhost()
+    {
+        var rand = Phaser.Math.Between(0, 10);
+
+        if (rand <= 3)
+        {
+            console.log("GHOST");
+            this.currentState = EnemyStates.GHOST;
+        }
     }
     // == == ==
 
@@ -179,6 +244,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.deflateTimer.remove();
 
             // Reset patrol
+            this.resetColliders();
             this.resetMovement();
             this.currentState = EnemyStates.PATROL;
         }
@@ -234,6 +300,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
     // == == ==
 
+    // == GENERIC ==
     resetMovement()
     {
         switch (this.moveDirection) {
@@ -255,4 +322,20 @@ class enemyBase extends Phaser.GameObjects.Sprite
                 break;
         }
     }
+
+    resetColliders()
+    {
+        this.groundCollider = this.scene.physics.add.collider
+        (
+            this,
+            this.scene.digGround
+        );
+    }
+
+    checkOverlap(spriteA, spriteB) {
+	    var boundsA = spriteA.getBounds();
+	    var boundsB = spriteB.getBounds();
+	    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+	}
+    // == == ==
 }
