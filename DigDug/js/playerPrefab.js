@@ -54,6 +54,10 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             else this.anims.play('playerRun', true);
         }
 
+        if (this.moveX != 0 || this.moveY != 0)
+        {
+            this.digHere();
+        }
 
     }
 
@@ -80,8 +84,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         this.lastPlayerMovement = this.playerMovement;
 
-        const canMoveVertically = this.scene.canMoveVertically();
-        const canMoveHorizontaly = this.scene.canMoveHorizontaly();
+        const canMoveVertically = this.scene.canMoveVertically(this.body);
+        const canMoveHorizontaly = this.scene.canMoveHorizontaly(this.body);
 
         if (canMoveHorizontaly)
         {
@@ -115,8 +119,6 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             if (this.moveY > 0) this.playerMovement = PlayerMovement.DOWN
             else if (this.moveY < 0) this.playerMovement = PlayerMovement.UP
         }
-
-        this.digHere();
     }
 
 

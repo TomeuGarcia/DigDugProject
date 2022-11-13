@@ -196,12 +196,15 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
 
         // Check if it leaves an area with collions
-        if (!this.checkOverlap(this, this.scene.digGround) && this.canUnGhost)
+        if (!this.checkOverlap(this, this.scene.digGround) && this.canUnGhost && 
+            (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {
             // Reset collisions & state
             this.canUnGhost = false;
             this.resetColliders();
             this.resetMovement();
+            
+            this.tint = 0xffffff;
             this.currentState = EnemyStates.PATROL;
         }
     }
@@ -218,6 +221,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (rand <= 3)
         {
             this.currentState = EnemyStates.GHOST;
+            this.tint = 0x999999;
         }
     }
     // == == ==
