@@ -12,31 +12,49 @@ class level1 extends Phaser.Scene
         this.cameras.main.setBackgroundColor("#00A");
 
         this.load.setPath('assets/images/');
-        this.load.image('foreground', 'foreground.png');
-        this.load.image('player', 'digDugGuy.png');
+        
+        this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
+
+        this.load.image('pooka', 'pooka.png'); // Pooka enemy
 
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
 
         this.load.setPath('assets/tilesets/');
         this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
+        this.load.json('levelJSON', 'testLevel1.json');
     }
 
     create()
     {
         this.loadMap();
         this.setupDigging();
-        
+
         this.initPlayer();
 
-        this.initInputs();
+        this.score = 0; // Testing
+        this.spaceDown = false; // Testing
+        this.initEnemies();
+
+        this.loadAnimations();
     }
 
     update()
     {
-        this.getInputs();
-        this.movePlayer();
+        ////// nothing
+
+        // TESTING INFLATE
+        if (this.cursorKeys.space.isDown && !this.spaceDown)
+        {
+            this.spaceDown = true;
+            this.inflatePooka();
+        }
+        else if (this.cursorKeys.space.isUp)
+        {
+            this.spaceDown = false;
+        }
+
     }
 
     //// CREATE start
@@ -50,11 +68,33 @@ class level1 extends Phaser.Scene
         // Draw the layers
         this.borders = this.map.createLayer('layer_borders', 'test_level_1');
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
-        this.map.createLayer('layer_surface', 'test_level_1');
 
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
-        this.map.setCollisionByExclusion(0, true, true, 'layer_ground');
+        this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
 
+        
+        const levelGroundLayer = this.cache.json.get('levelJSON').layers[0];
+        this.levelWidth = levelGroundLayer.width;
+        this.levelHeight = levelGroundLayer.height;
+        this.levelArray = [];
+        for (var i = 0; i < this.levelHeight; ++i)
+        {
+            this.levelArray.push([]);
+            for (var j = 0; j < this.levelWidth; ++j)
+            {
+                if (levelGroundLayer.data[(i*this.levelWidth) + j] == 0)
+                {
+                    this.levelArray[i].push(MapContent.Empty)
+                }
+                else
+                {
+                    const x = i % this.levelWidth;
+                    const y = i / this.levelHeight;
+    
+                    this.levelArray[i].push(MapContent.Ground);                    
+                }
+            }
+        }   
     }
 
     setupDigging()
@@ -74,12 +114,14 @@ class level1 extends Phaser.Scene
 
     initPlayer()
     {
-        this.mapPixelOffset = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
-            gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
+        const playerStart = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
+                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
 
-        this.player = this.physics.add.sprite(this.mapPixelOffset.x, this.mapPixelOffset.y, 'player').setScale(1).setOrigin(.5);
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
+
+        this.player = new playerPrefab(this, playerStart.x, playerStart.y, 'player', this.cursorKeys).setScale(1).setOrigin(.5);
+
         this.player.body.collideWorldBounds = true;
-
         this.physics.add.collider
         (
             this.player,
@@ -87,116 +129,104 @@ class level1 extends Phaser.Scene
         );
     }
 
-    initInputs()
+    initEnemies()
     {
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(0.9).setOrigin(.5);
+    }
 
-        this.moveX = 0;
-        this.moveY = 0;
-        this.lastMoveX = 0;
-        this.lastMoveY = 0;
+    loadAnimations()
+    {
+        this.anims.create
+        ({
+            key: 'playerRun',
+            frames: this.anims.generateFrameNumbers('player', {start: 0, end: 1}),
+            frameRate: 10,
+            repeat: -1
+        })
+
+        this.anims.create
+        ({
+            key: 'playerRunDigging',
+            frames: this.anims.generateFrameNumbers('player', {start: 2, end: 3}),
+            frameRate: 10,
+            repeat: -1
+        })
+
+        this.anims.create // Only plays when the player presses (if not it stays on frame 4)
+        ({
+            key: 'playerPumping',
+            frames: this.anims.generateFrameNumbers('player', {start: 4, end: 5}),
+            frameRate: 10,
+            repeat: 0
+        })
+
+        this.anims.create
+        ({
+            key: 'playerDying',
+            frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
+            frameRate: 10,
+            repeat: 0
+        })
     }
     //// CREATE end
 
 
-    //// UPDATE start
-    getInputs()
+    inflatePooka()
     {
-        if (this.moveX != 0) this.lastMoveX = this.moveX;
-        if (this.moveY != 0) this.lastMoveY = this.moveY;
-
-        this.moveX = 0;
-        this.moveY = 0;
-
-        if (this.cursorKeys.right.isDown) this.moveX += gamePrefs.PLAYER_MOVE_SPEED;
-        if (this.cursorKeys.left.isDown) this.moveX -= gamePrefs.PLAYER_MOVE_SPEED;
-
-        if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
-        if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
-    }
-
-    movePlayer()
-    {
-        if (this.canMoveHorizontaly())
+        if (!this.pooka.isInInflatedState())
         {
-            if (this.moveX == 0 && this.moveY != 0 && !this.canMoveVertically())
-            {
-                this.player.setVelocityX(this.lastMoveX * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.x += this.lastMoveX;
-                //this.player.body.position.x += this.lastMoveX;
-            }
-            else
-            {
-                // Move normal
-                this.player.setVelocityX(this.moveX * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.x += this.moveX;
-                //this.player.body.position.x += this.moveX;
-            }
-            this.dig();
-
-            if (this.moveX != 0) 
-            {
-                this.player.setVelocityY(0);
-                return;
-            }
+            this.pooka.addInflation();
+            this.pooka.setInfaltedState();
         }
-
-
-        if (this.canMoveVertically())
+        else
         {
-            if (this.moveY == 0 && this.moveX != 0 && !this.canMoveHorizontaly())
-            {
-                this.player.setVelocityY(this.lastMoveY * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.y += this.lastMoveY;
-                //this.player.body.position.y += this.lastMoveY;
-            }
-            else
-            {
-                // Move normal
-                this.player.setVelocityY(this.moveY * gamePrefs.PLAYER_MOVE_SPEED);
-                //this.player.y += this.moveY;
-                //this.player.body.position.y += this.moveY;
-            }
-            this.dig();
+            this.pooka.addInflation();
         }
-        
     }
-    //// UPDATE end
 
     
     //// OTHER
-    dig()
+    canMoveHorizontaly(body)
     {
-        const playerX = this.player.body.x+1;
-        const playerY = this.player.body.y+1;
-
-        const cellPos = this.pix2cell(playerX, playerY);
-        const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
-
-        if (tile)
-        {
-            if (tile.collides)
-            {
-                tile.setCollision(false, false, false, false, true);
-            }
-        }
-
-        shapeMask.fillRect(playerX, playerY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
+        return this.canMove(parseInt(body.y) + gamePrefs.HALF_CELL_SIZE);
     }
 
-    canMoveHorizontaly()
+    canMoveVertically(body)
     {
-        return this.canMove(parseInt(this.player.body.y) + gamePrefs.HALF_CELL_SIZE);
-    }
-
-    canMoveVertically()
-    {
-        return this.canMove(parseInt(this.player.body.x) + gamePrefs.HALF_CELL_SIZE);
+        return this.canMove(parseInt(body.x) + gamePrefs.HALF_CELL_SIZE);
     }
 
     canMove(pixel)
     {
         return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
+    }
+
+    dig(pixPos)
+    {
+        const cellPos = this.pix2cell(pixPos.x, pixPos.y);
+        const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
+        
+        if (tile)
+        {
+            if (tile.collides)
+            {
+                tile.setCollision(false, false, false, false, true);
+                this.player.isDigging = true;
+            }
+        }
+
+        // remove decimal part
+        var desiredX = ~~pixPos.x;
+        var desiredY = ~~pixPos.y;
+        if (desiredX % gamePrefs.CELL_SIZE != 1){
+            desiredX--;
+        }
+        if (desiredY % gamePrefs.CELL_SIZE != 1){
+            desiredY--;
+        }
+
+        //shapeMask.fillRect(desiredX, desiredY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
+        shapeMask.fillRect(desiredX-1, desiredY-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
     }
 
     pix2cell(pixelX, pixelY)
@@ -209,6 +239,17 @@ class level1 extends Phaser.Scene
     {
         return new Phaser.Math.Vector2((cellX * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE, 
                                        (cellY * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE);
+    }
+
+
+    isGroundCell(cellX, cellY)
+    {
+        return this.levelArray[cellY][cellX] == MapContent.Ground;
+    }
+
+    removeGroundCell(cellX, cellY)
+    {
+        this.levelArray[cellY][cellX] = MapContent.Empty;
     }
 
 }
