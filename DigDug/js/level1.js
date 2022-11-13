@@ -20,6 +20,8 @@ class level1 extends Phaser.Scene
         this.load.image('pooka', 'pooka.png'); // Pooka enemy
 
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
+        
+        this.load.image('brush','diggedFromBottom.png');
 
         this.load.setPath('assets/tilesets/');
         this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
@@ -110,6 +112,8 @@ class level1 extends Phaser.Scene
 
         this.renderTexture.draw(this.digGround);
         this.digGround.alpha = 0.0; // make layer invisible
+
+        this.brush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
     }
 
     initPlayer()
@@ -227,6 +231,13 @@ class level1 extends Phaser.Scene
 
         //shapeMask.fillRect(desiredX, desiredY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
         shapeMask.fillRect(desiredX-1, desiredY-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
+
+        /*
+        const pixPos2 = this.cell2pix(cellPos.x, cellPos.y);
+        if (this.player.moveY > 0) this.brush.flipY = true;
+        else this.brush.flipY = false;
+        this.renderTexture.erase(this.brush, pixPos2.x, pixPos2.y);
+        */
     }
 
     pix2cell(pixelX, pixelY)
