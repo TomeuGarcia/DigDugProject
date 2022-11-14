@@ -30,6 +30,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.points = 100;
         this.inflatedAmount = 0;
         this.canUnGhost = false;
+        this.isDead = false;
         
         //this.currentState = EnemyStates.GHOST;
         this.currentState = EnemyStates.PATROL;
@@ -102,8 +103,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == PATROL ==
     doPatrol()
     {
-        if ((this.body.blocked.right || this.body.blocked.left) && 
-            (this.moveDirection == MoveDirection.RIGHT || this.moveDirection == MoveDirection.LEFT))
+        if (this.body.blocked.right || this.body.blocked.left)
         {
             if (this.moveDirection == MoveDirection.RIGHT)
             {
@@ -128,8 +128,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
                 this.flipX = !this.flipX;
             }
         }
-        else if ((this.body.blocked.down || this.body.blocked.up) && 
-                (this.moveDirection == MoveDirection.UP || this.moveDirection == MoveDirection.DOWN))
+        else if (this.body.blocked.down || this.body.blocked.up)
         {
             if (this.moveDirection == MoveDirection.UP)
             {
@@ -169,7 +168,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         })
 
         // Chase player
-        if (this.body.x < this.scene.player.x)
+        if (this.body.x < this.scene.player.x - gamePrefs.HALF_CELL_SIZE)
         {
             this.body.setVelocityX(gamePrefs.ENEMY_SPEED);
         }
@@ -182,7 +181,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.body.setVelocityX(0);
         }
 
-        if (this.body.y < this.scene.player.y)
+        if (this.body.y < this.scene.player.y - gamePrefs.HALF_CELL_SIZE)
         {
             this.body.setVelocityY(gamePrefs.ENEMY_SPEED);
         }
@@ -196,7 +195,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
 
         // Check if it leaves an area with collions
-        if (!this.checkOverlap(this, this.scene.digGround) && this.canUnGhost && 
+        if (this.isInEmptyCell() && this.canUnGhost &&
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {
             // Reset collisions & state
@@ -206,6 +205,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
             
             this.tint = 0xffffff;
             this.currentState = EnemyStates.PATROL;
+
+            if (this.body.velocity.x > 0) this.moveDirection == MoveDirection.RIGHT;
+            else if (this.body.velocity.x < 0) this.moveDirection == MoveDirection.LEFT;
+            else if (this.body.velocity.y > 0) this.moveDirection == MoveDirection.DOWN;
+            else if (this.body.velocity.y < 0) this.moveDirection == MoveDirection.UP;
         }
     }
 
@@ -221,7 +225,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (rand <= 3)
         {
             this.currentState = EnemyStates.GHOST;
-            this.tint = 0x999999;
+            this.tint = 0x777777;
         }
     }
     // == == ==
@@ -260,6 +264,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     setInfaltedState()
     {
+        if (this.isDead) return;
+
         this.currentState = EnemyStates.INFLATED;
 
         // Start countdown
@@ -285,6 +291,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == DIE ==
     doDie()
     {
+        this.isDead = true;
+        this.deflateTimer.remove(false);
+
         // Add points
         this.scene.score += this.points;
         console.log("Score: " + this.scene.score);
@@ -336,9 +345,21 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
 
     checkOverlap(spriteA, spriteB) {
+
+        const cellPos = this.scene.pix2cell(~~this.body.x, ~~this.body.y);
+        return this.scene.isEmptyCell(cellPos.x, cellPos.y);
+
+
 	    var boundsA = spriteA.getBounds();
 	    var boundsB = spriteB.getBounds();
 	    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
 	}
+
+    isInEmptyCell()
+    {
+        const cellPos = this.scene.pix2cell(~~this.body.x, ~~this.body.y);
+        return this.scene.isEmptyCell(cellPos.x, cellPos.y);
+    }
+
     // == == ==
 }

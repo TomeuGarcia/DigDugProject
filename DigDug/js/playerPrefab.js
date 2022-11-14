@@ -144,6 +144,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         }
         else if (this.startedGoingDown())
         {
+            this.flipX = true;
+            this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
+            /*
             if (this.lastPlayerMovement == PlayerMovement.UP) {
                 this.flipX = false;
             }
@@ -152,11 +155,18 @@ class playerPrefab extends Phaser.GameObjects.Sprite
                 if (this.lastMoveX > 0)
                     this.rotation = Phaser.Math.PI2 / 4.0;
                 else
-                    this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0
+                {                 
+                    this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
+                }      
             }
+            */
         }
         else if (this.startedGoingUp())
         {
+            this.flipX = false;
+            this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
+
+            /*
             if (this.lastPlayerMovement == PlayerMovement.DOWN) 
             {
                 this.flipX = true;
@@ -165,7 +175,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             {
                 this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
             }          
-            
+            */
         }
     }
 

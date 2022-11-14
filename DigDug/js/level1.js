@@ -47,7 +47,7 @@ class level1 extends Phaser.Scene
         ////// nothing
 
         // TESTING INFLATE
-        if (this.cursorKeys.space.isDown && !this.spaceDown)
+        if (this.cursorKeys.space.isDown && !this.spaceDown && this.pooka)
         {
             this.spaceDown = true;
             this.inflatePooka();
@@ -111,7 +111,7 @@ class level1 extends Phaser.Scene
         this.renderTexture.mask = this.mask;
 
         this.renderTexture.draw(this.digGround);
-        this.digGround.alpha = 0.0; // make layer invisible
+        this.digGround.alpha = 0.5; // make layer invisible
 
         this.brush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
     }
@@ -256,6 +256,11 @@ class level1 extends Phaser.Scene
     isGroundCell(cellX, cellY)
     {
         return this.levelArray[cellY][cellX] == MapContent.Ground;
+    }
+
+    isEmptyCell(cellX, cellY)
+    {
+        return this.levelArray[cellY][cellX] == MapContent.Empty;
     }
 
     removeGroundCell(cellX, cellY)
