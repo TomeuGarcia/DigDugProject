@@ -107,28 +107,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             if (this.moveDirection == MoveDirection.RIGHT)
             {
-                if (!this.body.blocked.down)
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
+                this.moveDirection = MoveDirection.UP;
+                this.trySwitchToGhost();
+                
+                this.directionX = 0;
+                this.directionY = -1;
+                this.body.setVelocityX(0);
+                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                this.flipX = !this.flipX;
             }
             else if (this.moveDirection == MoveDirection.LEFT)// && this.scene.canMoveVertically(this.body))
             {
