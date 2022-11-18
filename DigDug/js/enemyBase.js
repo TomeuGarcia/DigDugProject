@@ -17,7 +17,7 @@ const MAX_INFLATED = 4;
 
 class enemyBase extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy')
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated')
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -27,19 +27,20 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.allowGravity = false;
 
         this.scene = _scene;
-        this.points = 100;
+        this.spriteTag = _spriteTag;
+        this.inflatedSpriteTag = _inflatedSpriteTag;
+        this.points = 400;
         this.inflatedAmount = 0;
         this.canUnGhost = false;
         this.isDead = false;
-        
-        //this.currentState = EnemyStates.GHOST;
+        this.canInflate = true;
+
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
 
         this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(20 * this.directionX);
-        //this.body.setVelocityY(20 * this.directionY);
 
         // Overlap with player
         _scene.physics.add.overlap(
@@ -195,7 +196,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
 
         // Check if it leaves an area with collions
-        if (this.isInEmptyCell() && this.canUnGhost &&
+        if (this.isInEmptyCell() && this.canUnGhost && 
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {
             // Reset collisions & state
@@ -237,6 +238,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.setVelocityX(0);
         this.body.setVelocityY(0);
 
+        if (this.inflatedAmount > 0)
+            this.setFrame(this.inflatedAmount - 1);
+
         // Check inflated amount
         if (this.inflatedAmount >= MAX_INFLATED)
         {
@@ -247,8 +251,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
         else if (this.inflatedAmount <= 0)
         {    
+            this.flipX = !this.flipX;
+            this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
-            this.deflateTimer.remove();
+            this.deflateTimer.remove(false);
+            this.canInflateTimer.remove(false);
 
             // Reset patrol
             this.resetColliders();
@@ -267,48 +274,88 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.isDead) return;
 
         this.currentState = EnemyStates.INFLATED;
+        this.setTexture(this.inflatedSpriteTag);
+        this.flipX = !this.flipX;
+        this.tint = 0xffffff;
 
         // Start countdown
-        this.deflateTimer = this.scene.time.addEvent({
+        this.deflateTimer = this.scene.time.addEvent
+        ({
             delay: 2000,
             callback: this.decreaseInflation,
             callbackScope: this,
             repeat: -1
-        })
+        });
+
+        this.canInflateTimer = this.scene.time.addEvent
+        ({
+            delay: 500,
+            callback: this.resetCanInflate,
+            callbackScope: this,
+            repeat: -1
+        });
     }
 
     addInflation()
     {
-        this.inflatedAmount++;
+        if (this.canInflate)
+        {
+            this.inflatedAmount++;
+            this.canInflate = false;
+        }
     }
 
     decreaseInflation()
     {
         this.inflatedAmount--;
     }
+
+    resetCanInflate()
+    {
+        this.canInflate = true;
+    }
     // == == ==
 
     // == DIE ==
     doDie()
     {
+        if (this.isDead) return;
+
         this.isDead = true;
         this.deflateTimer.remove(false);
+
+        this.startDespawnTimer();
+    }
+
+    killedByRock()
+    {
+        this.points = this.points * 2;
+        this.currentState = EnemyStates.DYING;
+    }
+
+    startDespawnTimer()
+    {
+        this.despawnTimer = this.scene.time.addEvent({
+            delay: 1000,
+            callback: this.destroySelf,
+            callbackScope: this,
+        });
+    }
+
+    destroySelf()
+    {
+        this.despawnTimer.remove(false);
+        this.canInflateTimer.remove(false);
 
         // Add points
         this.scene.score += this.points;
         console.log("Score: " + this.scene.score);
 
         // Reset points value
-        this.points = 100;
+        this.points = 400;
 
         // Remove from scene
         this.destroy();
-    }
-
-    killedByRock()
-    {
-        this.points = 200;
-        this.currentState = EnemyStates.DYING;
     }
     // == == ==
 
@@ -344,22 +391,28 @@ class enemyBase extends Phaser.GameObjects.Sprite
         );
     }
 
-    checkOverlap(spriteA, spriteB) {
-
+    checkOverlap(spriteA, spriteB) 
+    {
         const cellPos = this.scene.pix2cell(~~this.body.x, ~~this.body.y);
         return this.scene.isEmptyCell(cellPos.x, cellPos.y);
 
-
-	    var boundsA = spriteA.getBounds();
+	    /*var boundsA = spriteA.getBounds();
 	    var boundsB = spriteB.getBounds();
-	    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);
+	    return Phaser.Geom.Intersects.RectangleToRectangle(boundsA, boundsB);*/
 	}
 
     isInEmptyCell()
     {
-        const cellPos = this.scene.pix2cell(~~this.body.x, ~~this.body.y);
-        return this.scene.isEmptyCell(cellPos.x, cellPos.y);
+        const bodyX = ~~this.body.x;
+        const bodyY = ~~this.body.y;
+
+        const cellPos = this.scene.pix2cell(bodyX, bodyY);
+        return this.scene.isEmptyCell(cellPos.x, cellPos.y);// && this.isInCellCenter(bodyX, bodyY);
     }
 
+    isInCellCenter(_pixX, _pixY)
+    {
+        return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
+    }
     // == == ==
 }
