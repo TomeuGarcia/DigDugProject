@@ -17,6 +17,9 @@ class level1 extends Phaser.Scene
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
 
+        this.load.image('harpoonH', 'harpoonHorizontal.png');
+        this.load.image('harpoonV', 'harpoonVertical.png');
+
         this.load.image('pooka', 'pooka.png'); // Pooka enemy
 
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED

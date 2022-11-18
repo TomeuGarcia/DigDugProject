@@ -11,7 +11,9 @@ var gamePrefs =
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
     NUM_CELL_TOP_AIR: 1, 
-    ENEMY_SPEED: 20
+    ENEMY_SPEED: 20,
+    HARPOON_SPEED: 50,
+    HARPOON_LIFETIME: 50
 }
 
 var config = 

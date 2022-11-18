@@ -29,6 +29,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
+
+        this.harpoonH = new harpoonHorizontalPrefab(_scene, this.body.x, this.body.y, 'harpoonH', this);
+        this.harpoonV = new harpoonVerticalPrefab(_scene, this.body.x, this.body.y, 'harpoonV', this);
     }
 
 
@@ -57,6 +60,24 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         if (this.moveX != 0 || this.moveY != 0)
         {
             this.digHere();
+        }
+
+
+        if (this.cursorKeys.space.isDown)
+        {
+            const position = new Phaser.Math.Vector2(this.x, this.y);
+            const velocity = new Phaser.Math.Vector2(0, 0);
+
+            if (this.playerMovement == PlayerMovement.RIGHT || this.playerMovement == PlayerMovement.LEFT)
+            {
+                const velocity = this.playerMovement == PlayerMovement.RIGHT ? gamePrefs.HARPOON_SPEED : -gamePrefs.HARPOON_SPEED;
+                this.harpoonH.getShot(position, velocity, this.flipX);
+            }
+            else
+            {
+                const velocity = this.playerMovement == PlayerMovement.DOWN ? gamePrefs.HARPOON_SPEED : -gamePrefs.HARPOON_SPEED;
+                this.harpoonV.getShot(position, velocity, this.flipX);
+            }
         }
 
     }
