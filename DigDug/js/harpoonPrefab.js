@@ -10,6 +10,7 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
 
+        this.lifetime = _lifetime;
 
         this.lifetimeTimer = _scene.time.addEvent(
             {
@@ -55,6 +56,15 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
     {
         this.setVisible(true);
         this.lifetimeTimer.paused = false;
+        this.lifetimeTimer.reset(
+            {
+                delay: this.lifetime,
+                callback: this.endLifetime,
+                callbackScope: this,
+                repeat: -1
+            }
+        );
+
         this.useTimer.paused = false;
         
         this.isBeingShot = true;

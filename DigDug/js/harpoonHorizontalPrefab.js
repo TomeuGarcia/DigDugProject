@@ -9,6 +9,11 @@ class harpoonHorizontalPrefab extends harpoonPrefab
         this.hide();
 
         this.moveVel = 0;
+
+        this.scene = _scene;
+        this.scene.spriteMaskHarpoonH = _scene.add.image(0, 0, _spriteTag).setVisible(false);
+        var mask = this.scene.spriteMaskHarpoonH.createBitmapMask();
+        this.setMask(mask);
     }
 
     preUpdate(time, delta)
