@@ -10,7 +10,7 @@ const PlayerMovement = {
 const PlayerStates = {
     MOVING: 0,
     SHOOTING: 1,
-    INFLATING: 2
+    PUMPING: 2
 }
 
 class playerPrefab extends Phaser.GameObjects.Sprite
@@ -41,23 +41,33 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.alreadyUsedHarpoonInput = false;
 
         this.playerState = PlayerStates.MOVING;
+
+        this.targetedEnemy = null;
     }
 
 
     preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
+        this.getMoveInputs();
 
         if (this.playerState == PlayerStates.MOVING)
         {
             this.updateMovingState();
+        }
+        else if (this.playerState == PlayerStates.PUMPING)
+        {
+            this.updatePumpingState();
+            if (this.moveX != 0 || this.moveY != 0) 
+            {
+                this.quitPumpingToMoving();
+            }
         }
     }
 
 
     updateMovingState()
     {
-        this.getMoveInputs();
         this.move();
         
         if (this.moveX == 0 && this.moveY == 0)
@@ -253,4 +263,33 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.anims.play('playerRun', true);
     }
 
+    onHarpoonHitEnemy(_enemy)
+    {
+        this.playerState = PlayerStates.PUMPING;
+        this.targetedEnemy = _enemy;
+        this.alreadyUsedHarpoonInput = false;
+    }
+
+    quitPumpingToMoving()
+    {
+        this.playerState = PlayerStates.MOVING;
+        this.harpoonH.hide();
+        this.harpoonV.hide();
+    }
+
+    updatePumpingState()
+    {
+        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput)
+        {
+            this.targetedEnemy.addInflation();
+            this.alreadyUsedHarpoonInput = true;
+        }
+        else if (!this.cursorKeys.space.isDown && this.alreadyUsedHarpoonInput)
+        {
+            this.alreadyUsedHarpoonInput = false;
+        }
+    }
+
+
+    
 }

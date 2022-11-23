@@ -120,6 +120,12 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         if (harpoonToEnemy.dot(harpoonDir) > sameDirThreshold)
         {
             this.inflatePooka();
+
+            _harpoon.body.setVelocityY(0);
+            _harpoon.body.setVelocityX(0);
+            _harpoon.lifetimeTimer.paused = true;
+
+            this.player.onHarpoonHitEnemy(_enemy);
         }
     }
 

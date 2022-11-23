@@ -22,7 +22,13 @@ class level1 extends Phaser.Scene
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
         this.load.image('maskHarpoonV', 'harpoonVerticalMask.png');
 
-        this.load.image('pooka', 'pooka.png'); // Pooka enemy
+        // Pooka enemy
+        this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
+        // Fygar enemy
+        this.load.spritesheet('fygar', 'fygarNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
+        
 
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
         
@@ -156,7 +162,7 @@ class level1 extends Phaser.Scene
     initEnemies()
     {
         this.enemies = this.add.group();
-        this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(1).setOrigin(.5);
+        this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate').setScale(1).setOrigin(.5);
         this.enemies.add(this.pooka);
     }
 
@@ -193,6 +199,23 @@ class level1 extends Phaser.Scene
             frameRate: 10,
             repeat: 0
         })
+
+        // ENEMIES
+        this.anims.create
+        ({
+            key: 'pookaWalking',
+            frames: this.anims.generateFrameNumbers('pooka', {start: 0, end: 1}),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        this.anims.create
+        ({
+            key: 'pookaGhosting',
+            frames: this.anims.generateFrameNumbers('pooka', {start: 2, end: 3}),
+            frameRate: 10,
+            repeat: -1
+        });
     }
     //// CREATE end
 
