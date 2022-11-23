@@ -20,6 +20,9 @@ class level1_Copy extends Phaser.Scene
         // Pooka enemy
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
+        // Fygar enemy
+        this.load.spritesheet('fygar', 'fygarNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
 
         this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
         
