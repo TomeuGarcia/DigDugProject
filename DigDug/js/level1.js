@@ -45,6 +45,21 @@ class level1 extends Phaser.Scene
         this.initEnemies();
 
         this.loadAnimations();
+
+        this.physics.add.overlap(
+            this.player.harpoonH,
+            this.enemies,
+            this.player.harpoonH.onEnemyOverlap,
+            null,
+            this
+        );
+        this.physics.add.overlap(
+            this.player.harpoonV,
+            this.enemies,
+            this.player.harpoonV.onEnemyOverlap,
+            null,
+            this
+        );
     }
 
     update()
@@ -55,7 +70,7 @@ class level1 extends Phaser.Scene
         if (this.cursorKeys.space.isDown && !this.spaceDown && this.pooka)
         {
             this.spaceDown = true;
-            this.inflatePooka();
+            //this.inflatePooka();
         }
         else if (this.cursorKeys.space.isUp)
         {
@@ -140,7 +155,9 @@ class level1 extends Phaser.Scene
 
     initEnemies()
     {
+        this.enemies = this.add.group();
         this.pooka = new enemyBase(this, 200, 88, 'pooka').setScale(1).setOrigin(.5);
+        this.enemies.add(this.pooka);
     }
 
     loadAnimations()

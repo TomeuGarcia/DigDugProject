@@ -45,6 +45,8 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         );
 
         this.isBeingShot = false;
+
+
     }
 
     preUpdate(time, delta)
@@ -106,6 +108,19 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
     onCollideDigGround(_digGround, _thisHarpoon)
     {
         this.endLifetime();
+    }
+
+
+    onEnemyOverlap(_harpoon, _enemy)
+    {
+        const harpoonToEnemy = new Phaser.Math.Vector2(_enemy.body.x - _harpoon.body.x, _enemy.body.y - _harpoon.body.y).normalize();
+        const harpoonDir = new Phaser.Math.Vector2(_harpoon.body.velocity.x, _harpoon.body.velocity.y).normalize();
+        const sameDirThreshold = 0.95;
+        
+        if (harpoonToEnemy.dot(harpoonDir) > sameDirThreshold)
+        {
+            this.inflatePooka();
+        }
     }
 
 }

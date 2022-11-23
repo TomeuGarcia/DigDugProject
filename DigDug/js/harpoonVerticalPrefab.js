@@ -57,4 +57,12 @@ class harpoonVerticalPrefab extends harpoonPrefab
         this.body.setVelocityY(_velocity);
     }
 
+    onEnemyOverlap(_harpoon, _enemy)
+    {
+        console.log("harpoon V overlaps enemy");
+        super.onEnemyOverlap(_harpoon, _enemy);        
+    }
+
+
+
 }
