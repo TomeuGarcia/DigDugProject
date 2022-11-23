@@ -3,12 +3,16 @@
 
 class harpoonVerticalPrefab extends harpoonPrefab
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag, _playerOwner)
+    constructor(_scene, _positionX, _positionY, _spriteTag, _spriteMaskTag)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
         this.hide();
 
         this.moveVel = 0;
+
+        this.scene.spriteMaskHarpoonV = _scene.add.image(0, 0, _spriteMaskTag).setVisible(false);
+        var mask = this.scene.spriteMaskHarpoonV.createBitmapMask();
+        this.setMask(mask);
     }
 
     preUpdate(time, delta)
@@ -33,11 +37,22 @@ class harpoonVerticalPrefab extends harpoonPrefab
 
         this.flipY = _isFlipped;
 
-        if (this.flipY) this.setOrigin(0.5, 1);
-        else this.setOrigin(0.5, 0);
+        if (this.flipY) 
+        {
+            this.setOrigin(0.5, 1);
+            this.scene.spriteMaskHarpoonV.setOrigin(0.5, 0);
+        }
+        else 
+        {
+            this.setOrigin(0.5, 0);
+            this.scene.spriteMaskHarpoonV.setOrigin(0.5, 1);
+        }
 
         this.x = _position.x;
         this.y = _position.y;
+
+        this.scene.spriteMaskHarpoonV.x = _position.x;
+        this.scene.spriteMaskHarpoonV.y = _position.y;
 
         this.body.setVelocityY(_velocity);
     }

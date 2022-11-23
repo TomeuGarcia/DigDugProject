@@ -3,13 +3,14 @@
 
 class harpoonPrefab extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag, _lifetime = 550)
+    constructor(_scene, _positionX, _positionY, _spriteTag, _spriteMaskTag, _lifetime = 550)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
 
+        this.scene = _scene;
         this.lifetime = _lifetime;
 
         this.lifetimeTimer = _scene.time.addEvent(

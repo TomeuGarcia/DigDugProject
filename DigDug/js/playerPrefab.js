@@ -36,8 +36,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
 
-        this.harpoonH = new harpoonHorizontalPrefab(_scene, this.body.x, this.body.y, 'harpoonH');
-        this.harpoonV = new harpoonVerticalPrefab(_scene, this.body.x, this.body.y, 'harpoonV');
+        this.harpoonH = new harpoonHorizontalPrefab(_scene, this.body.x, this.body.y, 'harpoonH', 'maskHarpoonH');
+        this.harpoonV = new harpoonVerticalPrefab(_scene, this.body.x, this.body.y, 'harpoonV', 'maskHarpoonV');
         this.alreadyUsedHarpoonInput = false;
 
         this.playerState = PlayerStates.MOVING;

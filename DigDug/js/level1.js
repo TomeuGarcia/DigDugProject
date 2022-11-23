@@ -19,6 +19,8 @@ class level1 extends Phaser.Scene
 
         this.load.image('harpoonH', 'harpoonHorizontal.png');
         this.load.image('harpoonV', 'harpoonVertical.png');
+        this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
+        this.load.image('maskHarpoonV', 'harpoonVerticalMask.png');
 
         this.load.image('pooka', 'pooka.png'); // Pooka enemy
 
