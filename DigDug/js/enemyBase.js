@@ -108,48 +108,110 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             if (this.moveDirection == MoveDirection.RIGHT)
             {
-                this.moveDirection = MoveDirection.UP;
-                this.trySwitchToGhost();
-                
-                this.directionX = 0;
-                this.directionY = -1;
-                this.body.setVelocityX(0);
-                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                this.flipX = !this.flipX;
-            }
-            else if (this.moveDirection == MoveDirection.LEFT)// && this.scene.canMoveVertically(this.body))
-            {
-                this.moveDirection = MoveDirection.DOWN;
-                this.trySwitchToGhost();
+                var rand = Phaser.Math.Between(1, 4);
 
-                this.directionX = 0;
-                this.directionY = 1;
-                this.body.setVelocityX(0);
-                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                this.flipX = !this.flipX;
+                if (rand <= 2)
+                {
+                    this.moveDirection = MoveDirection.UP;
+                    this.trySwitchToGhost();
+                    
+                    this.directionX = 0;
+                    this.directionY = -1;
+                    this.body.setVelocityX(0);
+                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                    this.flipX = !this.flipX;
+                }
+                else
+                {
+                    this.moveDirection = MoveDirection.DOWN;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = 0;
+                    this.directionY = 1;
+                    this.body.setVelocityX(0);
+                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                    this.flipX = !this.flipX;
+                }
+            }
+            else if (this.moveDirection == MoveDirection.LEFT)
+            {
+                var rand = Phaser.Math.Between(1, 4);
+
+                if (rand <= 2)
+                {
+                    this.moveDirection = MoveDirection.UP;
+                    this.trySwitchToGhost();
+                    
+                    this.directionX = 0;
+                    this.directionY = -1;
+                    this.body.setVelocityX(0);
+                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                    this.flipX = !this.flipX;
+                }
+                else
+                {
+                    this.moveDirection = MoveDirection.DOWN;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = 0;
+                    this.directionY = 1;
+                    this.body.setVelocityX(0);
+                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                    this.flipX = !this.flipX;
+                }
             }
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
             if (this.moveDirection == MoveDirection.UP)
             {
-                this.moveDirection = MoveDirection.LEFT;
-                this.trySwitchToGhost();
+                var rand = Phaser.Math.Between(1, 4);
 
-                this.directionX = -1;
-                this.directionY = 0;
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                this.body.setVelocityY(0);
+                if (rand <= 2)
+                {
+                    this.moveDirection = MoveDirection.LEFT;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = -1;
+                    this.directionY = 0;
+                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                    this.body.setVelocityY(0);
+                }
+                else
+                {
+                    this.moveDirection = MoveDirection.RIGHT;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = 1;
+                    this.directionY = 0;
+                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                    this.body.setVelocityY(0);
+                }
             }
             else if (this.moveDirection == MoveDirection.DOWN)
             {
-                this.moveDirection = MoveDirection.RIGHT;
-                this.trySwitchToGhost();
+                var rand = Phaser.Math.Between(1, 4);
 
-                this.directionX = 1;
-                this.directionY = 0;
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                this.body.setVelocityY(0);
+                if (rand <= 2)
+                {
+                    this.moveDirection = MoveDirection.LEFT;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = -1;
+                    this.directionY = 0;
+                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                    this.body.setVelocityY(0);
+                }
+                else
+                {
+                    this.moveDirection = MoveDirection.RIGHT;
+                    this.trySwitchToGhost();
+    
+                    this.directionX = 1;
+                    this.directionY = 0;
+                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                    this.body.setVelocityY(0);
+                }
             }
         }
     }
