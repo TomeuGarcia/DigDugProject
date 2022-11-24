@@ -162,7 +162,7 @@ class level1 extends Phaser.Scene
     initEnemies()
     {
         this.enemies = this.add.group();
-        this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate').setScale(1).setOrigin(.5);
+        this.pooka = new enemyBase(this, 192, 88, 'pooka', 'pookaInflate');//.setScale(1).setOrigin(.5);
         this.enemies.add(this.pooka);
     }
 
@@ -312,5 +312,16 @@ class level1 extends Phaser.Scene
     {
         this.levelArray[cellY][cellX] = MapContent.Empty;
     }
+
+    notifyPlayerEnemyReleased()
+    {
+        this.player.onEnemyGotReleased();
+    }
+
+    notifyPlayerEnemyDiedInflated()
+    {
+        this.player.onEnemyDiedInflated();
+    }
+
 
 }
