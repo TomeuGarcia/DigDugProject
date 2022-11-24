@@ -11,7 +11,9 @@ var gamePrefs =
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
     NUM_CELL_TOP_AIR: 1, 
-    ENEMY_SPEED: 20
+    ENEMY_SPEED: 20,
+    HARPOON_SPEED: 100,
+    HARPOON_LIFETIME: 50
 }
 
 var config = 
@@ -19,7 +21,7 @@ var config =
     type: Phaser.AUTO,
     width: 256, // window.innerWidth  //menu --> width: 480,
     height: 288, //256,  // window.innerHeight //menu --> height: 360,
-    scene:[menu, level1_Copy], // levels/screens/scenes array
+    scene:[menu, level1], // levels/screens/scenes array
     render:
     {
         pixelArt: true
