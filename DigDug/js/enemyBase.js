@@ -310,6 +310,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
             // Die
             this.currentState = EnemyStates.DYING;
+            this.scene.notifyPlayerEnemyDiedInflated();
         }
         else if (this.inflatedAmount <= 0)
         {    
@@ -323,6 +324,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.resetColliders();
             this.resetMovement();
             this.currentState = EnemyStates.PATROL;
+
+            this.scene.notifyPlayerEnemyReleased();
         }
     }
 

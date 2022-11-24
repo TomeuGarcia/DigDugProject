@@ -313,4 +313,15 @@ class level1 extends Phaser.Scene
         this.levelArray[cellY][cellX] = MapContent.Empty;
     }
 
+    notifyPlayerEnemyReleased()
+    {
+        this.player.onEnemyGotReleased();
+    }
+
+    notifyPlayerEnemyDiedInflated()
+    {
+        this.player.onEnemyDiedInflated();
+    }
+
+
 }

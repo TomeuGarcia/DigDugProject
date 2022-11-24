@@ -268,6 +268,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.PUMPING;
         this.targetedEnemy = _enemy;
         this.alreadyUsedHarpoonInput = false;
+        this.anims.play('playerPumping', true);  
     }
 
     quitPumpingToMoving()
@@ -275,6 +276,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
         this.harpoonH.hide();
         this.harpoonV.hide();
+        this.anims.play('playerRun', true);
     }
 
     updatePumpingState()
@@ -283,6 +285,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         {
             this.targetedEnemy.addInflation();
             this.alreadyUsedHarpoonInput = true;
+
+            this.anims.play('playerPumping', true);            
         }
         else if (!this.cursorKeys.space.isDown && this.alreadyUsedHarpoonInput)
         {
@@ -290,6 +294,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         }
     }
 
+    onEnemyGotReleased()
+    {
+        this.quitPumpingToMoving();
+    }
 
+    onEnemyDiedInflated()
+    {
+        this.quitPumpingToMoving();
+    }
     
 }
