@@ -96,6 +96,7 @@ class level1 extends Phaser.Scene
         // Draw the layers
         this.borders = this.map.createLayer('layer_borders', 'test_level_1');
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
+        this.surface = this.map.createLayer('layer_surface', 'test_level_1');
 
         this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
