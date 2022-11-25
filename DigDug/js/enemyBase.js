@@ -34,13 +34,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.ghostSpriteTag = _ghostSpriteTag;
         this.points = 400;
         this.inflatedAmount = 0;
+        this.canGhost = false;
         this.canUnGhost = false;
         this.isDead = false;
         this.canInflate = true;
 
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
-        this.anims.play(this.walkingSpriteTag, true);
 
         this.directionX = -1;
         this.directionY = 0;
@@ -66,6 +66,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this,
             _scene.digGround
         );
+
+        this.startGhostCooldownTimer();
     }
 
     preUpdate(time,delta)
@@ -83,6 +85,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     doCurrentState()
     {
+        console.log(this.currentState);
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
@@ -226,6 +229,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GHOST ==
     doGhost()
     {
+        if (!this.canGhost) { return; }
+
         // Play ghost animation
         this.anims.play(this.ghostSpriteTag, true);
 
@@ -285,16 +290,31 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
     }
 
-    canRetrunNormal()
-    {
-        this.canUnGhost = true;
+    canRetrunNormal() { this.canUnGhost = true; }
+
+    allowGhost() 
+    { 
+        this.cooldownGhostTimer.remove(false);
+        this.canGhost = true;
     }
 
     trySwitchToGhost()
     {
         var rand = Phaser.Math.Between(0, 10);
 
-        if (rand <= 3) { this.currentState = EnemyStates.GHOST; }
+        if (rand <= 3 && this.canGhost) { this.currentState = EnemyStates.GHOST; }
+    }
+
+    startGhostCooldownTimer()
+    {
+        if (!this.canGhost)
+        {
+            this.cooldownGhostTimer = this.scene.time.addEvent({
+                delay: 3000,
+                callback: this.allowGhost,
+                callbackScope: this,
+            });  
+        }
     }
     // == == ==
 
@@ -306,12 +326,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.setVelocityY(0);
 
         if (this.inflatedAmount > 0)
-            this.setFrame(this.inflatedAmount - 1);
+            this.setTexture(this.inflatedSpriteTag, this.inflatedAmount - 1);
 
         // Check inflated amount
         if (this.inflatedAmount >= MAX_INFLATED)
         {
             this.deflateTimer.remove();
+            this.setTexture(this.inflatedSpriteTag, 3);
 
             // Die
             this.currentState = EnemyStates.DYING;
@@ -343,10 +364,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         if (this.isDead) return;
 
+        this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
-        this.setTexture(this.inflatedSpriteTag);
         this.flipX = !this.flipX;
-        this.tint = 0xffffff;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
@@ -416,6 +436,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.despawnTimer.remove(false);
         this.canInflateTimer.remove(false);
+        this.cooldownGhostTimer.remove(false);
 
         // Add points
         this.scene.score += this.points;
