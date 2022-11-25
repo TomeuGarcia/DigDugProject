@@ -21,7 +21,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         super(_scene, _positionX, _positionY, _spriteTag);
 
         _scene.add.existing(this);
-        _scene.physics.world.enable(this);
+        _scene.physics.world.enable(this);        
 
         this.scene = _scene;
         this.cursorKeys = _cursors;
