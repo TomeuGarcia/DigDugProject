@@ -98,7 +98,7 @@ class level1 extends Phaser.Scene
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
         this.surface = this.map.createLayer('layer_surface', 'test_level_1');
 
-        this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
+        this.map.setCollisionBetween(3, 3, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
 
         
@@ -138,7 +138,9 @@ class level1 extends Phaser.Scene
         this.renderTexture.mask = this.mask;
 
         this.renderTexture.draw(this.digGround);
+        this.renderTexture.draw(this.surface);
         this.digGround.alpha = 0.5; // make layer invisible
+        this.surface.alpha = 0.5;
 
         this.brush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
     }
