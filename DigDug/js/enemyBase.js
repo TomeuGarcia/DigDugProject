@@ -17,7 +17,8 @@ const MAX_INFLATED = 4;
 
 class enemyBase extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated')
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated', 
+                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign')
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -29,6 +30,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.scene = _scene;
         this.spriteTag = _spriteTag;
         this.inflatedSpriteTag = _inflatedSpriteTag;
+        this.walkingSpriteTag = _walkingSpriteTag;
+        this.ghostSpriteTag = _ghostSpriteTag;
         this.points = 400;
         this.inflatedAmount = 0;
         this.canUnGhost = false;
@@ -37,6 +40,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
+        this.anims.play(this.walkingSpriteTag, true);
 
         this.directionX = -1;
         this.directionY = 0;
@@ -104,6 +108,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == PATROL ==
     doPatrol()
     {
+        this.anims.play(this.walkingSpriteTag, true);
+
         if (this.body.blocked.right || this.body.blocked.left)
         {
             if (this.moveDirection == MoveDirection.RIGHT)
@@ -220,6 +226,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GHOST ==
     doGhost()
     {
+        // Play ghost animation
+        this.anims.play(this.ghostSpriteTag, true);
+
         // Reomve collisions
         this.scene.physics.world.removeCollider(this.groundCollider);
 
@@ -285,11 +294,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         var rand = Phaser.Math.Between(0, 10);
 
-        if (rand <= 3)
-        {
-            this.currentState = EnemyStates.GHOST;
-            this.tint = 0x777777;
-        }
+        if (rand <= 3) { this.currentState = EnemyStates.GHOST; }
     }
     // == == ==
 
@@ -427,6 +432,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GENERIC ==
     resetMovement()
     {
+        this.anims.play('enemyWalking', true);
+        
         switch (this.moveDirection) {
             case MoveDirection.RIGHT:
             case MoveDirection.LEFT:
