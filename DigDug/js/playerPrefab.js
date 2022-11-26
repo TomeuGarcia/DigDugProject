@@ -163,10 +163,21 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     digHere()
     {
-        const pixPos = new Phaser.Math.Vector2(this.body.x+1, this.body.y+1);
+        const pixPos = this.getCenterPixPos();
+        //console.log(pixPos);
+
         this.scene.dig(pixPos);
     }
 
+    getCenterPixPos()
+    {
+        return new Phaser.Math.Vector2(this.body.x+1 + gamePrefs.HALF_CELL_SIZE, this.body.y+1 + gamePrefs.HALF_CELL_SIZE);
+    }
+    getCellPos()
+    {
+        const pixPos = this.getCenterPixPos();
+        return this.scene.pix2cell(pixPos.x, pixPos.y);
+    }
 
 
     rotateSprite()
@@ -188,8 +199,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         }
         else if (this.startedGoingUp())
         {
-            this.flipX = false;
-            this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
+            if (this.getCellPos().y > 2)
+            {
+                this.flipX = false;
+                this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
+            }
         }
     }
 
@@ -214,7 +228,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkDigging()
     {
-        const newCell = this.scene.pix2cell(this.body.x, this.body.y);
+        const newCell = this.getCellPos();
         if (this.currentCell.x != newCell.x || this.currentCell.y != newCell.y) // Are different cells
         {
             this.currentCell = newCell;
