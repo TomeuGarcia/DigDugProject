@@ -281,6 +281,7 @@ class level1 extends Phaser.Scene
     dig(pixPos)
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
+        
         const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
         
         if (tile)
@@ -291,10 +292,15 @@ class level1 extends Phaser.Scene
                 this.player.isDigging = true;
             }
         }
+        
 
         // remove decimal part
         var desiredX = ~~pixPos.x;
         var desiredY = ~~pixPos.y;
+
+        desiredX -= gamePrefs.HALF_CELL_SIZE;
+        desiredY -= gamePrefs.HALF_CELL_SIZE;
+
         if (desiredX % gamePrefs.CELL_SIZE != 1){
             desiredX--;
         }
@@ -315,8 +321,8 @@ class level1 extends Phaser.Scene
 
     pix2cell(pixelX, pixelY)
     {
-        return new Phaser.Math.Vector2(Phaser.Math.FloorTo(pixelX/gamePrefs.CELL_SIZE), 
-                                       Phaser.Math.FloorTo(pixelY/gamePrefs.CELL_SIZE));
+        return new Phaser.Math.Vector2(parseInt(pixelX/gamePrefs.CELL_SIZE), 
+                                       parseInt(pixelY/gamePrefs.CELL_SIZE));
     }
 
     cell2pix(cellX, cellY)
@@ -339,6 +345,10 @@ class level1 extends Phaser.Scene
     removeGroundCell(cellX, cellY)
     {
         this.levelArray[cellY][cellX] = MapContent.Empty;
+
+        const pixPos = this.cell2pix(cellX, cellY);
+
+        shapeMask.fillRect(pixPos.x - game.HALF_CELL_SIZE -1, pixPos.y - game.HALF_CELL_SIZE-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
     }
 
     notifyPlayerEnemyReleased()
