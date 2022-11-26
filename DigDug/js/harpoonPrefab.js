@@ -45,7 +45,7 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         );
 
         this.isBeingShot = false;
-
+        this.enemyHit = false;
 
     }
 
@@ -72,6 +72,8 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         
         this.isBeingShot = true;
         this.setCanBeUsed(false);
+
+        this.enemyHit = false;
     }
 
 
@@ -86,7 +88,7 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
 
     setCanBeUsed(_canBeUsed)
     {
-        this.canBeUsed = _canBeUsed;
+        this.canBeUsed = _canBeUsed;        
     }
 
     hide()
@@ -113,12 +115,16 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
 
     onEnemyOverlap(_harpoon, _enemy)
     {
+        if (_harpoon.enemyHit) return;
+
         const harpoonToEnemy = new Phaser.Math.Vector2(_enemy.body.x - _harpoon.body.x, _enemy.body.y - _harpoon.body.y).normalize();
         const harpoonDir = new Phaser.Math.Vector2(_harpoon.body.velocity.x, _harpoon.body.velocity.y).normalize();
-        const sameDirThreshold = 0.95;
+        const sameDirThreshold = 0.8;
         
         if (harpoonToEnemy.dot(harpoonDir) > sameDirThreshold)
         {
+            _harpoon.enemyHit = true;
+
             this.inflatePooka();
 
             _harpoon.body.setVelocityY(0);
