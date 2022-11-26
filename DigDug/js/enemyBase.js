@@ -112,116 +112,75 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doPatrol()
     {
         this.anims.play(this.walkingSpriteTag, true);
+        this.setFlip();
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
-            if (this.moveDirection == MoveDirection.RIGHT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
-            else if (this.moveDirection == MoveDirection.LEFT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
+            this.randomizeVerticalDirection();
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
-            if (this.moveDirection == MoveDirection.UP)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+            this.randomizeDiagonalDirection();
+        }
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
-            else if (this.moveDirection == MoveDirection.DOWN)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+    setFlip()
+    {
+        if (this.moveDirection == MoveDirection.LEFT)
+            this.flipX = false;
+        else if (this.moveDirection == MoveDirection.RIGHT)
+            this.flipX = true;
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
+    randomizeVerticalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.UP;
+            this.trySwitchToGhost();
+            
+            this.directionX = 0;
+            this.directionY = -1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.DOWN;
+            this.trySwitchToGhost();
+
+            this.directionX = 0;
+            this.directionY = 1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+    }
+
+    randomizeDiagonalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.LEFT;
+            this.trySwitchToGhost();
+
+            this.directionX = -1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.RIGHT;
+            this.trySwitchToGhost();
+
+            this.directionX = 1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
         }
     }
     // == == ==
