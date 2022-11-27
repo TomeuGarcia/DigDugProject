@@ -19,8 +19,8 @@ var gamePrefs =
 var config = 
 {
     type: Phaser.AUTO,
-    width: 256, // window.innerWidth  //menu --> width: 480,
-    height: 288, //256,  // window.innerHeight //menu --> height: 360,
+    width: 303, // window.innerWidth
+    height: 288, //256,  // window.innerHeight
     scene:[menu, level1], // levels/screens/scenes array
     render:
     {
