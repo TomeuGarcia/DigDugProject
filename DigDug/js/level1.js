@@ -71,29 +71,40 @@ class level1 extends Phaser.Scene
             this
         );
     }
-    initScore(){
-        this.score = 0;
-        this.scoreText = this.add.text(100, 32, 'score: 0', { fontSize: '12px', fill: '#000' });
-    }
-    addScore (score)
+
+    initScore()
     {
-    this.score += score;
-    this.scoreText.setText('Score: ' + this.score);
+        this.score = 0;
+        this.scoreText = this.add.text(gamePrefs.CELL_SIZE * 15 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 2, 
+            'SCORE:', { fontSize: '12px', fill: '#fff' });
+        this.scoreCountText = this.add.text(gamePrefs.CELL_SIZE * 16 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 
+            '0', { fontSize: '12px', fill: '#fff' });
     }
-    initFruit(){
+    addScore(_score)
+    {
+        this.score += _score;
+        this.scoreCountText.setText(this.score);
+    }
+
+    initFruit()
+    {
         this.fruits = this.physics.add.staticGroup();
-        this.physics.add.overlap(this.player, this.fruits, this.CollectFruit, null, this);
-        this.SpawnFruit();
+        this.physics.add.overlap(this.player, this.fruits, this.collectFruit, null, this);
+        this.spawnFruit();
         
     }
-    SpawnFruit(){
-        this.fruits.create(135, 170, 'watermelon');
+    spawnFruit()
+    {
+        this.fruits.create(gamePrefs.CELL_SIZE * 7 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 10 + gamePrefs.HALF_CELL_SIZE, 'watermelon');
     }
-    CollectFruit(player,star){
-        star.disableBody(true, true);
-        this.addScore(10);
-        this.time.delayedCall(10000,this.SpawnFruit,[],this);
+    collectFruit(_player, _fruit)
+    {
+        _fruit.disableBody(true, true);
+        this.addScore(30);
+        const randomDelay = Phaser.Math.Between(10000, 20000);
+        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
     }
+
     update()
     {
         ////// nothing
