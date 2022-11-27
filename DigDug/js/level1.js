@@ -16,7 +16,7 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
-
+        this.load.image('watermelon', 'watermelon.png');
         this.load.image('harpoonH', 'harpoonHorizontal.png');
         this.load.image('harpoonV', 'harpoonVertical.png');
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
@@ -45,8 +45,12 @@ class level1 extends Phaser.Scene
         this.setupDigging();
 
         this.initPlayer();
+       
+        this.initScore();
+        this.initFruit();
 
-        this.score = 0; // Testing
+        this.score = 0; // Tes
+        
         this.spaceDown = false; // Testing
         this.initEnemies();
 
@@ -67,7 +71,29 @@ class level1 extends Phaser.Scene
             this
         );
     }
-
+    initScore(){
+        this.score = 0;
+        this.scoreText = this.add.text(100, 32, 'score: 0', { fontSize: '12px', fill: '#000' });
+    }
+    addScore (score)
+    {
+    this.score += score;
+    this.scoreText.setText('Score: ' + this.score);
+    }
+    initFruit(){
+        this.fruits = this.physics.add.staticGroup();
+        this.physics.add.overlap(this.player, this.fruits, this.CollectFruit, null, this);
+        this.SpawnFruit();
+        
+    }
+    SpawnFruit(){
+        this.fruits.create(135, 170, 'watermelon');
+    }
+    CollectFruit(player,star){
+        star.disableBody(true, true);
+        this.addScore(10);
+        this.time.delayedCall(10000,this.SpawnFruit,[],this);
+    }
     update()
     {
         ////// nothing

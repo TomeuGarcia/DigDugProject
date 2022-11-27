@@ -5,7 +5,7 @@ class scoreManager{
         var scoreText;
     }
 
-    create(){
+    init(){
         scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
     }
     
