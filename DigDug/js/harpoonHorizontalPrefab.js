@@ -60,7 +60,6 @@ class harpoonHorizontalPrefab extends harpoonPrefab
 
     onEnemyOverlap(_harpoon, _enemy)
     {
-        console.log("harpoon H overlaps enemy");
         super.onEnemyOverlap(_harpoon, _enemy);
     }
 

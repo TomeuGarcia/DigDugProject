@@ -10,7 +10,8 @@ const PlayerMovement = {
 const PlayerStates = {
     MOVING: 0,
     SHOOTING: 1,
-    PUMPING: 2
+    PUMPING: 2,
+    DYING: 3
 }
 
 class playerPrefab extends Phaser.GameObjects.Sprite
@@ -43,6 +44,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
 
         this.targetedEnemy = null;
+
+        this.depth = 5;
+
+        this.respawnTimer = this.scene.time.addEvent({
+            delay: 4000,
+            callback: this.respawn,
+            callbackScope: this,
+            repeat: -1
+        })
+        this.respawnTimer.paused = true;
     }
 
 
@@ -62,6 +73,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             {
                 this.quitPumpingToMoving();
             }
+        }
+        else if (this.playerState == PlayerStates.DYING)
+        {
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(0);
         }
     }
 
@@ -318,4 +334,23 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.quitPumpingToMoving();
     }
     
+    die()
+    {        
+        this.playerState = PlayerStates.DYING;
+        this.anims.play('playerDying', true);
+        this.respawnTimer.paused = false;
+    }
+
+    isDead()
+    {
+        return this.playerState == PlayerStates.DYING;
+    }
+
+    respawn()
+    {
+        this.playerState = PlayerStates.MOVING;
+        this.anims.play('playerRun', true);
+        this.respawnTimer.paused = true;
+    }
+
 }

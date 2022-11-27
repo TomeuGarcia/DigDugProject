@@ -82,7 +82,6 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
-
     }
 
     //// CREATE start
@@ -199,7 +198,7 @@ class level1 extends Phaser.Scene
         ({
             key: 'playerDying',
             frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
-            frameRate: 10,
+            frameRate: 2,
             repeat: 0
         })
 
@@ -248,16 +247,16 @@ class level1 extends Phaser.Scene
     //// CREATE end
 
 
-    inflatePooka()
+    inflateEnemy(_enemy)
     {
-        if (!this.pooka.isInInflatedState())
+        if (_enemy.isInInflatedState())
         {
-            this.pooka.addInflation();
-            this.pooka.setInfaltedState();
+            _enemy.addInflation();
         }
         else
         {
-            this.pooka.addInflation();
+            _enemy.addInflation();
+            _enemy.setInfaltedState();
         }
     }
 
