@@ -85,7 +85,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     doCurrentState()
     {
-        console.log(this.currentState);
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
@@ -412,7 +411,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GENERIC ==
     resetMovement()
     {
-        this.anims.play('enemyWalking', true);
+        this.anims.play(this.walkingSpriteTag, true);
         
         switch (this.moveDirection) {
             case MoveDirection.RIGHT:
