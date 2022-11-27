@@ -7,6 +7,12 @@ const PlayerMovement = {
     DOWN: 4
 }
 
+const PlayerStates = {
+    MOVING: 0,
+    SHOOTING: 1,
+    PUMPING: 2
+}
+
 class playerPrefab extends Phaser.GameObjects.Sprite
 {
 
@@ -15,7 +21,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         super(_scene, _positionX, _positionY, _spriteTag);
 
         _scene.add.existing(this);
-        _scene.physics.world.enable(this);
+        _scene.physics.world.enable(this);        
 
         this.scene = _scene;
         this.cursorKeys = _cursors;
@@ -24,21 +30,45 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.lastMoveX = 0;
         this.lastMoveY = 0;
 
-        this.playerMovement = PlayerMovement.NONE;
+        this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
 
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
+
+        this.harpoonH = new harpoonHorizontalPrefab(_scene, this.body.x, this.body.y, 'harpoonH', 'maskHarpoonH');
+        this.harpoonV = new harpoonVerticalPrefab(_scene, this.body.x, this.body.y, 'harpoonV', 'maskHarpoonV');
+        this.alreadyUsedHarpoonInput = false;
+
+        this.playerState = PlayerStates.MOVING;
+
+        this.targetedEnemy = null;
     }
 
 
     preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
+        this.getMoveInputs();
 
-        this.getInputs();
+        if (this.playerState == PlayerStates.MOVING)
+        {
+            this.updateMovingState();
+        }
+        else if (this.playerState == PlayerStates.PUMPING)
+        {
+            this.updatePumpingState();
+            if (this.moveX != 0 || this.moveY != 0) 
+            {
+                this.quitPumpingToMoving();
+            }
+        }
+    }
+
+
+    updateMovingState()
+    {
         this.move();
-
         
         if (this.moveX == 0 && this.moveY == 0)
         {
@@ -59,11 +89,20 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this.digHere();
         }
 
+        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput && (this.harpoonH.canBeShoot() && this.harpoonV.canBeShoot()))
+        {
+            this.shootHarpoon();
+            this.alreadyUsedHarpoonInput = true;
+        }
+        else if (this.cursorKeys.space.isUp)
+        {
+            this.alreadyUsedHarpoonInput = false;
+        }
+
     }
 
 
-
-    getInputs()
+    getMoveInputs()
     {
         if (this.moveX != 0) this.lastMoveX = this.moveX;
         if (this.moveY != 0) this.lastMoveY = this.moveY;
@@ -124,10 +163,21 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     digHere()
     {
-        const pixPos = new Phaser.Math.Vector2(this.body.x+1, this.body.y+1);
+        const pixPos = this.getCenterPixPos();
+        //console.log(pixPos);
+
         this.scene.dig(pixPos);
     }
 
+    getCenterPixPos()
+    {
+        return new Phaser.Math.Vector2(this.body.x+1 + gamePrefs.HALF_CELL_SIZE, this.body.y+1 + gamePrefs.HALF_CELL_SIZE);
+    }
+    getCellPos()
+    {
+        const pixPos = this.getCenterPixPos();
+        return this.scene.pix2cell(pixPos.x, pixPos.y);
+    }
 
 
     rotateSprite()
@@ -144,28 +194,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         }
         else if (this.startedGoingDown())
         {
-            if (this.lastPlayerMovement == PlayerMovement.UP) {
-                this.flipX = false;
-            }
-            else
-            {
-                if (this.lastMoveX > 0)
-                    this.rotation = Phaser.Math.PI2 / 4.0;
-                else
-                    this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0
-            }
+            this.flipX = true;
+            this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
         }
         else if (this.startedGoingUp())
         {
-            if (this.lastPlayerMovement == PlayerMovement.DOWN) 
+            if (this.getCellPos().y > 2)
             {
-                this.flipX = true;
-            }
-            else
-            {
+                this.flipX = false;
                 this.rotation = Phaser.Math.PI2 / 4.0 + Phaser.Math.PI2 / 2.0;
-            }          
-            
+            }
         }
     }
 
@@ -190,7 +228,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkDigging()
     {
-        const newCell = this.scene.pix2cell(this.body.x, this.body.y);
+        const newCell = this.getCellPos();
         if (this.currentCell.x != newCell.x || this.currentCell.y != newCell.y) // Are different cells
         {
             this.currentCell = newCell;
@@ -208,4 +246,76 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     }
 
 
+
+    shootHarpoon()
+    {
+        this.playerState = PlayerStates.SHOOTING;
+        this.anims.pause();
+        this.setFrame(14); // shooting frame
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(0);
+
+        const position = new Phaser.Math.Vector2(this.x, this.y);
+
+        if (this.playerMovement == PlayerMovement.RIGHT || this.playerMovement == PlayerMovement.LEFT)
+        {
+            const velocity = this.playerMovement == PlayerMovement.RIGHT ? gamePrefs.HARPOON_SPEED : -gamePrefs.HARPOON_SPEED;
+            this.harpoonH.setActive(true);
+            this.harpoonH.getShot(position, velocity, this.flipX);
+        }
+        else
+        {
+            const velocity = this.playerMovement == PlayerMovement.DOWN ? gamePrefs.HARPOON_SPEED : -gamePrefs.HARPOON_SPEED;
+            this.harpoonV.setActive(true);
+            this.harpoonV.getShot(position, velocity, this.flipX);
+        }
+    }
+
+    onHarpoonLifetimeEnd()
+    {
+        this.playerState = PlayerStates.MOVING;
+        this.anims.play('playerRun', true);
+    }
+
+    onHarpoonHitEnemy(_enemy)
+    {
+        this.playerState = PlayerStates.PUMPING;
+        this.targetedEnemy = _enemy;
+        this.alreadyUsedHarpoonInput = false;
+        this.anims.play('playerPumping', true);  
+    }
+
+    quitPumpingToMoving()
+    {
+        this.playerState = PlayerStates.MOVING;
+        this.harpoonH.hide();
+        this.harpoonV.hide();
+        this.anims.play('playerRun', true);
+    }
+
+    updatePumpingState()
+    {
+        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput)
+        {
+            this.targetedEnemy.addInflation();
+            this.alreadyUsedHarpoonInput = true;
+
+            this.anims.play('playerPumping', true);            
+        }
+        else if (!this.cursorKeys.space.isDown && this.alreadyUsedHarpoonInput)
+        {
+            this.alreadyUsedHarpoonInput = false;
+        }
+    }
+
+    onEnemyGotReleased()
+    {
+        this.quitPumpingToMoving();
+    }
+
+    onEnemyDiedInflated()
+    {
+        this.quitPumpingToMoving();
+    }
+    
 }
