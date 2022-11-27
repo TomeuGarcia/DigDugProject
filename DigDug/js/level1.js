@@ -82,7 +82,6 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
-
     }
 
     //// CREATE start
@@ -248,16 +247,16 @@ class level1 extends Phaser.Scene
     //// CREATE end
 
 
-    inflatePooka()
+    inflateEnemy(_enemy)
     {
-        if (!this.pooka.isInInflatedState())
+        if (_enemy.isInInflatedState())
         {
-            this.pooka.addInflation();
-            this.pooka.setInfaltedState();
+            _enemy.addInflation();
         }
         else
         {
-            this.pooka.addInflation();
+            _enemy.addInflation();
+            _enemy.setInfaltedState();
         }
     }
 
