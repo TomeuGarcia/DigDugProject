@@ -47,7 +47,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.setVelocityX(20 * this.directionX);
 
         // Overlap with player
-        _scene.physics.add.overlap(
+        this.playerOverlap = _scene.physics.add.overlap(
             this, 
             _scene.player,
             this.hit,
@@ -383,6 +383,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     startDespawnTimer()
     {
+        this.playerOverlap.destroy();
+
         this.despawnTimer = this.scene.time.addEvent({
             delay: 1000,
             callback: this.destroySelf,
