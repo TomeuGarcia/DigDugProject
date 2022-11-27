@@ -37,6 +37,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canGhost = false;
         this.canUnGhost = false;
         this.isDead = false;
+        this.isDespawning = false;
         this.canInflate = true;
 
         this.currentState = EnemyStates.PATROL;
@@ -74,7 +75,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         super.preUpdate(time, delta);
 
-        this.doCurrentState();
+        if (this.isDead)
+        {
+            if (this.isDespawning) this.setTexture(this.inflatedSpriteTag, 3);
+        }
+        else
+        {
+            this.doCurrentState();
+        }        
     }
 
     hit(_jumper, _hero)
@@ -384,6 +392,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     startDespawnTimer()
     {
+        this.isDespawning = true;
         this.despawnTimer = this.scene.time.addEvent({
             delay: 1000,
             callback: this.destroySelf,
@@ -466,5 +475,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
     }
+    
+    
+    getCenterPixPos()
+    {
+        return new Phaser.Math.Vector2(this.body.x + this.body.width / 2, this.body.y + this.body.height / 2);
+    }  
+    
     // == == ==
+
+
 }

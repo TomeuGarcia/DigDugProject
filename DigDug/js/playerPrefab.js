@@ -43,6 +43,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
 
         this.targetedEnemy = null;
+
+        this.depth = 5;
     }
 
 
