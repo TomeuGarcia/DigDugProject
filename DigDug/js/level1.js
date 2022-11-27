@@ -198,7 +198,7 @@ class level1 extends Phaser.Scene
         ({
             key: 'playerDying',
             frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
-            frameRate: 10,
+            frameRate: 2,
             repeat: 0
         })
 
