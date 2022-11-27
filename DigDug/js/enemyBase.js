@@ -37,6 +37,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canGhost = false;
         this.canUnGhost = false;
         this.isDead = false;
+        this.isDespawning = false;
         this.canInflate = true;
 
         this.currentState = EnemyStates.PATROL;
@@ -47,7 +48,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.setVelocityX(20 * this.directionX);
 
         // Overlap with player
-        _scene.physics.add.overlap(
+        this.playerOverlap = _scene.physics.add.overlap(
             this, 
             _scene.player,
             this.hit,
@@ -74,7 +75,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         super.preUpdate(time, delta);
 
-        this.doCurrentState();
+        if (this.isDead)
+        {
+            if (this.isDespawning) this.setTexture(this.inflatedSpriteTag, 3);
+        }
+        else
+        {
+            this.doCurrentState();
+        }        
     }
 
     hit(_jumper, _hero)
@@ -85,7 +93,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     doCurrentState()
     {
-        console.log(this.currentState);
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
@@ -112,116 +119,75 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doPatrol()
     {
         this.anims.play(this.walkingSpriteTag, true);
+        this.setFlip();
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
-            if (this.moveDirection == MoveDirection.RIGHT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
-            else if (this.moveDirection == MoveDirection.LEFT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
+            this.randomizeVerticalDirection();
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
-            if (this.moveDirection == MoveDirection.UP)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+            this.randomizeDiagonalDirection();
+        }
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
-            else if (this.moveDirection == MoveDirection.DOWN)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+    setFlip()
+    {
+        if (this.moveDirection == MoveDirection.LEFT)
+            this.flipX = false;
+        else if (this.moveDirection == MoveDirection.RIGHT)
+            this.flipX = true;
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
+    randomizeVerticalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.UP;
+            this.trySwitchToGhost();
+            
+            this.directionX = 0;
+            this.directionY = -1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.DOWN;
+            this.trySwitchToGhost();
+
+            this.directionX = 0;
+            this.directionY = 1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+    }
+
+    randomizeDiagonalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.LEFT;
+            this.trySwitchToGhost();
+
+            this.directionX = -1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.RIGHT;
+            this.trySwitchToGhost();
+
+            this.directionX = 1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
         }
     }
     // == == ==
@@ -425,6 +391,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     startDespawnTimer()
     {
+        this.playerOverlap.destroy();
+
+        this.isDespawning = true;
         this.despawnTimer = this.scene.time.addEvent({
             delay: 1000,
             callback: this.destroySelf,
@@ -453,7 +422,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GENERIC ==
     resetMovement()
     {
-        this.anims.play('enemyWalking', true);
+        this.anims.play(this.walkingSpriteTag, true);
         
         switch (this.moveDirection) {
             case MoveDirection.RIGHT:
@@ -507,5 +476,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
     }
+    
+    
+    getCenterPixPos()
+    {
+        return new Phaser.Math.Vector2(this.body.x + this.body.width / 2, this.body.y + this.body.height / 2);
+    }  
+    
     // == == ==
+
+
 }
