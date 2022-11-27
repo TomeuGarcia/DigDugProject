@@ -96,8 +96,9 @@ class level1 extends Phaser.Scene
         // Draw the layers
         this.borders = this.map.createLayer('layer_borders', 'test_level_1');
         this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
+        this.surface = this.map.createLayer('layer_surface', 'test_level_1');
 
-        this.map.setCollisionBetween(7, 7, true, true, 'layer_borders');
+        this.map.setCollisionBetween(3, 3, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
 
         
@@ -137,7 +138,9 @@ class level1 extends Phaser.Scene
         this.renderTexture.mask = this.mask;
 
         this.renderTexture.draw(this.digGround);
+        this.renderTexture.draw(this.surface);
         this.digGround.alpha = 0.5; // make layer invisible
+        this.surface.alpha = 0.5;
 
         this.brush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
     }
@@ -162,7 +165,7 @@ class level1 extends Phaser.Scene
     initEnemies()
     {
         this.enemies = this.add.group();
-        this.pooka = new enemyBase(this, 192, 88, 'pooka', 'pookaInflate');//.setScale(1).setOrigin(.5);
+        this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting').setOrigin(.5);
         this.enemies.add(this.pooka);
     }
 
@@ -200,12 +203,12 @@ class level1 extends Phaser.Scene
             repeat: 0
         })
 
-        // ENEMIES
+        // POOKA
         this.anims.create
         ({
             key: 'pookaWalking',
             frames: this.anims.generateFrameNumbers('pooka', {start: 0, end: 1}),
-            frameRate: 10,
+            frameRate: 2,
             repeat: -1
         });
 
@@ -213,7 +216,32 @@ class level1 extends Phaser.Scene
         ({
             key: 'pookaGhosting',
             frames: this.anims.generateFrameNumbers('pooka', {start: 2, end: 3}),
-            frameRate: 10,
+            frameRate: 2,
+            repeat: -1
+        });
+
+        // FYGAR
+        this.anims.create
+        ({
+            key: 'fygarWalking',
+            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
+            frameRate: 2,
+            repeat: -1
+        });
+
+        this.anims.create
+        ({
+            key: 'fygarGhosting',
+            frames: this.anims.generateFrameNumbers('fygar', {start: 6, end: 7}),
+            frameRate: 2,
+            repeat: -1
+        });
+
+        this.anims.create
+        ({
+            key: 'fygarAttacking',
+            frames: this.anims.generateFrameNumbers('fygar', {start: 3, end: 4}),
+            frameRate: 2,
             repeat: -1
         });
     }
@@ -253,6 +281,7 @@ class level1 extends Phaser.Scene
     dig(pixPos)
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
+        
         const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
         
         if (tile)
@@ -263,10 +292,15 @@ class level1 extends Phaser.Scene
                 this.player.isDigging = true;
             }
         }
+        
 
         // remove decimal part
         var desiredX = ~~pixPos.x;
         var desiredY = ~~pixPos.y;
+
+        desiredX -= gamePrefs.HALF_CELL_SIZE;
+        desiredY -= gamePrefs.HALF_CELL_SIZE;
+
         if (desiredX % gamePrefs.CELL_SIZE != 1){
             desiredX--;
         }
@@ -287,8 +321,8 @@ class level1 extends Phaser.Scene
 
     pix2cell(pixelX, pixelY)
     {
-        return new Phaser.Math.Vector2(Phaser.Math.FloorTo(pixelX/gamePrefs.CELL_SIZE), 
-                                       Phaser.Math.FloorTo(pixelY/gamePrefs.CELL_SIZE));
+        return new Phaser.Math.Vector2(parseInt(pixelX/gamePrefs.CELL_SIZE), 
+                                       parseInt(pixelY/gamePrefs.CELL_SIZE));
     }
 
     cell2pix(cellX, cellY)
@@ -311,6 +345,10 @@ class level1 extends Phaser.Scene
     removeGroundCell(cellX, cellY)
     {
         this.levelArray[cellY][cellX] = MapContent.Empty;
+
+        const pixPos = this.cell2pix(cellX, cellY);
+
+        shapeMask.fillRect(pixPos.x - game.HALF_CELL_SIZE -1, pixPos.y - game.HALF_CELL_SIZE-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
     }
 
     notifyPlayerEnemyReleased()

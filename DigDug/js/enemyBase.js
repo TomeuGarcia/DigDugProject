@@ -17,7 +17,8 @@ const MAX_INFLATED = 4;
 
 class enemyBase extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated')
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated', 
+                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign')
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -29,8 +30,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.scene = _scene;
         this.spriteTag = _spriteTag;
         this.inflatedSpriteTag = _inflatedSpriteTag;
+        this.walkingSpriteTag = _walkingSpriteTag;
+        this.ghostSpriteTag = _ghostSpriteTag;
         this.points = 400;
         this.inflatedAmount = 0;
+        this.canGhost = false;
         this.canUnGhost = false;
         this.isDead = false;
         this.canInflate = true;
@@ -62,6 +66,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this,
             _scene.digGround
         );
+
+        this.startGhostCooldownTimer();
     }
 
     preUpdate(time,delta)
@@ -79,6 +85,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     doCurrentState()
     {
+        console.log(this.currentState);
         switch (this.currentState) {
             case EnemyStates.PATROL:
                 this.doPatrol();
@@ -104,115 +111,76 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == PATROL ==
     doPatrol()
     {
+        this.anims.play(this.walkingSpriteTag, true);
+        this.setFlip();
+
         if (this.body.blocked.right || this.body.blocked.left)
         {
-            if (this.moveDirection == MoveDirection.RIGHT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
-            else if (this.moveDirection == MoveDirection.LEFT)
-            {
-                var rand = Phaser.Math.Between(1, 4);
-
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.UP;
-                    this.trySwitchToGhost();
-                    
-                    this.directionX = 0;
-                    this.directionY = -1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.DOWN;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 0;
-                    this.directionY = 1;
-                    this.body.setVelocityX(0);
-                    this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                    this.flipX = !this.flipX;
-                }
-            }
+            this.randomizeVerticalDirection();
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
-            if (this.moveDirection == MoveDirection.UP)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+            this.randomizeDiagonalDirection();
+        }
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
-            else if (this.moveDirection == MoveDirection.DOWN)
-            {
-                var rand = Phaser.Math.Between(1, 4);
+    setFlip()
+    {
+        if (this.moveDirection == MoveDirection.LEFT)
+            this.flipX = false;
+        else if (this.moveDirection == MoveDirection.RIGHT)
+            this.flipX = true;
+    }
 
-                if (rand <= 2)
-                {
-                    this.moveDirection = MoveDirection.LEFT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = -1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-                else
-                {
-                    this.moveDirection = MoveDirection.RIGHT;
-                    this.trySwitchToGhost();
-    
-                    this.directionX = 1;
-                    this.directionY = 0;
-                    this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                    this.body.setVelocityY(0);
-                }
-            }
+    randomizeVerticalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.UP;
+            this.trySwitchToGhost();
+            
+            this.directionX = 0;
+            this.directionY = -1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.DOWN;
+            this.trySwitchToGhost();
+
+            this.directionX = 0;
+            this.directionY = 1;
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+        }
+    }
+
+    randomizeDiagonalDirection()
+    {
+        var rand = Phaser.Math.Between(1, 4);
+
+        if (rand <= 2)
+        {
+            this.moveDirection = MoveDirection.LEFT;
+            this.trySwitchToGhost();
+
+            this.directionX = -1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
+        }
+        else
+        {
+            this.moveDirection = MoveDirection.RIGHT;
+            this.trySwitchToGhost();
+
+            this.directionX = 1;
+            this.directionY = 0;
+            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityY(0);
         }
     }
     // == == ==
@@ -220,6 +188,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GHOST ==
     doGhost()
     {
+        if (!this.canGhost) { return; }
+
+        // Play ghost animation
+        this.anims.play(this.ghostSpriteTag, true);
+
         // Reomve collisions
         this.scene.physics.world.removeCollider(this.groundCollider);
 
@@ -276,19 +249,30 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
     }
 
-    canRetrunNormal()
-    {
-        this.canUnGhost = true;
+    canRetrunNormal() { this.canUnGhost = true; }
+
+    allowGhost() 
+    { 
+        this.cooldownGhostTimer.remove(false);
+        this.canGhost = true;
     }
 
     trySwitchToGhost()
     {
         var rand = Phaser.Math.Between(0, 10);
 
-        if (rand <= 3)
+        if (rand <= 3 && this.canGhost) { this.currentState = EnemyStates.GHOST; }
+    }
+
+    startGhostCooldownTimer()
+    {
+        if (!this.canGhost)
         {
-            this.currentState = EnemyStates.GHOST;
-            this.tint = 0x777777;
+            this.cooldownGhostTimer = this.scene.time.addEvent({
+                delay: 3000,
+                callback: this.allowGhost,
+                callbackScope: this,
+            });  
         }
     }
     // == == ==
@@ -301,12 +285,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.setVelocityY(0);
 
         if (this.inflatedAmount > 0)
-            this.setFrame(this.inflatedAmount - 1);
+            this.setTexture(this.inflatedSpriteTag, this.inflatedAmount - 1);
 
         // Check inflated amount
         if (this.inflatedAmount >= MAX_INFLATED)
         {
             this.deflateTimer.remove();
+            this.setTexture(this.inflatedSpriteTag, 3);
 
             // Die
             this.currentState = EnemyStates.DYING;
@@ -338,10 +323,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         if (this.isDead) return;
 
+        this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
-        this.setTexture(this.inflatedSpriteTag);
         this.flipX = !this.flipX;
-        this.tint = 0xffffff;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
@@ -411,6 +395,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.despawnTimer.remove(false);
         this.canInflateTimer.remove(false);
+        this.cooldownGhostTimer.remove(false);
 
         // Add points
         this.scene.score += this.points;
@@ -427,6 +412,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == GENERIC ==
     resetMovement()
     {
+        this.anims.play('enemyWalking', true);
+        
         switch (this.moveDirection) {
             case MoveDirection.RIGHT:
             case MoveDirection.LEFT:
