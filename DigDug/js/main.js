@@ -13,14 +13,15 @@ var gamePrefs =
     NUM_CELL_TOP_AIR: 1, 
     ENEMY_SPEED: 20,
     HARPOON_SPEED: 100,
-    HARPOON_LIFETIME: 50
+    HARPOON_LIFETIME: 50,
+    PLAYER_HIT_DIST: 10
 }
 
 var config = 
 {
     type: Phaser.AUTO,
-    width: 256, // window.innerWidth  //menu --> width: 480,
-    height: 288, //256,  // window.innerHeight //menu --> height: 360,
+    width: 303, // window.innerWidth
+    height: 288, //256,  // window.innerHeight
     scene:[menu, level1], // levels/screens/scenes array
     render:
     {
