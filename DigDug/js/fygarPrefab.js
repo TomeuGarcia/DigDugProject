@@ -13,7 +13,13 @@ class fygarPrefab extends enemyBase
         super.preUpdate(time, delta);
     }
 
-    doAttack() // override super's attack
+    doPatrol()
+    {
+        super();
+
+    }
+
+    doAttack()
     {
         
     }
