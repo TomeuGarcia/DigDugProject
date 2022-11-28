@@ -2,7 +2,8 @@ const EnemyStates = {
     PATROL: 0, 
     GHOST: 1, 
     INFLATED: 2, 
-    DYING: 3
+    ATTACKING: 3,
+    DYING: 4
 };
 
 const MoveDirection = {
@@ -113,6 +114,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
             case EnemyStates.INFLATED:
                 this.doInflated();
+                break;
+
+            case EnemyStates.ATTACKING:
+                this.doAttack();
                 break;
 
             case EnemyStates.DYING:
@@ -378,6 +383,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     resetCanInflate()
     {
         this.canInflate = true;
+    }
+    // == == ==
+
+    // == ATTACK ==
+    doAttack()
+    {
+        
     }
     // == == ==
 
