@@ -37,6 +37,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canGhost = false;
         this.canUnGhost = false;
         this.isDead = false;
+        this.isDespawning = false;
         this.canInflate = true;
 
         this.currentState = EnemyStates.PATROL;
@@ -74,13 +75,29 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         super.preUpdate(time, delta);
 
-        this.doCurrentState();
+        if (this.isDead)
+        {
+            if (this.isDespawning) this.setTexture(this.inflatedSpriteTag, 3);
+        }
+        else
+        {
+            this.doCurrentState();
+        }        
     }
 
-    hit(_jumper, _hero)
+    hit(_enemy, _player)
     {
+        const enemyPixPos = _enemy.getCenterPixPos();
+        const playerPixPos = _player.getCenterPixPos();
+        const distance = enemyPixPos.distance(playerPixPos);
+
+        if (_enemy.currentState == EnemyStates.INFLATED || _player.isDead() || distance > gamePrefs.PLAYER_HIT_DIST)
+        {
+           return; 
+        }
+
         // Kill player
-        _hero.anims.play('playerDying', true);
+        _player.die();
     }
 
     doCurrentState()
@@ -270,7 +287,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.cooldownGhostTimer = this.scene.time.addEvent({
                 delay: 3000,
                 callback: this.allowGhost,
-                callbackScope: this,
+                callbackScope: this
             });  
         }
     }
@@ -385,6 +402,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.playerOverlap.destroy();
 
+        this.isDespawning = true;
         this.despawnTimer = this.scene.time.addEvent({
             delay: 1000,
             callback: this.destroySelf,
@@ -399,11 +417,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.cooldownGhostTimer.remove(false);
 
         // Add points
-        this.scene.score += this.points;
-        console.log("Score: " + this.scene.score);
+        this.scene.addScore(this.points);
 
         // Reset points value
-        this.points = 400;
+        //this.points = 400;
 
         // Remove from scene
         this.destroy();
@@ -467,5 +484,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
     }
+    
+    
+    getCenterPixPos()
+    {
+        return new Phaser.Math.Vector2(this.body.x + this.body.width / 2, this.body.y + this.body.height / 2);
+    }  
+    
     // == == ==
+
+
 }

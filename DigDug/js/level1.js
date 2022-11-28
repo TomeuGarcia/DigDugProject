@@ -16,7 +16,7 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
-
+        this.load.image('watermelon', 'watermelon.png');
         this.load.image('harpoonH', 'harpoonHorizontal.png');
         this.load.image('harpoonV', 'harpoonVertical.png');
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
@@ -45,8 +45,12 @@ class level1 extends Phaser.Scene
         this.setupDigging();
 
         this.initPlayer();
+       
+        this.initScore();
+        this.initFruit();
 
-        this.score = 0; // Testing
+        this.score = 0; // Tes
+        
         this.spaceDown = false; // Testing
         this.initEnemies();
 
@@ -68,6 +72,39 @@ class level1 extends Phaser.Scene
         );
     }
 
+    initScore()
+    {
+        this.score = 0;
+        this.scoreText = this.add.text(gamePrefs.CELL_SIZE * 15 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 2, 
+            'SCORE:', { fontSize: '12px', fill: '#fff' });
+        this.scoreCountText = this.add.text(gamePrefs.CELL_SIZE * 16 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 
+            '0', { fontSize: '12px', fill: '#fff' });
+    }
+    addScore(_score)
+    {
+        this.score += _score;
+        this.scoreCountText.setText(this.score);
+    }
+
+    initFruit()
+    {
+        this.fruits = this.physics.add.staticGroup();
+        this.physics.add.overlap(this.player, this.fruits, this.collectFruit, null, this);
+        this.spawnFruit();
+        
+    }
+    spawnFruit()
+    {
+        this.fruits.create(gamePrefs.CELL_SIZE * 7 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 10 + gamePrefs.HALF_CELL_SIZE, 'watermelon');
+    }
+    collectFruit(_player, _fruit)
+    {
+        _fruit.disableBody(true, true);
+        this.addScore(30);
+        const randomDelay = Phaser.Math.Between(10000, 20000);
+        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
+    }
+
     update()
     {
         ////// nothing
@@ -82,7 +119,6 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
-
     }
 
     //// CREATE start
@@ -199,7 +235,7 @@ class level1 extends Phaser.Scene
         ({
             key: 'playerDying',
             frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
-            frameRate: 10,
+            frameRate: 2,
             repeat: 0
         })
 
@@ -248,16 +284,16 @@ class level1 extends Phaser.Scene
     //// CREATE end
 
 
-    inflatePooka()
+    inflateEnemy(_enemy)
     {
-        if (!this.pooka.isInInflatedState())
+        if (_enemy.isInInflatedState())
         {
-            this.pooka.addInflation();
-            this.pooka.setInfaltedState();
+            _enemy.addInflation();
         }
         else
         {
-            this.pooka.addInflation();
+            _enemy.addInflation();
+            _enemy.setInfaltedState();
         }
     }
 
