@@ -40,6 +40,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.isDespawning = false;
         this.canInflate = true;
 
+        this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
+
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
 
@@ -83,6 +85,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             this.doCurrentState();
         }        
+
+        this.moveSpeed = Phaser.Math.Clamp(this.moveSpeed + (gamePrefs.ENEMY_SPEED_INCREMENT * delta), gamePrefs.ENEMY_MIN_SPEED, gamePrefs.ENEMY_MAX_SPEED);
     }
 
     hit(_enemy, _player)
@@ -160,7 +164,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.directionX = 0;
             this.directionY = -1;
             this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+            this.body.setVelocityY(this.moveSpeed * this.directionY);
         }
         else
         {
@@ -170,7 +174,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.directionX = 0;
             this.directionY = 1;
             this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+            this.body.setVelocityY(this.moveSpeed * this.directionY);
         }
     }
 
@@ -185,7 +189,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
             this.directionX = -1;
             this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityX(this.moveSpeed * this.directionX);
             this.body.setVelocityY(0);
         }
         else
@@ -195,7 +199,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
             this.directionX = 1;
             this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+            this.body.setVelocityX(this.moveSpeed * this.directionX);
             this.body.setVelocityY(0);
         }
     }
@@ -222,11 +226,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Chase player
         if (this.body.x < this.scene.player.x - gamePrefs.HALF_CELL_SIZE)
         {
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED);
+            this.body.setVelocityX(this.moveSpeed);
         }
         else if (this.body.x > this.scene.player.x)
         {
-            this.body.setVelocityX(-gamePrefs.ENEMY_SPEED);
+            this.body.setVelocityX(-this.moveSpeed);
         }
         else
         {
@@ -235,11 +239,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (this.body.y < this.scene.player.y - gamePrefs.HALF_CELL_SIZE)
         {
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED);
+            this.body.setVelocityY(this.moveSpeed);
         }
         else if (this.body.y > this.scene.player.y)
         {
-            this.body.setVelocityY(-gamePrefs.ENEMY_SPEED);
+            this.body.setVelocityY(-this.moveSpeed);
         }
         else
         {
@@ -435,18 +439,18 @@ class enemyBase extends Phaser.GameObjects.Sprite
         switch (this.moveDirection) {
             case MoveDirection.RIGHT:
             case MoveDirection.LEFT:
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                this.body.setVelocityX(this.moveSpeed * this.directionX);
                 this.body.setVelocityY(0);
                 break;
 
             case MoveDirection.DOWN:
             case MoveDirection.UP:
                 this.body.setVelocityX(0);
-                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
+                this.body.setVelocityY(this.moveSpeed * this.directionY);
                 break;
 
             default:
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
+                this.body.setVelocityX(this.moveSpeed * this.directionX);
                 this.body.setVelocityY(0);
                 break;
         }
