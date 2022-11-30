@@ -26,7 +26,7 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
         // Fygar enemy
-        this.load.spritesheet('fygar', 'fygarNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
         this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
         
@@ -265,7 +265,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarWalking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 1, end: 2}),
             frameRate: 2,
             repeat: -1
         });
@@ -273,7 +273,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarGhosting',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 6, end: 7}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 4, end: 5}),
             frameRate: 2,
             repeat: -1
         });
@@ -281,7 +281,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarAttacking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 3, end: 4}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
             frameRate: 2,
             repeat: -1
         });

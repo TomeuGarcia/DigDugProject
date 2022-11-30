@@ -42,6 +42,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canInflate = true;
 
         this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
+        this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
 
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
@@ -85,9 +86,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else
         {
             this.doCurrentState();
-        }        
+            this.updateMoveSpeed(delta);
+        }       
 
-        this.moveSpeed = Phaser.Math.Clamp(this.moveSpeed + (gamePrefs.ENEMY_SPEED_INCREMENT * delta), gamePrefs.ENEMY_MIN_SPEED, gamePrefs.ENEMY_MAX_SPEED);
+                
     }
 
     hit(_enemy, _player)
@@ -152,9 +154,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
     setFlip()
     {
         if (this.moveDirection == MoveDirection.LEFT)
-            this.flipX = false;
-        else if (this.moveDirection == MoveDirection.RIGHT)
             this.flipX = true;
+        else if (this.moveDirection == MoveDirection.RIGHT)
+            this.flipX = false;
     }
 
     randomizeVerticalDirection()
@@ -231,11 +233,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Chase player
         if (this.body.x < this.scene.player.x - gamePrefs.HALF_CELL_SIZE)
         {
-            this.body.setVelocityX(this.moveSpeed);
+            this.body.setVelocityX(this.ghostMoveSpeed);
         }
         else if (this.body.x > this.scene.player.x)
         {
-            this.body.setVelocityX(-this.moveSpeed);
+            this.body.setVelocityX(-this.ghostMoveSpeed);
         }
         else
         {
@@ -244,11 +246,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (this.body.y < this.scene.player.y - gamePrefs.HALF_CELL_SIZE)
         {
-            this.body.setVelocityY(this.moveSpeed);
+            this.body.setVelocityY(this.ghostMoveSpeed);
         }
         else if (this.body.y > this.scene.player.y)
         {
-            this.body.setVelocityY(-this.moveSpeed);
+            this.body.setVelocityY(-this.ghostMoveSpeed);
         }
         else
         {
@@ -504,7 +506,17 @@ class enemyBase extends Phaser.GameObjects.Sprite
         return new Phaser.Math.Vector2(this.body.x + this.body.width / 2, this.body.y + this.body.height / 2);
     }  
     
+
+    updateMoveSpeed(_delta)
+    {
+        if (this.moveSpeed >= gamePrefs.ENEMY_MAX_SPEED) return;
+
+        const step = (_delta * 0.001) / gamePrefs.ENEMY_SPEED_INC_SPAN_SECONDS * (gamePrefs.ENEMY_MAX_SPEED - gamePrefs.ENEMY_MIN_SPEED);      
+        this.moveSpeed = Phaser.Math.Clamp(this.moveSpeed + step, gamePrefs.ENEMY_MIN_SPEED, gamePrefs.ENEMY_MAX_SPEED);
+    }
+
     // == == ==
+
 
 
 }
