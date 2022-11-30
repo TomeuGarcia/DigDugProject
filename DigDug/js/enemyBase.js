@@ -387,10 +387,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == == ==
 
     // == ATTACK ==
-    doAttack()
-    {
-        
-    }
+    doAttack() {}
     // == == ==
 
     // == DIE ==

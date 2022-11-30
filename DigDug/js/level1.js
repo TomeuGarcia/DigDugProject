@@ -204,6 +204,10 @@ class level1 extends Phaser.Scene
         this.enemies = this.add.group();
         this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting').setOrigin(.5);
         this.enemies.add(this.pooka);
+
+        
+        this.fygar = new fygarPrefab(this, 40, 88);
+        this.enemies.add(this.fygar);
     }
 
     loadAnimations()
