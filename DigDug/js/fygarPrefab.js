@@ -8,14 +8,16 @@ class fygarPrefab extends enemyBase
         this.doingTimer = false;
     }
 
-    preUpdate(time,delta)
+    preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
     }
 
     doPatrol()
     {
-        super();
+        super.doPatrol();
+
+        this.startTryAttackTimer();
     }
 
     startTryAttackTimer()
@@ -38,11 +40,15 @@ class fygarPrefab extends enemyBase
 
     trySwitchToAttack()
     {
-        this.doingTimer = false;
+        if (this.doingTimer)
+        {        
+            this.doingTimer = false;
 
-        if (this.currentState == EnemyStates.PATROL)
-        {
-            this.currentState = EnemyStates.ATTACKING;
+            if (this.currentState == EnemyStates.PATROL && 
+                (this.moveDirection == MoveDirection.LEFT || this.moveDirection == MoveDirection.RIGHT))
+            {
+                this.currentState = EnemyStates.ATTACKING;
+            }
         }
     }
 
@@ -52,10 +58,25 @@ class fygarPrefab extends enemyBase
         this.body.setVelocityX(0);
         this.body.setVelocityY(0);
 
+        // Change animation
+        this.anims.play('fygarAttacking', true);
+
         // Spawn fire in front of fygar
 
         // Wait X time
+        this.fireTimer = this.scene.time.addEvent
+        ({
+            delay: 1000,
+            callback: this.resetToPatrol,
+            callbackScope: this,
+            repeat: -1
+        });
+    }
 
+    resetToPatrol()
+    {
         // Reset to patrol
+        this.resetMovement();
+        this.currentState = EnemyStates.PATROL;
     }
 }
