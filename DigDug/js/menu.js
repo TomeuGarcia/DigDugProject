@@ -30,7 +30,8 @@ class menu extends Phaser.Scene
 		this.firstPlayerScoreText = this.add.bitmapText(50, 30, 'gameFont', '1UP', 10)
 												.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
 
-		const firstPlayerScoreCount = 0;
+		const player1Score = localStorage.getItem(storagePrefs.PLAYER_1_SCORE);
+		const firstPlayerScoreCount = player1Score != null ? player1Score : 0;
 		this.firstPlayerScore = this.add.bitmapText(50, 45, 'gameFont', parseInt(firstPlayerScoreCount), 10)
 											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
 
@@ -38,7 +39,14 @@ class menu extends Phaser.Scene
 		this.highScoreText = this.add.bitmapText(config.width/2, 30, 'gameFont', 'HIGH-SCORE', 10)
 										.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
 
-		const highestScoreCount = 1000;
+		const highestScore = localStorage.getItem(storagePrefs.HIGHEST_SCORE);	
+		var highestScoreCount = highestScore != null ? highestScore : 0;
+		if (firstPlayerScoreCount > highestScoreCount) 
+		{
+			highestScoreCount = firstPlayerScoreCount
+			localStorage.setItem(storagePrefs.HIGHEST_SCORE, highestScoreCount);
+		}
+
 		this.firstPlayerScore = this.add.bitmapText(config.width/2, 45, 'gameFont', parseInt(highestScoreCount), 10)
 											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
 
