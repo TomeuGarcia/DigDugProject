@@ -26,7 +26,7 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
         // Fygar enemy
-        this.load.spritesheet('fygar', 'fygarNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
         this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
         
@@ -76,10 +76,11 @@ class level1 extends Phaser.Scene
     initScore()
     {
         this.score = 0;
-        this.scoreText = this.add.text(gamePrefs.CELL_SIZE * 15 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 2, 
-            'SCORE:', { fontSize: '12px', fill: '#fff' });
-        this.scoreCountText = this.add.text(gamePrefs.CELL_SIZE * 16 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 
-            '0', { fontSize: '12px', fill: '#fff' });
+        this.firstPlayerScore = this.add.bitmapText(config.width - 4, gamePrefs.CELL_SIZE * 2, 'gameFont', 'SCORE:', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', '0', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     addScore(_score)
     {
@@ -265,7 +266,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarWalking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 1, end: 2}),
             frameRate: 2,
             repeat: -1
         });
@@ -273,7 +274,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarGhosting',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 6, end: 7}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 4, end: 5}),
             frameRate: 2,
             repeat: -1
         });
@@ -281,7 +282,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarAttacking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 3, end: 4}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
             frameRate: 2,
             repeat: -1
         });
@@ -389,6 +390,12 @@ class level1 extends Phaser.Scene
     isEmptyCell(cellX, cellY)
     {
         return this.levelArray[cellY][cellX] == MapContent.Empty;
+    }
+
+    canMoveToCell(cellX, cellY)
+    {
+        if (cellX < 0 || cellX >= this.levelArray.width || cellY < 0 || cellY >= this.levelArray.height) return false;
+        return this.isEmptyCell(cellX, cellY);
     }
 
     removeGroundCell(cellX, cellY)

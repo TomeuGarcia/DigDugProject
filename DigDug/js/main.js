@@ -11,10 +11,18 @@ var gamePrefs =
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
     NUM_CELL_TOP_AIR: 1, 
-    ENEMY_SPEED: 20,
+    ENEMY_MIN_SPEED: 20,
+    ENEMY_MAX_SPEED: 40,
+    ENEMY_SPEED_INC_SPAN_SECONDS: 30,
     HARPOON_SPEED: 100,
     HARPOON_LIFETIME: 50,
     PLAYER_HIT_DIST: 10
+}
+
+var uiPrefs =
+{
+    TEXT_COLOR_RED: 0xff3f2f,
+    TEXT_COLOR_WHITE: 0xffffff
 }
 
 var config = 
