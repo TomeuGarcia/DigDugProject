@@ -292,7 +292,7 @@ class level1 extends Phaser.Scene
             key: 'fygarFireAttack',
             frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
             frameRate: 2,
-            repeat: -1
+            repeat: 0
         });
     }
     //// CREATE end

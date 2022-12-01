@@ -6,6 +6,7 @@ class fygarPrefab extends enemyBase
         super(_scene, _positionX, _positionY, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting');
 
         this.doingTimer = false;
+        this.fire = new firePrefab(_scene, config.width + 80, config.height + 80, this);
     }
 
     preUpdate(time, delta)
@@ -62,15 +63,16 @@ class fygarPrefab extends enemyBase
         this.anims.play('fygarAttacking', true);
 
         // Spawn fire in front of fygar
+        this.fire.startAttack(this.body.x, this.body.y, this.flipX);
 
         // Wait X time
-        this.fireTimer = this.scene.time.addEvent
+        /*this.fireTimer = this.scene.time.addEvent
         ({
             delay: 1000,
             callback: this.resetToPatrol,
             callbackScope: this,
             repeat: -1
-        });
+        });*/
     }
 
     resetToPatrol()
