@@ -63,7 +63,7 @@ class fygarPrefab extends enemyBase
         this.anims.play('fygarAttacking', true);
 
         // Spawn fire in front of fygar
-        this.fire.startAttack(this.body.x, this.body.y, this.flipX);
+        this.fire.startAttack(this, this.body.x, this.body.y, this.flipX);
 
         // Wait X time
         /*this.fireTimer = this.scene.time.addEvent

@@ -34,7 +34,13 @@ class firePrefab extends Phaser.GameObjects.Sprite
         (
             this,
             _scene.digGround
-        );
+        );        
+
+        this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
+            function () {
+                this.resetToPatrol();
+            }, 
+            this);
     }
 
     preUpdate(time, delta)
@@ -50,8 +56,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
         _player.die();
     }
 
-    startAttack(_posX, _posY, _flip)
+    startAttack(_fygarPrefab, _posX, _posY, _flip)
     {
+        this.owner = _fygarPrefab;
         if (_flip)
         {
             this.setOrigin(1, 0.5);
@@ -65,7 +72,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.body.x = _posX;
         this.body.y = _posY;
 
-        this.anims.play('fygarFireAttack', true);//.on('animationcomplete', resetOwnerPatrol);
+        this.anims.play('fygarFireAttack', true);
     }
 
     resetOwnerPatrol()
