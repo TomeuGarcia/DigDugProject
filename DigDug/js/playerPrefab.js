@@ -34,6 +34,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
 
+        this.score = 0;
+
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
 
@@ -339,6 +341,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
+
+        if (true) // TODO no lives left
+        {
+            this.scene.onPlayerLostAllLives();
+        }
     }
 
     isDead()
