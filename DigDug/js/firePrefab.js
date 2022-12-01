@@ -1,9 +1,9 @@
 
 class firePrefab extends Phaser.GameObjects.Sprite
 {
-    constructor(_scene, _positionX, _positionY, _owner)
+    constructor(_scene, _positionX, _positionY, _owner, _ownerEndAttackCallback)
     {
-        super(_scene, _positionX, _positionY, _owner);
+        super(_scene, _positionX, _positionY);
 
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
@@ -14,6 +14,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         this.owner = _owner;
+        this.ownerEndAttackCallback = _ownerEndAttackCallback;
 
         // Overlap with player
         this.playerOverlap = _scene.physics.add.overlap(
@@ -38,7 +39,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
         this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
             function () {
-                this.resetToPatrol();
+                this.resetOwnerPatrol();
             }, 
             this);
     }
@@ -56,30 +57,34 @@ class firePrefab extends Phaser.GameObjects.Sprite
         _player.die();
     }
 
-    startAttack(_fygarPrefab, _posX, _posY, _flip)
+    startAttack(_posX, _posY, _flip)
     {
-        this.owner = _fygarPrefab;
         if (_flip)
         {
             this.setOrigin(1, 0.5);
+            _posX -= gamePrefs.HALF_CELL_SIZE;
         }
         else
         {
             this.setOrigin(0, .5);
+            _posX += gamePrefs.HALF_CELL_SIZE;
         }
         this.flipX = _flip;
 
-        this.body.x = _posX;
-        this.body.y = _posY;
+        this.x = _posX;
+        this.y = _posY;
 
         this.anims.play('fygarFireAttack', true);
     }
 
     resetOwnerPatrol()
     {
+        console.log("resetOwnerPatrol");
+        console.log(this.ownerEndAttackCallback());
+
         this.body.x = config.width + 80;
         this.body.y = config.height + 80;
 
-        this.owner.resetToPatrol();
+        this.ownerEndAttackCallback(this.owner);
     }
 }
