@@ -374,7 +374,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
         else if (this.inflatedAmount <= 0)
         {    
-            this.flipX = !this.flipX;
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
@@ -400,7 +399,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
-        this.flipX = !this.flipX;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
