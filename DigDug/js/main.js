@@ -25,6 +25,12 @@ var uiPrefs =
     TEXT_COLOR_WHITE: 0xffffff
 }
 
+var storagePrefs =
+{
+    PLAYER_1_SCORE: 'player1Score',
+    HIGHEST_SCORE: 'highestScore'
+}
+
 var config = 
 {
     type: Phaser.AUTO,

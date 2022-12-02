@@ -50,7 +50,6 @@ class level1 extends Phaser.Scene
         this.initScore();
         this.initFruit();
 
-        this.score = 0; // Tes
         
         this.spaceDown = false; // Testing
         this.initEnemies();
@@ -75,7 +74,6 @@ class level1 extends Phaser.Scene
 
     initScore()
     {
-        this.score = 0;
         this.firstPlayerScore = this.add.bitmapText(config.width - 4, gamePrefs.CELL_SIZE * 2, 'gameFont', 'SCORE:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
 
@@ -84,8 +82,10 @@ class level1 extends Phaser.Scene
     }
     addScore(_score)
     {
-        this.score += _score;
-        this.scoreCountText.setText(this.score);
+        this.player.score += _score;
+        this.scoreCountText.setText(this.player.score);
+
+        localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
     }
 
     initFruit()
@@ -417,5 +417,9 @@ class level1 extends Phaser.Scene
         this.player.onEnemyDiedInflated();
     }
 
+    onPlayerLostAllLives()
+    {
+        //////
+    }
 
 }
