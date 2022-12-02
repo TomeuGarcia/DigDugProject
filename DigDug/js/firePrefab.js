@@ -15,6 +15,13 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.scene = _scene;
         this.owner = _owner;
         this.ownerEndAttackCallback = _ownerEndAttackCallback;
+        
+        this.fireSequence = [];
+        this.fireSequence.push(this.scene.add.sprite('fireSmall'));
+        this.fireSequence.push(this.scene.add.sprite('fireMedium'));
+        this.fireSequence.push(this.scene.add.sprite('fireBig'));
+        this.fireSequenceIndex = 0;
+        
 
         // Overlap with player
         this.playerOverlap = _scene.physics.add.overlap(
