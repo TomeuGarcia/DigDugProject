@@ -19,6 +19,18 @@ var gamePrefs =
     PLAYER_HIT_DIST: 10
 }
 
+var uiPrefs =
+{
+    TEXT_COLOR_RED: 0xff3f2f,
+    TEXT_COLOR_WHITE: 0xffffff
+}
+
+var storagePrefs =
+{
+    PLAYER_1_SCORE: 'player1Score',
+    HIGHEST_SCORE: 'highestScore'
+}
+
 var config = 
 {
     type: Phaser.AUTO,
