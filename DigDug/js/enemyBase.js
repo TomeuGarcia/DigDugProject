@@ -46,10 +46,15 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
+        this.lastDirection = this.moveDirection;
 
         this.directionX = -1;
         this.directionY = 0;
-        this.body.setVelocityX(20 * this.directionX);
+        this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
+
+        this.desiredVerticalDirection = MoveDirection.DOWN;
+        this.exploredLeft = false;
+        this.exploredRight = false;
 
         // Overlap with player
         this.playerOverlap = _scene.physics.add.overlap(
@@ -141,6 +146,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
 
+        this.computeDesiredMove();
+        return;
+
         if (this.body.blocked.right || this.body.blocked.left)
         {
             this.randomizeVerticalDirection();
@@ -184,6 +192,102 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
         else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
         else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
+
+        this.body.setVelocityX(this.moveSpeed * this.directionX);
+        this.body.setVelocityY(this.moveSpeed * this.directionY);
+    }
+
+    computeDesiredMove()
+    {
+        // set ExploredLeft ExploredRight
+        if (this.moveDirection == MoveDirection.LEFT && this.body.blocked.left)
+        {
+            this.exploredLeft = true;
+            this.moveDirection = MoveDirection.RIGHT;
+            this.directionX = 1;
+            this.directionY = 0;
+        }
+        else if (this.moveDirection == MoveDirection.RIGHT && this.body.blocked.right)
+        {
+            this.exploredRight = true;
+            this.moveDirection = MoveDirection.LEFT;
+            this.directionX = -1;
+            this.directionY = 0;
+        }
+        else if (this.moveDirection == MoveDirection.DOWN && this.body.blocked.down)
+        {
+            this.exploredLeft = false;
+            this.exploredRight = false;
+        }
+        else if (this.moveDirection == MoveDirection.UP && this.body.blocked.up)
+        {
+            this.exploredLeft = false;
+            this.exploredRight = false;
+        }
+
+        // change desiredVerticalDirection
+        if (this.exploredLeft && this.exploredRight)
+        {
+            if (this.desiredVerticalDirection == MoveDirection.DOWN)
+            {
+                this.desiredVerticalDirection = MoveDirection.UP;
+            }
+            else if (this.desiredVerticalDirection == MoveDirection.UP)
+            {
+                this.desiredVerticalDirection = MoveDirection.DOWN;
+            }
+        }
+        
+        // set moveDirection
+        const currentCellPos = this.getCellPos();
+        if (this.desiredVerticalDirection != this.moveDirection)
+        {
+            if (this.desiredVerticalDirection == MoveDirection.DOWN)
+            {
+                if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y + 1))
+                {
+                    this.directionX = 0;
+                    this.directionY = 1;
+    
+                    this.exploredLeft = false;
+                    this.exploredRight = false;
+                    this.lastDirection = this.moveDirection;
+                    this.moveDirection = this.desiredVerticalDirection;
+                }
+            }
+            else if (this.desiredVerticalDirection == MoveDirection.UP)
+            {
+                if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y - 1))
+                {
+                    this.directionX = 0;
+                    this.directionY = -1;
+    
+                    this.exploredLeft = false;
+                    this.exploredRight = false;
+                    this.lastDirection = this.moveDirection;
+                    this.moveDirection = this.desiredVerticalDirection;
+                }
+            }
+            
+        }
+        else
+        {
+            if (this.body.blocked.up || this.body.blocked.down)
+            {
+                this.moveDirection = this.lastDirection;
+
+                if (this.moveDirection == MoveDirection.RIGHT)
+                {
+                    this.directionX = 1;
+                    this.directionY = 0;
+                }
+                else if (this.moveDirection == MoveDirection.LEFT)
+                {
+                    this.directionX = -1;
+                    this.directionY = 0;
+                }
+            }
+        }
 
         this.body.setVelocityX(this.moveSpeed * this.directionX);
         this.body.setVelocityY(this.moveSpeed * this.directionY);
@@ -540,7 +644,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     isInCellCenter(_pixX, _pixY)
     {
-        return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
+        return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && 
+               _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
     }
     
     
