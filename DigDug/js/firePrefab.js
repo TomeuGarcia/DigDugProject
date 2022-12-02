@@ -71,6 +71,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
         }
         this.flipX = _flip;
 
+        this.visible = true;
+        this.setActive(true);
+
         this.x = _posX;
         this.y = _posY;
 
@@ -79,12 +82,8 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     resetOwnerPatrol()
     {
-        console.log("resetOwnerPatrol");
-        console.log(this.ownerEndAttackCallback());
-
-        this.body.x = config.width + 80;
-        this.body.y = config.height + 80;
-
+        this.visible = false;
+        this.setActive(false);
         this.ownerEndAttackCallback(this.owner);
     }
 }
