@@ -51,6 +51,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
+        
 
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
@@ -146,8 +147,12 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
 
+        /*
         this.computeDesiredMove();
+        var rand = Phaser.Math.Between(1, 4);
+        if (rand <= 2) this.trySwitchToGhost();
         return;
+        */
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
@@ -199,22 +204,28 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     computeDesiredMove()
     {
-        if (!this.scene.canMoveVertically(this.body)) return;
+        const c = this.scene.canMoveVertically(this.body);
+        //console.log(c);
+        if (!c) 
+        {
+            return;
+        }
+
 
         // set ExploredLeft ExploredRight
         if (this.moveDirection == MoveDirection.LEFT && this.body.blocked.left)
         {
             this.exploredLeft = true;
             this.moveDirection = MoveDirection.RIGHT;
-            this.directionX = 1;
-            this.directionY = 0;
+            //this.directionX = 1;
+            //this.directionY = 0;
         }
         else if (this.moveDirection == MoveDirection.RIGHT && this.body.blocked.right)
         {
             this.exploredRight = true;
             this.moveDirection = MoveDirection.LEFT;
-            this.directionX = -1;
-            this.directionY = 0;
+            //this.directionX = -1;
+            //this.directionY = 0;
         }
         else if (this.moveDirection == MoveDirection.DOWN && this.body.blocked.down)
         {
@@ -248,8 +259,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
             {
                 if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y + 1))
                 {
-                    this.directionX = 0;
-                    this.directionY = 1;
+                    console.clear();
+                    console.log("can move DOWN");
+                    console.log("desire DOWN");
+                    //this.directionX = 0;
+                    //this.directionY = 1;
     
                     this.exploredLeft = false;
                     this.exploredRight = false;
@@ -261,8 +275,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
             {
                 if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y - 1))
                 {
-                    this.directionX = 0;
-                    this.directionY = -1;
+                    console.clear();
+                    console.log("can move UP");
+                    console.log("desire UP");
+                    //this.directionX = 0;
+                    //this.directionY = -1;
     
                     this.exploredLeft = false;
                     this.exploredRight = false;
@@ -274,22 +291,26 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
         else
         {
+            // if moving with desiredVertical and is stopped            
             if (this.body.blocked.up || this.body.blocked.down)
             {
                 this.moveDirection = this.lastDirection;
-
-                if (this.moveDirection == MoveDirection.RIGHT)
-                {
-                    this.directionX = 1;
-                    this.directionY = 0;
-                }
-                else if (this.moveDirection == MoveDirection.LEFT)
-                {
-                    this.directionX = -1;
-                    this.directionY = 0;
-                }
-            }
+                console.log("tf");
+            }            
         }
+
+        this.directionX = 0;
+        this.directionY = 0;
+
+        if (this.moveDirection == MoveDirection.RIGHT) this.directionX = 1;
+        else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
+        else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
+        else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
+
+        if (this.moveDirection == MoveDirection.RIGHT) console.log("RIGHT");
+        else if (this.moveDirection == MoveDirection.LEFT) console.log("LEFT");
+        else if (this.moveDirection == MoveDirection.DOWN) {console.log("DOWN"); console.log(this.body.blocked.down); }
+        else if (this.moveDirection == MoveDirection.UP) console.log("UP");
 
         this.body.setVelocityX(this.moveSpeed * this.directionX);
         this.body.setVelocityY(this.moveSpeed * this.directionY);
@@ -410,7 +431,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
 
 
-        // Check if it leaves an area with collions
+        // Check if it leaves an area with collisions
         if (this.isInEmptyCell() && this.canUnGhost && 
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {
