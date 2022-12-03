@@ -15,6 +15,13 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.scene = _scene;
         this.owner = _owner;
         this.ownerEndAttackCallback = _ownerEndAttackCallback;
+        
+        this.fireSequence = [];
+        this.fireSequence.push(this.scene.add.sprite('fireSmall'));
+        this.fireSequence.push(this.scene.add.sprite('fireMedium'));
+        this.fireSequence.push(this.scene.add.sprite('fireBig'));
+        this.fireSequenceIndex = 0;
+        
 
         // Overlap with player
         this.playerOverlap = _scene.physics.add.overlap(
@@ -71,6 +78,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
         }
         this.flipX = _flip;
 
+        this.visible = true;
+        this.setActive(true);
+
         this.x = _posX;
         this.y = _posY;
 
@@ -79,12 +89,8 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     resetOwnerPatrol()
     {
-        console.log("resetOwnerPatrol");
-        console.log(this.ownerEndAttackCallback());
-
-        this.body.x = config.width + 80;
-        this.body.y = config.height + 80;
-
+        this.visible = false;
+        this.setActive(false);
         this.ownerEndAttackCallback(this.owner);
     }
 }
