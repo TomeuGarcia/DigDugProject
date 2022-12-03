@@ -31,6 +31,16 @@ var storagePrefs =
     HIGHEST_SCORE: 'highestScore'
 }
 
+var loadPrefs =
+{
+    ROCK_CLASS: 'rock',
+    POOKA_CLASS: 'pooka',
+    FYGAR_CLASS: 'fygar',
+    PLAYER_FIRST_SPAWN_ANIM_CLASS: 'playerFirstSpawnAnim',
+    PLAYER_RESPAWN_CLASS: 'playerRespawn',
+    FRUIT_RESPAWN_CLASS: 'fruitRespawn'
+}
+
 var config = 
 {
     type: Phaser.AUTO,

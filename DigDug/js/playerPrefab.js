@@ -24,6 +24,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
         _scene.physics.world.enable(this);        
 
+        this.depth = 5;
+        this.setScale(1).setOrigin(.5)
+
         this.scene = _scene;
         this.cursorKeys = _cursors;
         this.moveX = 0;
@@ -47,7 +50,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
 
-        this.depth = 5;
+        
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
