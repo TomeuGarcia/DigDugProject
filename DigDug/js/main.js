@@ -6,8 +6,8 @@ var gamePrefs =
     PLAYER_MOVE_SPEED: 36,
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
-    NUM_CELL_WIDTH: 14,
-    NUM_CELL_HEIGHT: 15,
+    NUM_CELL_WIDTH: 20,
+    NUM_CELL_HEIGHT: 18,
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
     NUM_CELL_TOP_AIR: 1, 
@@ -44,8 +44,8 @@ var loadPrefs =
 var config = 
 {
     type: Phaser.AUTO,
-    width: 303, // window.innerWidth
-    height: 288, //256,  // window.innerHeight
+    width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
+    height: gamePrefs.CELL_SIZE * 18, //256,  // window.innerHeight
     scene:[menu, level1], // levels/screens/scenes array
     render:
     {
