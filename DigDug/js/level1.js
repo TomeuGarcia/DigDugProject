@@ -31,13 +31,19 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
         
 
-        this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
+        //this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
+        this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
         
         this.load.image('brush','diggedFromBottom.png');
 
+        /*
         this.load.setPath('assets/tilesets/');
         this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
         this.load.json('levelJSON', 'testLevel1.json');
+        */
+        this.load.setPath('assets/tilesets/final/');
+        this.load.tilemapTiledJSON('level1', 'level1.json');
+        this.load.json('level1JSON', 'level1.json');        
     }
 
     create()
@@ -128,19 +134,21 @@ class level1 extends Phaser.Scene
     {
         // Draw Level
         // Load the JSON
-        this.map = this.add.tilemap('testLevel1');
+        this.map = this.add.tilemap('level1');//this.map = this.add.tilemap('testLevel1');
         // Load tilesets
-        this.map.addTilesetImage('test_level_1');
+        this.map.addTilesetImage('digDugTileset'); //this.map.addTilesetImage('test_level_1');
         // Draw the layers
-        this.borders = this.map.createLayer('layer_borders', 'test_level_1');
-        this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
-        this.surface = this.map.createLayer('layer_surface', 'test_level_1');
+        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');//this.borders = this.map.createLayer('layer_borders', 'test_level_1');
+        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');//this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
+        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');//this.surface = this.map.createLayer('layer_surface', 'test_level_1');
 
-        this.map.setCollisionBetween(3, 3, true, true, 'layer_borders');
-        this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
+        this.map.setCollisionBetween(49, 49, true, true, 'layer_borders');
+        this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
         
-        const levelGroundLayer = this.cache.json.get('levelJSON').layers[0];
+        const levelJSON = this.cache.json.get('level1JSON');
+        const levelGroundLayer = levelJSON.layers[2];
+        const levelBordersLayer = levelJSON.layers[0];
         this.levelWidth = levelGroundLayer.width;
         this.levelHeight = levelGroundLayer.height;
         this.levelArray = [];
@@ -149,7 +157,9 @@ class level1 extends Phaser.Scene
             this.levelArray.push([]);
             for (var j = 0; j < this.levelWidth; ++j)
             {
-                if (levelGroundLayer.data[(i*this.levelWidth) + j] == 0)
+                const index = (i*this.levelWidth) + j;
+                if (levelGroundLayer.data[index] == 0 && 
+                    levelBordersLayer.data[index] == 0)
                 {
                     this.levelArray[i].push(MapContent.Empty)
                 }
