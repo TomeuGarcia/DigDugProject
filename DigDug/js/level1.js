@@ -28,7 +28,10 @@ class level1 extends Phaser.Scene
         // Fygar enemy
         this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
-        this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
+        //this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
+        this.load.image('fireSmall', 'fireSmall.png');
+        this.load.image('fireMedium', 'fireMedium.png');
+        this.load.image('fireBig', 'fireBig.png');
         
 
         //this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -297,13 +300,13 @@ class level1 extends Phaser.Scene
             repeat: -1
         });
 
-        this.anims.create
+        /*this.anims.create
         ({
             key: 'fygarFireAttack',
             frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
             frameRate: 2,
             repeat: 0
-        });
+        });*/
     }
     //// CREATE end
 
