@@ -199,6 +199,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     computeDesiredMove()
     {
+        if (!this.scene.canMoveVertically(this.body)) return;
+
         // set ExploredLeft ExploredRight
         if (this.moveDirection == MoveDirection.LEFT && this.body.blocked.left)
         {
