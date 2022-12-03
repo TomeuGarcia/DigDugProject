@@ -23,10 +23,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
+        this.depth = 4;
+
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
         this.body.allowGravity = false;
+        this.setOrigin(.5);
 
         this.scene = _scene;
         this.spriteTag = _spriteTag;
@@ -58,14 +61,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredRight = false;
 
         // Overlap with player
-        this.playerOverlap = _scene.physics.add.overlap(
-            this, 
-            _scene.player,
-            this.hit,
-            null,
-            this
-        );
-        
+      
         _scene.physics.add.collider
         (
             this,
@@ -80,6 +76,18 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.startGhostCooldownTimer();
     }
+
+    initCollisionsWithPlayer()
+    {
+        this.playerOverlap = this.scene.physics.add.overlap(
+            this, 
+            this.scene.player,
+            this.hit,
+            null,
+            this
+        );
+    }
+
 
     preUpdate(time,delta)
     {
@@ -100,6 +108,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     hit(_enemy, _player)
     {
+        console.log("hit");
+
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
         const distance = enemyPixPos.distance(playerPixPos);
