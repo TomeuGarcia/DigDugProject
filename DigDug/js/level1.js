@@ -30,48 +30,51 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
         this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
         
-
-        //this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
-        this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
-        
         this.load.image('brush','diggedFromBottom.png');
 
-        /*
-        this.load.setPath('assets/tilesets/');
-        this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
-        this.load.json('levelJSON', 'testLevel1.json');
-        */
+
+        // Tilemap
+        this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
+
         this.load.setPath('assets/tilesets/final/');
         this.load.tilemapTiledJSON('level1', 'level1.json');
-        this.load.json('level1JSON', 'level1.json');        
+        this.load.json('level1_JSON', 'level1.json');        
     }
 
     create()
     {
-        this.loadMap();
+        this.loadLevel();
         this.setupDigging();
-
-        this.initPlayer();
        
+        this.initLevelObjects();
+        this.initPlayer();
+        this.initEnemies();
+
         this.initScore();
         this.initFruit();
 
         
         this.spaceDown = false; // Testing
-        this.initEnemies();
 
         this.loadAnimations();
 
+        //this.player.body.collideWorldBounds = true;
+        this.physics.add.collider
+        (
+            this.player,
+            this.borders
+        );
+
         this.physics.add.overlap(
             this.player.harpoonH,
-            this.enemies,
+            this.enemyGroup,
             this.player.harpoonH.onEnemyOverlap,
             null,
             this
         );
         this.physics.add.overlap(
             this.player.harpoonV,
-            this.enemies,
+            this.enemyGroup,
             this.player.harpoonV.onEnemyOverlap,
             null,
             this
@@ -103,7 +106,7 @@ class level1 extends Phaser.Scene
     }
     spawnFruit()
     {
-        this.fruits.create(gamePrefs.CELL_SIZE * 7 + gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 10 + gamePrefs.HALF_CELL_SIZE, 'watermelon');
+        this.fruits.create(this.fruitRespawnPos.x, this.fruitRespawnPos.y, 'watermelon');
     }
     collectFruit(_player, _fruit)
     {
@@ -130,23 +133,23 @@ class level1 extends Phaser.Scene
     }
 
     //// CREATE start
-    loadMap()
+    loadLevel()
     {
         // Draw Level
         // Load the JSON
-        this.map = this.add.tilemap('level1');//this.map = this.add.tilemap('testLevel1');
+        this.map = this.add.tilemap('level1');
         // Load tilesets
-        this.map.addTilesetImage('digDugTileset'); //this.map.addTilesetImage('test_level_1');
+        this.map.addTilesetImage('digDugTileset');
         // Draw the layers
-        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');//this.borders = this.map.createLayer('layer_borders', 'test_level_1');
-        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');//this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
-        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');//this.surface = this.map.createLayer('layer_surface', 'test_level_1');
+        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');;
+        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
+        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');
 
         this.map.setCollisionBetween(49, 49, true, true, 'layer_borders');
         this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
         
-        const levelJSON = this.cache.json.get('level1JSON');
+        const levelJSON = this.cache.json.get('level1_JSON');
         const levelGroundLayer = levelJSON.layers[2];
         const levelBordersLayer = levelJSON.layers[0];
         this.levelWidth = levelGroundLayer.width;
@@ -174,6 +177,44 @@ class level1 extends Phaser.Scene
         }   
     }
 
+    initLevelObjects()
+    {
+        this.enemies = [];
+        this.enemyGroup = this.add.group();
+
+        const levelJSON = this.cache.json.get('level1_JSON');
+        const levelObjects = levelJSON.layers[3].objects;
+        for (var i = 0; i < levelObjects.length; ++i)
+        {
+            const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
+            const pixPos = this.cell2pix(cellPos.x, cellPos.y);
+
+            switch (levelObjects[i].class)
+            {
+                case loadPrefs.POOKA_CLASS:
+                    this.spawnPooka(pixPos);
+                    break;
+                case loadPrefs.FYGAR_CLASS:
+                    this.spawnFygar(pixPos);
+                    break;
+                case loadPrefs.ROCK_CLASS:
+                    this.spawnRock(pixPos);
+                    break;
+                case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
+                    this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+                case loadPrefs.PLAYER_RESPAWN_CLASS:
+                    this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+                case loadPrefs.FRUIT_RESPAWN_CLASS:
+                    this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     setupDigging()
     {
         shapeMask = this.make.graphics();
@@ -195,31 +236,31 @@ class level1 extends Phaser.Scene
 
     initPlayer()
     {
-        const playerStart = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
-                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
-
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-
-        this.player = new playerPrefab(this, playerStart.x, playerStart.y, 'player', this.cursorKeys).setScale(1).setOrigin(.5);
-
-        this.player.body.collideWorldBounds = true;
-        this.physics.add.collider
-        (
-            this.player,
-            this.borders
-        );
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
     }
-
     initEnemies()
     {
-        this.enemies = this.add.group();
-        this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting').setOrigin(.5);
-        this.enemies.add(this.pooka);
-
-        
-        this.fygar = new fygarPrefab(this, 40, 88);
-        this.enemies.add(this.fygar);
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].initCollisionsWithPlayer();
+            this.enemyGroup.add(this.enemies[i]);
+        }
     }
+
+    spawnRock(pixPos)
+    {
+        // TODO
+    }
+    spawnPooka(pixPos)
+    {
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting'));
+    }
+    spawnFygar(pixPos)
+    {
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting'));
+    }
+
 
     loadAnimations()
     {

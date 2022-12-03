@@ -5,6 +5,8 @@ class firePrefab extends Phaser.GameObjects.Sprite
     {
         super(_scene, _positionX, _positionY);
 
+        this.depth = 3;
+
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
