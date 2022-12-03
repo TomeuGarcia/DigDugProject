@@ -221,7 +221,7 @@ class level1 extends Phaser.Scene
         shapeMask.fillStyle(0xffffff);
         shapeMask.beginPath();
 
-        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH+2), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT+2));
+        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT));
 
         this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
         this.renderTexture.mask = this.mask;
