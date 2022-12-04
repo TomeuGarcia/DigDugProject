@@ -11,7 +11,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
         this.body.allowGravity = false;
-        this.body.setSize(16, 16);
+        this.body.setSize(48, 16);
 
         this.anims.play('fygarFireAttack', true);
 
@@ -88,11 +88,13 @@ class firePrefab extends Phaser.GameObjects.Sprite
         if (_flip)
         {
             this.setOrigin(1, 0.5);
+            this.body.setSize(48, 16);
             _posX -= gamePrefs.HALF_CELL_SIZE;
         }
         else
         {
             this.setOrigin(0, .5);
+            this.body.setSize(48, 16);
             _posX += gamePrefs.HALF_CELL_SIZE;
         }
         this.flipX = _flip;
