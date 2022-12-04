@@ -1,4 +1,5 @@
-class menu extends Phaser.Scene{
+class menu extends Phaser.Scene
+{
 	constructor()
 	{
         super({key: 'menu'});
@@ -6,9 +7,16 @@ class menu extends Phaser.Scene{
 
 	preload()
 	{
+		this.cameras.main.setBackgroundColor("#000");
+
 		this.load.setPath('assets/images/');
-        this.load.image('menu', 'mainMenu_Cleaner.png');
+		this.load.image('namcoLogo', 'namcoLogo.png');
+		this.load.image('digDugTitle', 'digDugTitle.png');
 		this.load.image('pointer', 'mainMenuPointer.png');
+
+        // ---- FONTS ----
+        this.load.setPath('assets/fonts/');
+        this.load.bitmapFont('gameFont', 'GameFont.png', 'GameFont.xml');
 	}
 
 	create()
@@ -16,137 +24,74 @@ class menu extends Phaser.Scene{
         this.cursors = this.input.keyboard.createCursorKeys();
 		this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
-		this.bgBack = this.add.sprite(-40, 10, 'menu').setOrigin(0).setScale(.7);
-		this.pointer = this.add.sprite(config.width/2 - 45, config.height/2 + 5, 'pointer').setOrigin(.5).setScale(.7);
+		this.pointer = this.add.sprite(config.width/2 - 45, config.height/2 + 3, 'pointer').setOrigin(0.5).setScale(.7);
 
 		// Player 1 score
-		this.firstPlayerScoreText = this.add.text(
-			20, 
-			25, 
-			"1UP", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#fc1c03',
-				stroke: '#fc1c03'
-			}
-		).setOrigin(0).setScale(.8);
-		this.firstPlayerScore = this.add.text(
-			config.width/2 - 70, 
-			40, 
-			"00", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		).setOrigin(0).setScale(.7);
+		this.firstPlayerScoreText = this.add.bitmapText(50, 30, 'gameFont', '1UP', 10)
+												.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
+
+		const player1Score = localStorage.getItem(storagePrefs.PLAYER_1_SCORE);
+		const firstPlayerScoreCount = player1Score != null ? player1Score : 0;
+		this.firstPlayerScore = this.add.bitmapText(50, 45, 'gameFont', parseInt(firstPlayerScoreCount), 10)
+											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
 
 		// High-score
-		this.highScoreText = this.add.text(
-			config.width/2 - 5, 
-			33, 
-			"HIGH-SCORE", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#fc1c03',
-				stroke: '#fc1c03'
-			}
-		).setOrigin(.5).setScale(.8);
-		this.highScore = this.add.text(
-			config.width/2, 
-			40, 
-			"10000", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		).setOrigin(0).setScale(.7);
+		this.highScoreText = this.add.bitmapText(config.width/2, 30, 'gameFont', 'HIGH-SCORE', 10)
+										.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
+
+		const highestScore = localStorage.getItem(storagePrefs.HIGHEST_SCORE);	
+		var highestScoreCount = highestScore != null ? highestScore : 0;
+		if (firstPlayerScoreCount > highestScoreCount) 
+		{
+			highestScoreCount = firstPlayerScoreCount
+			localStorage.setItem(storagePrefs.HIGHEST_SCORE, highestScoreCount);
+		}
+
+		this.firstPlayerScore = this.add.bitmapText(config.width/2, 45, 'gameFont', parseInt(highestScoreCount), 10)
+											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+
 
 		// Player 2 score
-		this.secondPlayerScoreText = this.add.text(
-			config.width/2 + 60, 
-			25, 
-			"2UP", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#fc1c03',
-				stroke: '#fc1c03'
-			}
-		).setOrigin(0).setScale(.8);
-		this.secondPlayerScore = this.add.text(
-			config.width/2 + 100, 
-			40, 
-			"00", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		).setOrigin(0).setScale(.7);
+		this.secondPlayerScoreText = this.add.bitmapText(config.width -50, 30, 'gameFont', '2UP', 10)
+												.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
+
+		const secondPlayerScoreCount = 0;
+		this.secondPlayerScore = this.add.bitmapText(config.width - 50, 45, 'gameFont', parseInt(secondPlayerScoreCount), 10)
+											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+
+		// Dig Dug Title
+		this.add.sprite(config.width/2, config.height/2 - 50, 'digDugTitle').setOrigin(0.5).setScale(.7);
+
 
 		// Dates & all rights reserved
-		this.dates = this.add.text(
-			config.width/2 + 5, 
-			config.height - 45, 
-			"1982 1985 NAMCO LTD.", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		).setOrigin(.5).setScale(.7);
-		this.rights = this.add.text(
-			config.width/2 + 5, 
-			config.height - 25, 
-			"ALL RIGHTS RESERVED", 
-			{
-				fontFamily: 'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		).setOrigin(.5).setScale(.7);
+		this.dates = this.add.bitmapText(config.width/2, config.height - 45, 'gameFont', '1982 1985 NAMCO LTD.\n\nALL RIGHTS RESERVED', 8)
+								.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5);
+
 
 		// == BUTTONS ==
 		// 1 player button
-		this.button = this.add.text(
-			config.width/2 - 30,
-			config.height/2,
-			"1 PLAYER",
-			{
-				fontFamily:  'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		)
-		.setOrigin(0)
-		.setScale(.7)
-		.setInteractive({useHandCursor: true})
-		.on(
-			'pointerdown',
-			this.startGame,
-			this
-		);
+		this.player1Button = this.add.bitmapText(config.width/2, config.height/2, 'gameFont', '1 PLAYER', 8)
+										.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0)
+										.setInteractive({useHandCursor: true})
+										.on(
+											'pointerdown',
+											this.startGame,
+											this
+										);
 
 		// 2 player button
-		this.button = this.add.text(
-			config.width/2 - 30,
-			config.height/2 + 30,
-			"2 PLAYERS",
-			{
-				fontFamily:  'Arial Black',
-				fill: '#FFFFFF',
-				stroke: '#FFFFFF'
-			}
-		)
-		.setOrigin(0)
-		.setScale(.7)
-		.setInteractive({useHandCursor: true})
-		.on(
-			'pointerdown',
-			this.startGame,
-			this
-		);
+		this.player2Button = this.add.bitmapText(config.width/2, config.height/2 + 20, 'gameFont', '2 PLAYER', 8)
+										.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0)
+										.setInteractive({useHandCursor: true})
+										.on(
+											'pointerdown',
+											this.startGame,
+											this
+										);
+
+		this.add.sprite(config.width/2, config.height - 85, 'namcoLogo').setOrigin(0.5).setScale(.06);
+
+
 	}
 
 	startGame()
@@ -164,11 +109,11 @@ class menu extends Phaser.Scene{
 	{
         if (this.cursors.down.isDown) 
 		{
-			this.pointer.setY(config.height/2 + 35);
+			this.pointer.setY(config.height/2 + 23);
 		}
 		else if (this.cursors.up.isDown)
 		{
-			this.pointer.setY(config.height/2 + 5);
+			this.pointer.setY(config.height/2 + 3);
 		}
 		else if (this.enterKey.isDown || this.cursors.space.isDown)
 		{

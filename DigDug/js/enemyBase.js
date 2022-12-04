@@ -2,7 +2,8 @@ const EnemyStates = {
     PATROL: 0, 
     GHOST: 1, 
     INFLATED: 2, 
-    DYING: 3
+    ATTACKING: 3,
+    DYING: 4
 };
 
 const MoveDirection = {
@@ -22,10 +23,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
+        this.depth = 4;
+
         _scene.add.existing(this);
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
         this.body.allowGravity = false;
+        this.setOrigin(.5);
 
         this.scene = _scene;
         this.spriteTag = _spriteTag;
@@ -40,22 +44,26 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.isDespawning = false;
         this.canInflate = true;
 
+        this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
+        this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
+
         this.currentState = EnemyStates.PATROL;
         this.moveDirection = MoveDirection.LEFT;
+        this.lastDirection = this.moveDirection;
 
         this.directionX = -1;
         this.directionY = 0;
-        this.body.setVelocityX(20 * this.directionX);
+        this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
+        
+
+        this.desiredVerticalDirection = MoveDirection.DOWN;
+        this.exploredLeft = false;
+        this.exploredRight = false;
+        this.exploredUp = false;
+        this.exploredDown = false;
 
         // Overlap with player
-        this.playerOverlap = _scene.physics.add.overlap(
-            this, 
-            _scene.player,
-            this.hit,
-            null,
-            this
-        );
-        
+      
         _scene.physics.add.collider
         (
             this,
@@ -71,6 +79,18 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.startGhostCooldownTimer();
     }
 
+    initCollisionsWithPlayer()
+    {
+        this.playerOverlap = this.scene.physics.add.overlap(
+            this, 
+            this.scene.player,
+            this.hit,
+            null,
+            this
+        );
+    }
+
+
     preUpdate(time,delta)
     {
         super.preUpdate(time, delta);
@@ -82,11 +102,16 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else
         {
             this.doCurrentState();
-        }        
+            this.updateMoveSpeed(delta);
+        }       
+
+                
     }
 
     hit(_enemy, _player)
     {
+        console.log("hit");
+
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
         const distance = enemyPixPos.distance(playerPixPos);
@@ -115,6 +140,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
                 this.doInflated();
                 break;
 
+            case EnemyStates.ATTACKING:
+                this.doAttack();
+                break;
+
             case EnemyStates.DYING:
                 this.doDie();
                 break;
@@ -130,74 +159,202 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
 
+        /*
+        this.computeDesiredMove();
+        var rand = Phaser.Math.Between(1, 4);
+        if (rand <= 2) this.trySwitchToGhost();
+        return;
+        */
+
         if (this.body.blocked.right || this.body.blocked.left)
         {
-            this.randomizeVerticalDirection();
+            this.changeVerticalDirection();
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
-            this.randomizeDiagonalDirection();
+            this.changeHorizontalDirection();
         }
+    }
+
+    computeNewMoveDir() // UwU I did this for some reason - tomeu
+    {
+        const cellPos = this.getCellPos();
+
+        var possibleMoveDirections = []
+        if (this.moveDirection != MoveDirection.RIGHT && this.scene.canMoveToCell(cellPos.x+1, cellPos.y))
+        {
+            possibleMoveDirections.push(MoveDirection.RIGHT);
+        }
+        else if (this.moveDirection != MoveDirection.LEFT && this.scene.canMoveToCell(cellPos.x-1, cellPos.y))
+        {
+            possibleMoveDirections.push(MoveDirection.LEFT);
+        }
+        else if (this.moveDirection != MoveDirection.DOWN && this.scene.canMoveToCell(cellPos.x, cellPos.y+1))
+        {
+            possibleMoveDirections.push(MoveDirection.DOWN);
+        }
+        else if (this.moveDirection != MoveDirection.UP && this.scene.canMoveToCell(cellPos.x, cellPos.y-1))
+        {
+            possibleMoveDirections.push(MoveDirection.UP);
+        }
+
+        this.moveDirection = possibleMoveDirections[Phaser.Math.Between(0, possibleMoveDirections.length-1)];
+
+
+        this.setVelocityMatchMoveDirection();
+    }
+
+    computeDesiredMove()
+    {
+        const c = this.scene.canMoveVertically(this.body);
+        //console.log(c);
+        if (!c) 
+        {
+            return;
+        }
+
+
+        // set ExploredLeft ExploredRight
+        if (this.moveDirection == MoveDirection.LEFT && this.body.blocked.left)
+        {
+            this.exploredLeft = true;
+            this.moveDirection = MoveDirection.RIGHT;
+            //this.directionX = 1;
+            //this.directionY = 0;
+        }
+        else if (this.moveDirection == MoveDirection.RIGHT && this.body.blocked.right)
+        {
+            this.exploredRight = true;
+            this.moveDirection = MoveDirection.LEFT;
+            //this.directionX = -1;
+            //this.directionY = 0;
+        }
+        else if (this.moveDirection == MoveDirection.DOWN && this.body.blocked.down)
+        {
+            this.exploredLeft = false;
+            this.exploredRight = false;
+        }
+        else if (this.moveDirection == MoveDirection.UP && this.body.blocked.up)
+        {
+            this.exploredLeft = false;
+            this.exploredRight = false;
+        }
+
+        // change desiredVerticalDirection
+        if (this.exploredLeft && this.exploredRight)
+        {
+            if (this.desiredVerticalDirection == MoveDirection.DOWN)
+            {
+                this.desiredVerticalDirection = MoveDirection.UP;
+            }
+            else if (this.desiredVerticalDirection == MoveDirection.UP)
+            {
+                this.desiredVerticalDirection = MoveDirection.DOWN;
+            }
+        }
+        
+        // set moveDirection
+        const currentCellPos = this.getCellPos();
+        if (this.desiredVerticalDirection != this.moveDirection)
+        {
+            if (this.desiredVerticalDirection == MoveDirection.DOWN)
+            {
+                if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y + 1))
+                {
+                    console.clear();
+                    console.log("can move DOWN");
+                    console.log("desire DOWN");
+                    //this.directionX = 0;
+                    //this.directionY = 1;
+    
+                    this.exploredLeft = false;
+                    this.exploredRight = false;
+                    this.lastDirection = this.moveDirection;
+                    this.moveDirection = this.desiredVerticalDirection;
+                }
+            }
+            else if (this.desiredVerticalDirection == MoveDirection.UP)
+            {
+                if (this.scene.canMoveToCell(currentCellPos.x, currentCellPos.y - 1))
+                {
+                    console.clear();
+                    console.log("can move UP");
+                    console.log("desire UP");
+                    //this.directionX = 0;
+                    //this.directionY = -1;
+    
+                    this.exploredLeft = false;
+                    this.exploredRight = false;
+                    this.lastDirection = this.moveDirection;
+                    this.moveDirection = this.desiredVerticalDirection;
+                }
+            }
+            
+        }
+        else
+        {
+            // if moving with desiredVertical and is stopped            
+            if (this.body.blocked.up || this.body.blocked.down)
+            {
+                this.moveDirection = this.lastDirection;
+                console.log("tf");
+            }            
+        }
+
+        this.setVelocityMatchMoveDirection();
+
+        if (this.moveDirection == MoveDirection.RIGHT) console.log("RIGHT");
+        else if (this.moveDirection == MoveDirection.LEFT) console.log("LEFT");
+        else if (this.moveDirection == MoveDirection.DOWN) {console.log("DOWN"); console.log(this.body.blocked.down); }
+        else if (this.moveDirection == MoveDirection.UP) console.log("UP");
     }
 
     setFlip()
     {
         if (this.moveDirection == MoveDirection.LEFT)
-            this.flipX = false;
-        else if (this.moveDirection == MoveDirection.RIGHT)
             this.flipX = true;
+        else if (this.moveDirection == MoveDirection.RIGHT)
+            this.flipX = false;
     }
 
-    randomizeVerticalDirection()
+    changeVerticalDirection()
     {
-        var rand = Phaser.Math.Between(1, 4);
+        if (this.trySwitchToGhost()) return;
 
-        if (rand <= 2)
-        {
-            this.moveDirection = MoveDirection.UP;
-            this.trySwitchToGhost();
-            
-            this.directionX = 0;
-            this.directionY = -1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-        }
-        else
-        {
-            this.moveDirection = MoveDirection.DOWN;
-            this.trySwitchToGhost();
+        const playerY = this.scene.player.getCenterPixPos().y;
+        const enemyY = this.getCenterPixPos().y;
 
-            this.directionX = 0;
-            this.directionY = 1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-        }
+        var dir = playerY < enemyY ? -1 : 1;
+        const cellPos = this.getCellPos();
+
+        const canChasePlayer = this.scene.canMoveToCell(cellPos.x, cellPos.y + dir);
+        if (!canChasePlayer) dir *= -1;
+
+        //var rand = Phaser.Math.Between(1, 4);
+        //if (rand <= 2)
+
+        this.moveDirection = dir <= 0 ? MoveDirection.UP : MoveDirection.DOWN;
+        this.setVelocityMatchMoveDirection();
     }
 
-    randomizeDiagonalDirection()
+    changeHorizontalDirection()
     {
-        var rand = Phaser.Math.Between(1, 4);
+        if (this.trySwitchToGhost()) return;
 
-        if (rand <= 2)
-        {
-            this.moveDirection = MoveDirection.LEFT;
-            this.trySwitchToGhost();
+        const playerX = this.scene.player.getCenterPixPos().x;
+        const enemyX = this.getCenterPixPos().x;
 
-            this.directionX = -1;
-            this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-            this.body.setVelocityY(0);
-        }
-        else
-        {
-            this.moveDirection = MoveDirection.RIGHT;
-            this.trySwitchToGhost();
+        var dir = playerX < enemyX ? -1 : 1;
+        const cellPos = this.getCellPos();
 
-            this.directionX = 1;
-            this.directionY = 0;
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-            this.body.setVelocityY(0);
-        }
+        const canChasePlayer = this.scene.canMoveToCell(cellPos.x + dir, cellPos.y);
+        if (!canChasePlayer) dir *= -1;
+
+        //var rand = Phaser.Math.Between(1, 4);
+        //if (rand <= 2)
+
+        this.moveDirection = dir <= 0 ? MoveDirection.LEFT : MoveDirection.RIGHT;
+        this.setVelocityMatchMoveDirection();
     }
     // == == ==
 
@@ -220,33 +377,15 @@ class enemyBase extends Phaser.GameObjects.Sprite
         })
 
         // Chase player
-        if (this.body.x < this.scene.player.x - gamePrefs.HALF_CELL_SIZE)
-        {
-            this.body.setVelocityX(gamePrefs.ENEMY_SPEED);
-        }
-        else if (this.body.x > this.scene.player.x)
-        {
-            this.body.setVelocityX(-gamePrefs.ENEMY_SPEED);
-        }
-        else
-        {
-            this.body.setVelocityX(0);
-        }
+        this.setMoveDirectionTowardsPlayer();
+        const enemyToPlayer = this.getDirectionTowardsPlayer();
+        const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
 
-        if (this.body.y < this.scene.player.y - gamePrefs.HALF_CELL_SIZE)
-        {
-            this.body.setVelocityY(gamePrefs.ENEMY_SPEED);
-        }
-        else if (this.body.y > this.scene.player.y)
-        {
-            this.body.setVelocityY(-gamePrefs.ENEMY_SPEED);
-        }
-        else
-        {
-            this.body.setVelocityY(0);
-        }
+        this.body.setVelocityX(enemyToPlayerVelocity.x);
+        this.body.setVelocityY(enemyToPlayerVelocity.y);
 
-        // Check if it leaves an area with collions
+
+        // Check if it leaves an area with collisions
         if (this.isInEmptyCell() && this.canUnGhost && 
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {
@@ -258,11 +397,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.tint = 0xffffff;
             this.currentState = EnemyStates.PATROL;
 
-            if (this.body.velocity.x > 0) this.moveDirection == MoveDirection.RIGHT;
-            else if (this.body.velocity.x < 0) this.moveDirection == MoveDirection.LEFT;
-            else if (this.body.velocity.y > 0) this.moveDirection == MoveDirection.DOWN;
-            else if (this.body.velocity.y < 0) this.moveDirection == MoveDirection.UP;
+            this.setVelocityMatchMoveDirection();
         }
+
+        
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
@@ -277,7 +415,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         var rand = Phaser.Math.Between(0, 10);
 
-        if (rand <= 3 && this.canGhost) { this.currentState = EnemyStates.GHOST; }
+        if (rand <= 3 && this.canGhost) 
+        { 
+            this.currentState = EnemyStates.GHOST;
+            return true; 
+        }
+
+        return false;
     }
 
     startGhostCooldownTimer()
@@ -315,7 +459,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
         else if (this.inflatedAmount <= 0)
         {    
-            this.flipX = !this.flipX;
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
@@ -341,7 +484,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
-        this.flipX = !this.flipX;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
@@ -379,6 +521,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.canInflate = true;
     }
+    // == == ==
+
+    // == ATTACK ==
+    doAttack() {}
     // == == ==
 
     // == DIE ==
@@ -428,28 +574,46 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == == ==
 
     // == GENERIC ==
+    getDirectionTowardsPlayer()
+    {
+        const playerPos = this.scene.player.getCenterPixPos();
+        const enemyPos = this.getCenterPixPos();
+        return playerPos.subtract(enemyPos).normalize();
+    }
+
+
+    setMoveDirectionTowardsPlayer()
+    {
+        const enemyToPlayer = this.getDirectionTowardsPlayer();
+        const dirThreshold = 0.9;
+
+        if (enemyToPlayer.dot(new Phaser.Math.Vector2(1, 0)) > dirThreshold) this.moveDirection = MoveDirection.RIGHT;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(-1, 0)) > dirThreshold) this.moveDirection = MoveDirection.LEFT;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, -1)) > dirThreshold) this.moveDirection = MoveDirection.UP;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, 1)) > dirThreshold) this.moveDirection = MoveDirection.DOWN;
+    }
+
+    setVelocityMatchMoveDirection()
+    {
+        this.directionX = 0;
+        this.directionY = 0;
+
+        if (this.moveDirection == MoveDirection.RIGHT) this.directionX = 1;
+        else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
+        else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
+        else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
+
+        this.body.setVelocityX(this.moveSpeed * this.directionX);
+        this.body.setVelocityY(this.moveSpeed * this.directionY);
+    }
+
+
     resetMovement()
     {
         this.anims.play(this.walkingSpriteTag, true);
-        
-        switch (this.moveDirection) {
-            case MoveDirection.RIGHT:
-            case MoveDirection.LEFT:
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                this.body.setVelocityY(0);
-                break;
 
-            case MoveDirection.DOWN:
-            case MoveDirection.UP:
-                this.body.setVelocityX(0);
-                this.body.setVelocityY(gamePrefs.ENEMY_SPEED * this.directionY);
-                break;
-
-            default:
-                this.body.setVelocityX(gamePrefs.ENEMY_SPEED * this.directionX);
-                this.body.setVelocityY(0);
-                break;
-        }
+        this.setMoveDirectionTowardsPlayer();
+        this.setVelocityMatchMoveDirection();
     }
 
     resetColliders()
@@ -473,16 +637,14 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     isInEmptyCell()
     {
-        const bodyX = ~~this.body.x;
-        const bodyY = ~~this.body.y;
-
-        const cellPos = this.scene.pix2cell(bodyX, bodyY);
+        const cellPos = this.getCellPos();
         return this.scene.isEmptyCell(cellPos.x, cellPos.y);// && this.isInCellCenter(bodyX, bodyY);
     }
 
     isInCellCenter(_pixX, _pixY)
     {
-        return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
+        return _pixX % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE && 
+               _pixY % gamePrefs.CELL_SIZE == gamePrefs.HALF_CELL_SIZE
     }
     
     
@@ -491,7 +653,22 @@ class enemyBase extends Phaser.GameObjects.Sprite
         return new Phaser.Math.Vector2(this.body.x + this.body.width / 2, this.body.y + this.body.height / 2);
     }  
     
+    getCellPos()
+    {
+        const pixPos = this.getCenterPixPos();
+        return this.scene.pix2cell(pixPos.x, pixPos.y);
+    }
+
+    updateMoveSpeed(_delta)
+    {
+        if (this.moveSpeed >= gamePrefs.ENEMY_MAX_SPEED) return;
+
+        const step = (_delta * 0.001) / gamePrefs.ENEMY_SPEED_INC_SPAN_SECONDS * (gamePrefs.ENEMY_MAX_SPEED - gamePrefs.ENEMY_MIN_SPEED);      
+        this.moveSpeed = Phaser.Math.Clamp(this.moveSpeed + step, gamePrefs.ENEMY_MIN_SPEED, gamePrefs.ENEMY_MAX_SPEED);
+    }
+
     // == == ==
+
 
 
 }

@@ -6,22 +6,46 @@ var gamePrefs =
     PLAYER_MOVE_SPEED: 36,
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
-    NUM_CELL_WIDTH: 14,
-    NUM_CELL_HEIGHT: 15,
+    NUM_CELL_WIDTH: 20,
+    NUM_CELL_HEIGHT: 18,
     NUM_CELL_LEFT_OFFSET: 1,
     NUM_CELL_TOP_OFFSET: 2,
     NUM_CELL_TOP_AIR: 1, 
-    ENEMY_SPEED: 20,
-    HARPOON_SPEED: 100,
+    ENEMY_MIN_SPEED: 20,
+    ENEMY_MAX_SPEED: 40,
+    ENEMY_SPEED_INC_SPAN_SECONDS: 30,
+    HARPOON_SPEED: 90,
     HARPOON_LIFETIME: 50,
     PLAYER_HIT_DIST: 10
+}
+
+var uiPrefs =
+{
+    TEXT_COLOR_RED: 0xff3f2f,
+    TEXT_COLOR_WHITE: 0xffffff
+}
+
+var storagePrefs =
+{
+    PLAYER_1_SCORE: 'player1Score',
+    HIGHEST_SCORE: 'highestScore'
+}
+
+var loadPrefs =
+{
+    ROCK_CLASS: 'rock',
+    POOKA_CLASS: 'pooka',
+    FYGAR_CLASS: 'fygar',
+    PLAYER_FIRST_SPAWN_ANIM_CLASS: 'playerFirstSpawnAnim',
+    PLAYER_RESPAWN_CLASS: 'playerRespawn',
+    FRUIT_RESPAWN_CLASS: 'fruitRespawn'
 }
 
 var config = 
 {
     type: Phaser.AUTO,
-    width: 303, // window.innerWidth
-    height: 288, //256,  // window.innerHeight
+    width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
+    height: gamePrefs.CELL_SIZE * 18, //256,  // window.innerHeight
     scene:[menu, level1], // levels/screens/scenes array
     render:
     {
