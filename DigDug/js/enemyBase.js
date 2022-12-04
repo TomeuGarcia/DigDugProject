@@ -59,6 +59,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
         this.exploredRight = false;
+        this.exploredUp = false;
+        this.exploredDown = false;
 
         // Overlap with player
       
@@ -166,12 +168,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
-            this.randomizeVerticalDirection();
-            //this.computeNewMoveDir();
+            this.changeVerticalDirection();
         }
         else if (this.body.blocked.down || this.body.blocked.up)
         {
-            this.randomizeDiagonalDirection();
+            this.changeHorizontalDirection();
         }
     }
 
@@ -200,16 +201,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.moveDirection = possibleMoveDirections[Phaser.Math.Between(0, possibleMoveDirections.length-1)];
 
 
-        this.directionX = 0;
-        this.directionY = 0;
-
-        if (this.moveDirection == MoveDirection.RIGHT) this.directionX = 1;
-        else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
-        else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
-        else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
-
-        this.body.setVelocityX(this.moveSpeed * this.directionX);
-        this.body.setVelocityY(this.moveSpeed * this.directionY);
+        this.setVelocityMatchMoveDirection();
     }
 
     computeDesiredMove()
@@ -309,21 +301,12 @@ class enemyBase extends Phaser.GameObjects.Sprite
             }            
         }
 
-        this.directionX = 0;
-        this.directionY = 0;
-
-        if (this.moveDirection == MoveDirection.RIGHT) this.directionX = 1;
-        else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
-        else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
-        else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
+        this.setVelocityMatchMoveDirection();
 
         if (this.moveDirection == MoveDirection.RIGHT) console.log("RIGHT");
         else if (this.moveDirection == MoveDirection.LEFT) console.log("LEFT");
         else if (this.moveDirection == MoveDirection.DOWN) {console.log("DOWN"); console.log(this.body.blocked.down); }
         else if (this.moveDirection == MoveDirection.UP) console.log("UP");
-
-        this.body.setVelocityX(this.moveSpeed * this.directionX);
-        this.body.setVelocityY(this.moveSpeed * this.directionY);
     }
 
     setFlip()
@@ -334,56 +317,44 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.flipX = false;
     }
 
-    randomizeVerticalDirection()
+    changeVerticalDirection()
     {
-        var rand = Phaser.Math.Between(1, 4);
+        if (this.trySwitchToGhost()) return;
 
-        if (rand <= 2)
-        {
-            this.moveDirection = MoveDirection.UP;
-            this.trySwitchToGhost();
-            
-            this.directionX = 0;
-            this.directionY = -1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(this.moveSpeed * this.directionY);
-        }
-        else
-        {
-            this.moveDirection = MoveDirection.DOWN;
-            this.trySwitchToGhost();
+        const playerY = this.scene.player.getCenterPixPos().y;
+        const enemyY = this.getCenterPixPos().y;
 
-            this.directionX = 0;
-            this.directionY = 1;
-            this.body.setVelocityX(0);
-            this.body.setVelocityY(this.moveSpeed * this.directionY);
-        }
+        var dir = playerY < enemyY ? -1 : 1;
+        const cellPos = this.getCellPos();
+
+        const canChasePlayer = this.scene.canMoveToCell(cellPos.x, cellPos.y + dir);
+        if (!canChasePlayer) dir *= -1;
+
+        //var rand = Phaser.Math.Between(1, 4);
+        //if (rand <= 2)
+
+        this.moveDirection = dir <= 0 ? MoveDirection.UP : MoveDirection.DOWN;
+        this.setVelocityMatchMoveDirection();
     }
 
-    randomizeDiagonalDirection()
+    changeHorizontalDirection()
     {
-        var rand = Phaser.Math.Between(1, 4);
+        if (this.trySwitchToGhost()) return;
 
-        if (rand <= 2)
-        {
-            this.moveDirection = MoveDirection.LEFT;
-            this.trySwitchToGhost();
+        const playerX = this.scene.player.getCenterPixPos().x;
+        const enemyX = this.getCenterPixPos().x;
 
-            this.directionX = -1;
-            this.directionY = 0;
-            this.body.setVelocityX(this.moveSpeed * this.directionX);
-            this.body.setVelocityY(0);
-        }
-        else
-        {
-            this.moveDirection = MoveDirection.RIGHT;
-            this.trySwitchToGhost();
+        var dir = playerX < enemyX ? -1 : 1;
+        const cellPos = this.getCellPos();
 
-            this.directionX = 1;
-            this.directionY = 0;
-            this.body.setVelocityX(this.moveSpeed * this.directionX);
-            this.body.setVelocityY(0);
-        }
+        const canChasePlayer = this.scene.canMoveToCell(cellPos.x + dir, cellPos.y);
+        if (!canChasePlayer) dir *= -1;
+
+        //var rand = Phaser.Math.Between(1, 4);
+        //if (rand <= 2)
+
+        this.moveDirection = dir <= 0 ? MoveDirection.LEFT : MoveDirection.RIGHT;
+        this.setVelocityMatchMoveDirection();
     }
     // == == ==
 
@@ -406,39 +377,12 @@ class enemyBase extends Phaser.GameObjects.Sprite
         })
 
         // Chase player
-        const pos = this.getCenterPixPos();
-        const playerPos = this.scene.player.getCenterPixPos();
-        const isMovingVertically = playerPos.y - pos.y > playerPos.x - pos.x;
+        this.setMoveDirectionTowardsPlayer();
+        const enemyToPlayer = this.getDirectionTowardsPlayer();
+        const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
 
-        if (pos.x < playerPos.x - 1)
-        {
-            this.body.setVelocityX(this.ghostMoveSpeed);
-            this.moveDirection = MoveDirection.RIGHT;
-        }
-        else if (pos.x > playerPos.x + 1)
-        {
-            this.body.setVelocityX(-this.ghostMoveSpeed);
-            this.moveDirection = MoveDirection.LEFT;
-        }
-        else
-        {
-            this.body.setVelocityX(0);
-        }
-
-        if (pos.y < playerPos.y - 1)
-        {
-            this.body.setVelocityY(this.ghostMoveSpeed);
-            if (isMovingVertically) this.moveDirection = MoveDirection.DOWN;
-        }
-        else if (pos.y > playerPos.y + 1)
-        {
-            this.body.setVelocityY(-this.ghostMoveSpeed);
-            if (isMovingVertically) this.moveDirection = MoveDirection.UP;
-        }
-        else
-        {
-            this.body.setVelocityY(0);
-        }
+        this.body.setVelocityX(enemyToPlayerVelocity.x);
+        this.body.setVelocityY(enemyToPlayerVelocity.y);
 
 
         // Check if it leaves an area with collisions
@@ -453,12 +397,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.tint = 0xffffff;
             this.currentState = EnemyStates.PATROL;
 
-            if (this.moveDirection == MoveDirection.RIGHT) this.body.setVelocityX(this.moveSpeed);
-            else if (this.moveDirection == MoveDirection.LEFT) this.body.setVelocityX(-this.moveSpeed);
-            else if (this.moveDirection == MoveDirection.DOWN) this.body.setVelocityY(this.moveSpeed);
-            else if (this.moveDirection == MoveDirection.UP) this.body.setVelocityY(-this.moveSpeed);
-
+            this.setVelocityMatchMoveDirection();
         }
+
+        
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
@@ -473,7 +415,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         var rand = Phaser.Math.Between(0, 10);
 
-        if (rand <= 3 && this.canGhost) { this.currentState = EnemyStates.GHOST; }
+        if (rand <= 3 && this.canGhost) 
+        { 
+            this.currentState = EnemyStates.GHOST;
+            return true; 
+        }
+
+        return false;
     }
 
     startGhostCooldownTimer()
@@ -626,28 +574,46 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == == ==
 
     // == GENERIC ==
+    getDirectionTowardsPlayer()
+    {
+        const playerPos = this.scene.player.getCenterPixPos();
+        const enemyPos = this.getCenterPixPos();
+        return playerPos.subtract(enemyPos).normalize();
+    }
+
+
+    setMoveDirectionTowardsPlayer()
+    {
+        const enemyToPlayer = this.getDirectionTowardsPlayer();
+        const dirThreshold = 0.9;
+
+        if (enemyToPlayer.dot(new Phaser.Math.Vector2(1, 0)) > dirThreshold) this.moveDirection = MoveDirection.RIGHT;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(-1, 0)) > dirThreshold) this.moveDirection = MoveDirection.LEFT;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, -1)) > dirThreshold) this.moveDirection = MoveDirection.UP;
+        else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, 1)) > dirThreshold) this.moveDirection = MoveDirection.DOWN;
+    }
+
+    setVelocityMatchMoveDirection()
+    {
+        this.directionX = 0;
+        this.directionY = 0;
+
+        if (this.moveDirection == MoveDirection.RIGHT) this.directionX = 1;
+        else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
+        else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
+        else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
+
+        this.body.setVelocityX(this.moveSpeed * this.directionX);
+        this.body.setVelocityY(this.moveSpeed * this.directionY);
+    }
+
+
     resetMovement()
     {
         this.anims.play(this.walkingSpriteTag, true);
-        
-        switch (this.moveDirection) {
-            case MoveDirection.RIGHT:
-            case MoveDirection.LEFT:
-                this.body.setVelocityX(this.moveSpeed * this.directionX);
-                this.body.setVelocityY(0);
-                break;
 
-            case MoveDirection.DOWN:
-            case MoveDirection.UP:
-                this.body.setVelocityX(0);
-                this.body.setVelocityY(this.moveSpeed * this.directionY);
-                break;
-
-            default:
-                this.body.setVelocityX(this.moveSpeed * this.directionX);
-                this.body.setVelocityY(0);
-                break;
-        }
+        this.setMoveDirectionTowardsPlayer();
+        this.setVelocityMatchMoveDirection();
     }
 
     resetColliders()
