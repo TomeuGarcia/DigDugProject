@@ -35,8 +35,7 @@ class fygarPrefab extends enemyBase
     }
 
     startTryAttackTimer()
-    {  
-        console.log("startTryAttackTimer()");
+    {
         var rand = Phaser.Math.Between(4000, 10000);
 
         this.attackTimer.reset({
