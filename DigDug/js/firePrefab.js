@@ -113,27 +113,25 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.isAttacking = true;
         this.anims.play('fygarFireAttack', true);
 
-        this.incrementFireTimer = this.scene.time.addEvent({
+        /*this.incrementFireTimer = this.scene.time.addEvent({
             delay: 200,
             callback: this.incrementFire,
             callbackScope: this,
             repeat: -1
-        });
+        });*/
     }
 
     incrementFire()
     {
         ++this.fireSequenceIndex;
 
-        //if (this.fireSequenceIndex >= this.fireSequence.length) { this.resetOwnerPatrol(); }
+        if (this.fireSequenceIndex >= this.fireSequence.length) { this.resetOwnerPatrol(); }
     }
 
     resetOwnerPatrol()
     {
         if (this.isAttacking)
         {
-            console.log("resetOwnerPatrol()");
-    
             if (this.incrementFireTimer != undefined)
                 this.incrementFireTimer.remove(false);
     
