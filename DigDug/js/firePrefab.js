@@ -11,7 +11,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
         this.body.allowGravity = false;
-        this.body.setSize(15, 15);
+        this.body.setSize(16, 16);
+
+        this.anims.play('fygarFireAttack', true);
 
         this.scene = _scene;
         this.owner = _owner;
@@ -73,12 +75,12 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hitTerrain()
     {
-        var cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x, this.y));
+        /*var cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x, this.y));
          
         if (this.isAttacking && !this.scene.isEmptyCell(cell.x, cell.y))
         {
             this.resetOwnerPatrol();
-        }
+        }*/
     }
 
     startAttack(_posX, _posY, _flip)
@@ -107,6 +109,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
     startFireAnim()
     {
         this.isAttacking = true;
+        this.anims.play('fygarFireAttack', true);
 
         this.incrementFireTimer = this.scene.time.addEvent({
             delay: 200,
@@ -120,7 +123,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
     {
         ++this.fireSequenceIndex;
 
-        if (this.fireSequenceIndex >= this.fireSequence.length) { this.resetOwnerPatrol(); }
+        //if (this.fireSequenceIndex >= this.fireSequence.length) { this.resetOwnerPatrol(); }
     }
 
     resetOwnerPatrol()

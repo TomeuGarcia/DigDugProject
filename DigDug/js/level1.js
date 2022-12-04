@@ -28,7 +28,7 @@ class level1 extends Phaser.Scene
         // Fygar enemy
         this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
-        //this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
+        this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
         this.load.image('fireSmall', 'fireSmall.png');
         this.load.image('fireMedium', 'fireMedium.png');
         this.load.image('fireBig', 'fireBig.png');
@@ -95,6 +95,7 @@ class level1 extends Phaser.Scene
         this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', '0', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
+    
     addScore(_score)
     {
         this.player.score += _score;
@@ -121,16 +122,19 @@ class level1 extends Phaser.Scene
         this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
         this.spawnFruitDelayed();     
     }
+
     spawnFruitDelayed()
     {
         const randomDelay = Phaser.Math.Between(gamePrefs.FRUIT_SPAWN_MIN_DELAY, gamePrefs.FRUIT_SPAWN_MAX_DELAY);
         this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
     }
+
     spawnFruit()
     {
         const randomFruitIndex = Phaser.Math.Between(0, gamePrefs.NUM_FRUITS-1);        
         this.fruits[randomFruitIndex].enable(this.fruitRespawnPos.x, this.fruitRespawnPos.y);
     }
+
     collectFruit(_player, _fruit)
     {
         _fruit.disable();
@@ -216,21 +220,27 @@ class level1 extends Phaser.Scene
                 case loadPrefs.POOKA_CLASS:
                     this.spawnPooka(pixPos);
                     break;
+
                 case loadPrefs.FYGAR_CLASS:
                     this.spawnFygar(pixPos);
                     break;
+
                 case loadPrefs.ROCK_CLASS:
                     this.spawnRock(pixPos);
                     break;
+
                 case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
                     this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 case loadPrefs.PLAYER_RESPAWN_CLASS:
                     this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 case loadPrefs.FRUIT_RESPAWN_CLASS:
                     this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 default:
                     break;
             }
@@ -360,13 +370,13 @@ class level1 extends Phaser.Scene
             repeat: -1
         });
 
-        /*this.anims.create
+        this.anims.create
         ({
             key: 'fygarFireAttack',
             frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
             frameRate: 2,
             repeat: 0
-        });*/
+        });
     }
     //// CREATE end
 
