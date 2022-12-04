@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="11">
+ <editorsettings>
+  <export target="level2.json" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" source="digDugTileset.tsx"/>
  <layer id="1" name="layer_borders" width="20" height="18">
   <data encoding="csv">
@@ -67,4 +70,36 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="4" name="layer_objects">
+  <object id="1" name="fygar1" class="fygar" x="168.347" y="107.648">
+   <point/>
+  </object>
+  <object id="2" name="pooka1" class="pooka" x="71.4299" y="156.274">
+   <point/>
+  </object>
+  <object id="3" name="pooka2" class="pooka" x="39.5715" y="188.132">
+   <point/>
+  </object>
+  <object id="4" name="pooka3" class="pooka" x="119.385" y="203.223">
+   <point/>
+  </object>
+  <object id="5" name="fygar2" class="fygar" x="183.102" y="234.075">
+   <point/>
+  </object>
+  <object id="6" name="rock1" class="rock" x="55.6684" y="90.8803">
+   <point/>
+  </object>
+  <object id="7" name="rock2" class="rock" x="72.1006" y="219.655">
+   <point/>
+  </object>
+  <object id="8" name="rock3" class="rock" x="151.579" y="107.313">
+   <point/>
+  </object>
+  <object id="9" name="rock4" class="rock" x="216.637" y="187.126">
+   <point/>
+  </object>
+  <object id="10" name="playerRespawn1" class="playerRespawn" x="119.721" y="170.694">
+   <point/>
+  </object>
+ </objectgroup>
 </map>
