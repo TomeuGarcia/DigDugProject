@@ -35,6 +35,9 @@ class level1 extends Phaser.Scene
         
         this.load.image('brush','diggedFromBottom.png');
 
+        // Fruits
+        this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
+
 
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -54,7 +57,7 @@ class level1 extends Phaser.Scene
         this.initEnemies();
 
         this.initScore();
-        this.initFruit();
+        this.initFruits();
 
         
         this.spaceDown = false; // Testing
@@ -100,23 +103,39 @@ class level1 extends Phaser.Scene
         localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
     }
 
-    initFruit()
+    initFruits()
     {
-        this.fruits = this.physics.add.staticGroup();
-        this.physics.add.overlap(this.player, this.fruits, this.collectFruit, null, this);
-        this.spawnFruit();
-        
+        this.fruits = [];
+        this.fruitsGroup = this.add.group();
+
+        for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
+        {
+            const points = (i+1) * 50;
+            this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
+            this.fruitsGroup.add(this.fruits[i]);
+
+            this.fruits[i].setActive(false);
+            this.fruits[i].visible = false;
+        }
+
+        this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
+        this.spawnFruitDelayed();     
+    }
+    spawnFruitDelayed()
+    {
+        const randomDelay = Phaser.Math.Between(gamePrefs.FRUIT_SPAWN_MIN_DELAY, gamePrefs.FRUIT_SPAWN_MAX_DELAY);
+        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
     }
     spawnFruit()
     {
-        this.fruits.create(this.fruitRespawnPos.x, this.fruitRespawnPos.y, 'watermelon');
+        const randomFruitIndex = Phaser.Math.Between(0, gamePrefs.NUM_FRUITS-1);        
+        this.fruits[randomFruitIndex].enable(this.fruitRespawnPos.x, this.fruitRespawnPos.y);
     }
     collectFruit(_player, _fruit)
     {
-        _fruit.disableBody(true, true);
-        this.addScore(30);
-        const randomDelay = Phaser.Math.Between(10000, 20000);
-        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
+        _fruit.disable();
+        this.addScore(_fruit.points);
+        this.spawnFruitDelayed();
     }
 
     update()
@@ -224,7 +243,7 @@ class level1 extends Phaser.Scene
         shapeMask.fillStyle(0xffffff);
         shapeMask.beginPath();
 
-        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH+2), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT+2));
+        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT));
 
         this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
         this.renderTexture.mask = this.mask;
@@ -257,11 +276,11 @@ class level1 extends Phaser.Scene
     }
     spawnPooka(pixPos)
     {
-        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting'));
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 200));
     }
     spawnFygar(pixPos)
     {
-        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting'));
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 300));
     }
 
 
