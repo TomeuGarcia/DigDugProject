@@ -22,6 +22,13 @@ class fygarPrefab extends enemyBase
     preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
+    }    
+    
+    initCollisionsWithPlayer()
+    {
+        super.initCollisionsWithPlayer();
+
+        this.fire.initFireCollisionsWithPlayer();
     }
 
     doPatrol()

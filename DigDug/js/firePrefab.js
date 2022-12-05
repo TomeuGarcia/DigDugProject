@@ -29,13 +29,13 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.fireSequenceIndex = 0;
 
         // Overlap with player
-        this.playerOverlap = _scene.physics.add.overlap(
+        /*this.playerOverlap = _scene.physics.add.overlap(
             this, 
-            _scene.player,
+            this.scene.player,
             this.hit,
             null,
             this
-        );
+        );*/
         
         this.borderOverlap = _scene.physics.add.overlap(
             this,
@@ -63,6 +63,17 @@ class firePrefab extends Phaser.GameObjects.Sprite
     preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
+    }
+
+    initFireCollisionsWithPlayer()
+    {
+        this.playerFireOverlap = this.scene.physics.add.overlap(
+            this, 
+            this.scene.player,
+            this.hit,
+            null,
+            this
+        );
     }
 
     hit(_fire, _player)
