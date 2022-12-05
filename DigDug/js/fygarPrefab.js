@@ -85,6 +85,11 @@ class fygarPrefab extends enemyBase
 
     resetToPatrol(thisFygar)
     {        
+        if (this.isBeingSquished) 
+        {
+            this.setTexture(this.spriteTag, this.squishedFrameI);
+            return;
+        }
         thisFygar.doingTimer = false;
 
         // Reset to patrol
@@ -96,4 +101,13 @@ class fygarPrefab extends enemyBase
     {
         super.resetMovement();
     }
+
+
+    setSquished()
+    {
+        super.setSquished();
+
+        this.attackTimer.pused = true;
+    }
+
 }

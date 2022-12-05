@@ -178,7 +178,7 @@ class level1 extends Phaser.Scene
         
         if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
         {
-            //this.squishEnemy(this.enemies[0]);
+            this.squishEnemy(this.enemies[0]);
         }
     }
 
@@ -410,6 +410,8 @@ class level1 extends Phaser.Scene
 
     inflateEnemy(_enemy)
     {
+        if (!_enemy.canInflate) return;
+
         if (_enemy.isInInflatedState())
         {
             _enemy.addInflation();
