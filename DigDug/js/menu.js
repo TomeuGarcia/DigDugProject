@@ -30,6 +30,10 @@ class menu extends Phaser.Scene
 		this.firstPlayerScoreText = this.add.bitmapText(50, 30, 'gameFont', '1UP', 10)
 												.setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0.5, 0);
 
+		// RESET SCORES
+		//localStorage.setItem(storagePrefs.HIGHEST_SCORE, 1000);
+		//localStorage.setItem(storagePrefs.PLAYER_1_SCORE, 0);
+
 		const player1Score = localStorage.getItem(storagePrefs.PLAYER_1_SCORE);
 		const firstPlayerScoreCount = player1Score != null ? player1Score : 0;
 		this.firstPlayerScore = this.add.bitmapText(50, 45, 'gameFont', parseInt(firstPlayerScoreCount), 10)

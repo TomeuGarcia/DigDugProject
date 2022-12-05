@@ -174,6 +174,12 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
+
+        
+        if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
+        {
+            //this.squishEnemy(this.enemies[0]);
+        }
     }
 
     //// CREATE start
@@ -306,12 +312,12 @@ class level1 extends Phaser.Scene
 
     spawnPooka(pixPos)
     {
-        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 200));
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 4, 200));
     }
     
     spawnFygar(pixPos)
     {
-        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 300));
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
     }
 
 
@@ -413,6 +419,11 @@ class level1 extends Phaser.Scene
             _enemy.addInflation();
             _enemy.setInfaltedState();
         }
+    }
+
+    squishEnemy(_enemy)
+    {
+        _enemy.setSquished();
     }
 
     

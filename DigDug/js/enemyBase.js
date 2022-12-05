@@ -20,7 +20,7 @@ const MAX_INFLATED = 4;
 class enemyBase extends Phaser.GameObjects.Sprite
 {
     constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated', 
-                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign', _points)
+                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign', _squishedFrameI, _points)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -37,6 +37,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.inflatedSpriteTag = _inflatedSpriteTag;
         this.walkingSpriteTag = _walkingSpriteTag;
         this.ghostSpriteTag = _ghostSpriteTag;
+        this.squishedFrameI = _squishedFrameI;
         this.points = _points;
         this.inflatedAmount = 0;
         this.canGhost = false;
@@ -97,8 +98,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         super.preUpdate(time, delta);
 
         if (this.isDead)
-        {
-            if (this.isDespawning) this.setTexture(this.inflatedSpriteTag, 3);
+        {            
+            //if (this.isDespawning) this.setTexture(this.inflatedSpriteTag, 3);
         }
         else
         {
@@ -533,21 +534,34 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     // == SQUISHED ==
     setSquished()
-    {
-        if (this.currentState == EnemyStates.SQUISHED) return;
-
+    {        
+        if (this.currentState == EnemyStates.SQUISHED ||
+            this.currentState == EnemyStates.DYING)
+        {
+            return;
+        } 
         this.currentState = EnemyStates.SQUISHED;
-        this.setTexture(this.spriteTag, 4);
-        this.scene.time.delayedCall(2000, this.killedByRock, [], this);
+     
+        this.anims.stop();
+        this.setTexture(this.spriteTag, this.squishedFrameI);
 
         this.body.setVelocityX(0);
-        this.body.setVelocityY(0);
+        this.body.setVelocityY(this.ghostMoveSpeed*2);
+
+        this.canGhost = false;
+        this.canUnGhost = false;
+        this.isDead = false;
+        this.isDespawning = false;
+        this.canInflate = false; 
+
+        this.body.allowGravity = true;
+
+        this.killedByRock();
     }
 
     doSquished()
-    {
-        //this.setTexture(this.walkingSpriteTag, 4);
-
+    {        
+        //this.setTexture(this.spriteTag, this.squishedFrameI);
         //this.scene.time.delayedCall(2000, this.killedByRock, [], this);
     }
     killedByRock()
@@ -564,6 +578,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.isDead) return;
 
         this.isDead = true;
+        this.anims.stop();
         if (this.deflateTimer != null) this.deflateTimer.remove(false);
 
         this.startDespawnTimer();

@@ -84,11 +84,6 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this.body.setVelocityX(0);
             this.body.setVelocityY(0);
         }
-
-        if (this.cursorKeys.space.isDown)
-        {
-            this.scene.enemies[0].setSquished();
-        }
     }
 
 
