@@ -456,7 +456,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.scene.notifyPlayerEnemyDiedInflated();
         }
         else if (this.inflatedAmount <= 0)
-        {    
+        {
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
