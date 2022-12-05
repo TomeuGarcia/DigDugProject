@@ -41,12 +41,13 @@ class menu extends Phaser.Scene
 
 		const highestScore = localStorage.getItem(storagePrefs.HIGHEST_SCORE);	
 		var highestScoreCount = highestScore != null ? highestScore : 0;
+/*
 		if (firstPlayerScoreCount > highestScoreCount) 
 		{
 			highestScoreCount = firstPlayerScoreCount
 			localStorage.setItem(storagePrefs.HIGHEST_SCORE, highestScoreCount);
 		}
-
+*/
 		this.firstPlayerScore = this.add.bitmapText(config.width/2, 45, 'gameFont', parseInt(highestScoreCount), 10)
 											.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
 

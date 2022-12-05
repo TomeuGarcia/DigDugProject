@@ -89,10 +89,19 @@ class level1 extends Phaser.Scene
 
     initScore()
     {
-        this.firstPlayerScore = this.add.bitmapText(config.width - 4, gamePrefs.CELL_SIZE * 2, 'gameFont', 'SCORE:', 8)
+        this.highScore = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE * 8, gamePrefs.CELL_SIZE * 2, 'gameFont', 'HI-    \nSCORE:', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0, 0);
+
+        this.highestScore = localStorage.getItem(storagePrefs.HIGHEST_SCORE);
+        if (this.highestScore == null) this.highestScore = 0;
+
+        this.highScoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', this.highestScore, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
 
-        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', '0', 8)
+        this.firstPlayerScore = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE * 2, gamePrefs.CELL_SIZE * 5, 'gameFont', '1UP:', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(1, 0);
+
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', '0', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
@@ -101,6 +110,10 @@ class level1 extends Phaser.Scene
         this.player.score += _score;
         this.scoreCountText.setText(this.player.score);
 
+        if (this.player.score > this.highestScore)
+        {
+            localStorage.setItem(storagePrefs.HIGHEST_SCORE, this.player.score);
+        }
         localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
     }
 
@@ -137,6 +150,10 @@ class level1 extends Phaser.Scene
 
     collectFruit(_player, _fruit)
     {
+        const fruitPos = new Phaser.Math.Vector2(_fruit.x, _fruit.y);
+        const playerPos = _player.getCenterPixPos();
+        if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
+
         _fruit.disable();
         this.addScore(_fruit.points);
         this.spawnFruitDelayed();

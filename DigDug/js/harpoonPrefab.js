@@ -121,8 +121,8 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
         const playerPixPos = _harpoon.scene.player.getCenterPixPos();
         const enemyPixPos = _enemy.getCenterPixPos();
 
-        const playerToEnemy = new Phaser.Math.Vector2(enemyPixPos.x - playerPixPos.x, enemyPixPos.y - playerPixPos.y).normalize();
         const harpoonDir = new Phaser.Math.Vector2(_harpoon.body.velocity.x, _harpoon.body.velocity.y).normalize();
+        const playerToEnemy = (enemyPixPos.subtract(playerPixPos).subtract(harpoonDir)).normalize();
         const dot = playerToEnemy.dot(harpoonDir);
 
         if (dot > _harpoon.hitDirThreshold)
