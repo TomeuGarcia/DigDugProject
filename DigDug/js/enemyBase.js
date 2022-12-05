@@ -3,7 +3,8 @@ const EnemyStates = {
     GHOST: 1, 
     INFLATED: 2, 
     ATTACKING: 3,
-    DYING: 4
+    SQUISHED: 4,
+    DYING: 5
 };
 
 const MoveDirection = {
@@ -42,7 +43,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canUnGhost = false;
         this.isDead = false;
         this.isDespawning = false;
-        this.canInflate = true;
+        this.canInflate = true;        
 
         this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
         this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
@@ -140,6 +141,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
             case EnemyStates.ATTACKING:
                 this.doAttack();
+                break;
+            
+            case EnemyStates.SQUISHED:
+                this.doSquished();
                 break;
 
             case EnemyStates.DYING:
@@ -525,21 +530,43 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doAttack() {}
     // == == ==
 
+
+    // == SQUISHED ==
+    setSquished()
+    {
+        if (this.currentState == EnemyStates.SQUISHED) return;
+
+        this.currentState = EnemyStates.SQUISHED;
+        this.setTexture(this.spriteTag, 4);
+        this.scene.time.delayedCall(2000, this.killedByRock, [], this);
+
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(0);
+    }
+
+    doSquished()
+    {
+        //this.setTexture(this.walkingSpriteTag, 4);
+
+        //this.scene.time.delayedCall(2000, this.killedByRock, [], this);
+    }
+    killedByRock()
+    {
+        this.points *= 2;
+        this.currentState = EnemyStates.DYING;
+    }
+    // == == ==
+
+
     // == DIE ==
     doDie()
     {
         if (this.isDead) return;
 
         this.isDead = true;
-        this.deflateTimer.remove(false);
+        if (this.deflateTimer != null) this.deflateTimer.remove(false);
 
         this.startDespawnTimer();
-    }
-
-    killedByRock()
-    {
-        this.points = this.points * 2;
-        this.currentState = EnemyStates.DYING;
     }
 
     startDespawnTimer()
@@ -557,8 +584,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
     destroySelf()
     {
         this.despawnTimer.remove(false);
-        this.canInflateTimer.remove(false);
-        this.cooldownGhostTimer.remove(false);
+        if (this.canInflateTimer != null) this.canInflateTimer.remove(false);
+        if (this.cooldownGhostTimer != null) this.cooldownGhostTimer.remove(false);
 
         // Add points
         this.scene.addScore(this.points);
