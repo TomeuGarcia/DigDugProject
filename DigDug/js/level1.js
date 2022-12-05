@@ -29,8 +29,14 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
         this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
+        this.load.image('fireSmall', 'fireSmall.png');
+        this.load.image('fireMedium', 'fireMedium.png');
+        this.load.image('fireBig', 'fireBig.png');
         
         this.load.image('brush','diggedFromBottom.png');
+
+        // Fruits
+        this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
 
 
         // Tilemap
@@ -51,7 +57,7 @@ class level1 extends Phaser.Scene
         this.initEnemies();
 
         this.initScore();
-        this.initFruit();
+        this.initFruits();
 
         
         this.spaceDown = false; // Testing
@@ -89,6 +95,7 @@ class level1 extends Phaser.Scene
         this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', '0', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
+    
     addScore(_score)
     {
         this.player.score += _score;
@@ -97,23 +104,42 @@ class level1 extends Phaser.Scene
         localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
     }
 
-    initFruit()
+    initFruits()
     {
-        this.fruits = this.physics.add.staticGroup();
-        this.physics.add.overlap(this.player, this.fruits, this.collectFruit, null, this);
-        this.spawnFruit();
-        
+        this.fruits = [];
+        this.fruitsGroup = this.add.group();
+
+        for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
+        {
+            const points = (i+1) * 50;
+            this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
+            this.fruitsGroup.add(this.fruits[i]);
+
+            this.fruits[i].setActive(false);
+            this.fruits[i].visible = false;
+        }
+
+        this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
+        this.spawnFruitDelayed();     
     }
+
+    spawnFruitDelayed()
+    {
+        const randomDelay = Phaser.Math.Between(gamePrefs.FRUIT_SPAWN_MIN_DELAY, gamePrefs.FRUIT_SPAWN_MAX_DELAY);
+        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
+    }
+
     spawnFruit()
     {
-        this.fruits.create(this.fruitRespawnPos.x, this.fruitRespawnPos.y, 'watermelon');
+        const randomFruitIndex = Phaser.Math.Between(0, gamePrefs.NUM_FRUITS-1);        
+        this.fruits[randomFruitIndex].enable(this.fruitRespawnPos.x, this.fruitRespawnPos.y);
     }
+
     collectFruit(_player, _fruit)
     {
-        _fruit.disableBody(true, true);
-        this.addScore(30);
-        const randomDelay = Phaser.Math.Between(10000, 20000);
-        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
+        _fruit.disable();
+        this.addScore(_fruit.points);
+        this.spawnFruitDelayed();
     }
 
     update()
@@ -194,21 +220,27 @@ class level1 extends Phaser.Scene
                 case loadPrefs.POOKA_CLASS:
                     this.spawnPooka(pixPos);
                     break;
+
                 case loadPrefs.FYGAR_CLASS:
                     this.spawnFygar(pixPos);
                     break;
+
                 case loadPrefs.ROCK_CLASS:
                     this.spawnRock(pixPos);
                     break;
+
                 case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
                     this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 case loadPrefs.PLAYER_RESPAWN_CLASS:
                     this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 case loadPrefs.FRUIT_RESPAWN_CLASS:
                     this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
                     break;
+
                 default:
                     break;
             }
@@ -254,11 +286,11 @@ class level1 extends Phaser.Scene
     }
     spawnPooka(pixPos)
     {
-        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting'));
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 200));
     }
     spawnFygar(pixPos)
     {
-        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting'));
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 300));
     }
 
 

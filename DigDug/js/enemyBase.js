@@ -19,7 +19,7 @@ const MAX_INFLATED = 4;
 class enemyBase extends Phaser.GameObjects.Sprite
 {
     constructor(_scene, _positionX, _positionY, _spriteTag = 'enemy', _inflatedSpriteTag = 'enemyInflated', 
-                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign')
+                _walkingSpriteTag = 'enemyWalking', _ghostSpriteTag = 'enemyGhostign', _points)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -36,7 +36,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.inflatedSpriteTag = _inflatedSpriteTag;
         this.walkingSpriteTag = _walkingSpriteTag;
         this.ghostSpriteTag = _ghostSpriteTag;
-        this.points = 400;
+        this.points = _points;
         this.inflatedAmount = 0;
         this.canGhost = false;
         this.canUnGhost = false;

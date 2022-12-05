@@ -2,9 +2,9 @@
 class fygarPrefab extends enemyBase 
 {
     constructor(_scene, _positionX, _positionY, _spriteTag = 'fygar', _inflatedSpriteTag = 'fygarInflate', 
-                _walkingSpriteTag = 'fygarWalking', _ghostSpriteTag = 'fygarGhosting')
+                _walkingSpriteTag = 'fygarWalking', _ghostSpriteTag = 'fygarGhosting', _points)
     {
-        super(_scene, _positionX, _positionY, _spriteTag, _inflatedSpriteTag, _walkingSpriteTag, _ghostSpriteTag);
+        super(_scene, _positionX, _positionY, _spriteTag, _inflatedSpriteTag, _walkingSpriteTag, _ghostSpriteTag, _points);
 
         this.doingTimer = false;
         this.fire = new firePrefab(_scene, config.width + 80, config.height + 80, this, this.resetToPatrol);
@@ -35,8 +35,7 @@ class fygarPrefab extends enemyBase
     }
 
     startTryAttackTimer()
-    {  
-        console.log("startTryAttackTimer()");
+    {
         var rand = Phaser.Math.Between(4000, 10000);
 
         this.attackTimer.reset({
