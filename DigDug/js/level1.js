@@ -78,6 +78,7 @@ class level1 extends Phaser.Scene
             null,
             this
         );
+
         this.physics.add.overlap(
             this.player.harpoonV,
             this.enemyGroup,
@@ -271,6 +272,7 @@ class level1 extends Phaser.Scene
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
     }
+
     initEnemies()
     {
         for (var i = 0; i < this.enemies.length; ++i)
@@ -284,10 +286,12 @@ class level1 extends Phaser.Scene
     {
         // TODO
     }
+
     spawnPooka(pixPos)
     {
         this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 200));
     }
+    
     spawnFygar(pixPos)
     {
         this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 300));

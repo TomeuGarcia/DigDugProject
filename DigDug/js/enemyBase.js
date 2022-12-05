@@ -110,8 +110,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     hit(_enemy, _player)
     {
-        console.log("hit");
-
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
         const distance = enemyPixPos.distance(playerPixPos);
