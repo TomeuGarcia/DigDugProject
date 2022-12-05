@@ -3,8 +3,7 @@ const EnemyStates = {
     GHOST: 1, 
     INFLATED: 2, 
     ATTACKING: 3,
-    SQUISHED: 4,
-    DYING: 5
+    DYING: 4
 };
 
 const MoveDirection = {
@@ -44,7 +43,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.canUnGhost = false;
         this.isDead = false;
         this.isDespawning = false;
-        this.canInflate = true;        
+        this.canInflate = true;    
+        this.isBeingSquished = false;
 
         this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
         this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
@@ -144,10 +144,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
                 this.doAttack();
                 break;
             
-            case EnemyStates.SQUISHED:
-                this.doSquished();
-                break;
-
             case EnemyStates.DYING:
                 this.doDie();
                 break;
@@ -535,12 +531,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == SQUISHED ==
     setSquished()
     {        
-        if (this.currentState == EnemyStates.SQUISHED ||
-            this.currentState == EnemyStates.DYING)
+        if (this.currentState == EnemyStates.DYING)
         {
             return;
         } 
-        this.currentState = EnemyStates.SQUISHED;
      
         this.anims.stop();
         this.setTexture(this.spriteTag, this.squishedFrameI);
@@ -553,17 +547,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.isDead = false;
         this.isDespawning = false;
         this.canInflate = false; 
-
-        this.body.allowGravity = true;
+        this.isBeingSquished = true;
 
         this.killedByRock();
     }
 
-    doSquished()
-    {        
-        //this.setTexture(this.spriteTag, this.squishedFrameI);
-        //this.scene.time.delayedCall(2000, this.killedByRock, [], this);
-    }
     killedByRock()
     {
         this.points *= 2;
@@ -650,6 +638,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     resetMovement()
     {
+        if (this.currentState == EnemyStates.DYING) return;
         this.anims.play(this.walkingSpriteTag, true);
 
         this.setMoveDirectionTowardsPlayer();
