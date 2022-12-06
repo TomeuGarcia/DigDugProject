@@ -21,6 +21,7 @@ class level1 extends Phaser.Scene
         this.load.image('harpoonV', 'harpoonVertical.png');
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
         this.load.image('maskHarpoonV', 'harpoonVerticalMask.png');
+        this.load.image('rock', 'watermelon.png');
 
         // Pooka enemy
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
@@ -307,6 +308,19 @@ class level1 extends Phaser.Scene
 
     spawnRock(pixPos)
     {
+        const rock = 
+        new rockPrefab(this,pixPos.x,pixPos.y,'rock');
+        this.physics.add.collider
+        (
+            rock,
+            this.borders
+        );
+        this.physics.add.collider
+        (
+            rock,
+            this.digGround
+        );
+        
         // TODO
     }
 
