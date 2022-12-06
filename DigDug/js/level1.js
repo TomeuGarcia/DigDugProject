@@ -21,7 +21,6 @@ class level1 extends Phaser.Scene
         this.load.image('harpoonV', 'harpoonVertical.png');
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
         this.load.image('maskHarpoonV', 'harpoonVerticalMask.png');
-        this.load.image('rock', 'watermelon.png');
 
         // Pooka enemy
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
@@ -38,7 +37,8 @@ class level1 extends Phaser.Scene
 
         // Fruits
         this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
-
+        //Rock
+        this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
 
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -46,6 +46,8 @@ class level1 extends Phaser.Scene
         this.load.setPath('assets/tilesets/final/');
         this.load.tilemapTiledJSON('level1', 'level1.json');
         this.load.json('level1_JSON', 'level1.json');        
+
+        
     }
 
     create()
@@ -55,7 +57,7 @@ class level1 extends Phaser.Scene
        
         this.initLevelObjects();
         this.initPlayer();
-        this.initEnemies();
+        this.initCollisionsEnemiesRock();
 
         this.initScore();
         this.initFruits();
@@ -231,6 +233,7 @@ class level1 extends Phaser.Scene
     initLevelObjects()
     {
         this.enemies = [];
+        this.rocks = [];
         this.enemyGroup = this.add.group();
 
         const levelJSON = this.cache.json.get('level1_JSON');
@@ -297,12 +300,20 @@ class level1 extends Phaser.Scene
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
     }
 
-    initEnemies()
+    initCollisionsEnemiesRock()
     {
         for (var i = 0; i < this.enemies.length; ++i)
         {
             this.enemies[i].initCollisionsWithPlayer();
             this.enemyGroup.add(this.enemies[i]);
+        }
+        for(var i = 0; i < this.rocks.length; ++i){
+
+            this.physics.add.collider
+            (
+            this.rocks[i],
+            this.player
+            ); 
         }
     }
 
@@ -310,6 +321,7 @@ class level1 extends Phaser.Scene
     {
         const rock = 
         new rockPrefab(this,pixPos.x,pixPos.y,'rock');
+        this.rocks.push(rock);
         this.physics.add.collider
         (
             rock,
@@ -319,8 +331,7 @@ class level1 extends Phaser.Scene
         (
             rock,
             this.digGround
-        );
-        
+        );     
         // TODO
     }
 
@@ -386,6 +397,7 @@ class level1 extends Phaser.Scene
             repeat: -1
         });
 
+     
         // FYGAR
         this.anims.create
         ({
@@ -417,6 +429,22 @@ class level1 extends Phaser.Scene
             frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
             frameRate: 2,
             repeat: 0
+        });
+        //ROCK
+        this.anims.create
+        ({
+            key: 'rockStartFalling',
+            frames: this.anims.generateFrameNumbers('rock', {start: 0, end: 1}),
+            frameRate: 2,
+            repeat: 1
+        });
+        this.anims.create
+        ({
+            key: 'rockDestroy',
+            frames:this.anims.generateFrameNumbers('rock',{start:2,end:3}),
+            frameRate:2,
+            repeat:0
+
         });
     }
     //// CREATE end
