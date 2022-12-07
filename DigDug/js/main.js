@@ -4,7 +4,7 @@
 var gamePrefs =
 {
     PLAYER_MOVE_SPEED: 36,
-    ROCK_FALLIN_SPEED: 36,
+    ROCK_FALLIN_SPEED: 50,
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
     NUM_CELL_WIDTH: 20,
