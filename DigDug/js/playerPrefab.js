@@ -24,6 +24,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
         _scene.physics.world.enable(this);        
 
+        this.depth = 5;
+        this.setScale(1).setOrigin(.5)
+
         this.scene = _scene;
         this.cursorKeys = _cursors;
         this.moveX = 0;
@@ -33,6 +36,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
+
+        this.score = 0;
 
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
@@ -45,7 +50,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
 
-        this.depth = 5;
+        
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
@@ -339,6 +344,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
+
+        if (true) // TODO no lives left
+        {
+            this.scene.onPlayerLostAllLives();
+        }
     }
 
     isDead()

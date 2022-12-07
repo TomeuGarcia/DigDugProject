@@ -16,7 +16,7 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
-
+        this.load.image('watermelon', 'watermelon.png');
         this.load.image('harpoonH', 'harpoonHorizontal.png');
         this.load.image('harpoonV', 'harpoonVertical.png');
         this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
@@ -26,46 +26,141 @@ class level1 extends Phaser.Scene
         this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
         // Fygar enemy
-        this.load.spritesheet('fygar', 'fygarNormal.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
         this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
-        
-
-        this.load.image('test_level_1','testingTiles.png'); // MUST HAVE SAME TAG AS IN TILED
+        this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
+        this.load.image('fireSmall', 'fireSmall.png');
+        this.load.image('fireMedium', 'fireMedium.png');
+        this.load.image('fireBig', 'fireBig.png');
         
         this.load.image('brush','diggedFromBottom.png');
 
-        this.load.setPath('assets/tilesets/');
-        this.load.tilemapTiledJSON('testLevel1', 'testLevel1.json');
-        this.load.json('levelJSON', 'testLevel1.json');
+        // Fruits
+        this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
+        //Rock
+        this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
+
+        // Tilemap
+        this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
+
+        this.load.setPath('assets/tilesets/final/');
+        this.load.tilemapTiledJSON('level1', 'level1.json');
+        this.load.json('level1_JSON', 'level1.json');        
+
+        
     }
 
     create()
     {
-        this.loadMap();
+        this.loadLevel();
         this.setupDigging();
-
+       
+        this.initLevelObjects();
         this.initPlayer();
+        this.initCollisionsEnemiesRock();
 
-        this.score = 0; // Testing
+        this.initScore();
+        this.initFruits();
+
+        
         this.spaceDown = false; // Testing
-        this.initEnemies();
 
         this.loadAnimations();
 
+        //this.player.body.collideWorldBounds = true;
+        this.physics.add.collider
+        (
+            this.player,
+            this.borders
+        );
+
         this.physics.add.overlap(
             this.player.harpoonH,
-            this.enemies,
+            this.enemyGroup,
             this.player.harpoonH.onEnemyOverlap,
             null,
             this
         );
+
         this.physics.add.overlap(
             this.player.harpoonV,
-            this.enemies,
+            this.enemyGroup,
             this.player.harpoonV.onEnemyOverlap,
             null,
             this
         );
+    }
+
+    initScore()
+    {
+        this.highScore = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE * 8, gamePrefs.CELL_SIZE * 2, 'gameFont', 'HI-    \nSCORE:', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0, 0);
+
+        this.highestScore = localStorage.getItem(storagePrefs.HIGHEST_SCORE);
+        if (this.highestScore == null) this.highestScore = 0;
+
+        this.highScoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 3, 'gameFont', this.highestScore, 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+
+        this.firstPlayerScore = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE * 2, gamePrefs.CELL_SIZE * 5, 'gameFont', '1UP:', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(1, 0);
+
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', '0', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+    }
+    
+    addScore(_score)
+    {
+        this.player.score += _score;
+        this.scoreCountText.setText(this.player.score);
+
+        if (this.player.score > this.highestScore)
+        {
+            localStorage.setItem(storagePrefs.HIGHEST_SCORE, this.player.score);
+        }
+        localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
+    }
+
+    initFruits()
+    {
+        this.fruits = [];
+        this.fruitsGroup = this.add.group();
+
+        for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
+        {
+            const points = (i+1) * 50;
+            this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
+            this.fruitsGroup.add(this.fruits[i]);
+
+            this.fruits[i].setActive(false);
+            this.fruits[i].visible = false;
+        }
+
+        this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
+        this.spawnFruitDelayed();     
+    }
+
+    spawnFruitDelayed()
+    {
+        const randomDelay = Phaser.Math.Between(gamePrefs.FRUIT_SPAWN_MIN_DELAY, gamePrefs.FRUIT_SPAWN_MAX_DELAY);
+        this.time.delayedCall(randomDelay, this.spawnFruit, [], this);
+    }
+
+    spawnFruit()
+    {
+        const randomFruitIndex = Phaser.Math.Between(0, gamePrefs.NUM_FRUITS-1);        
+        this.fruits[randomFruitIndex].enable(this.fruitRespawnPos.x, this.fruitRespawnPos.y);
+    }
+
+    collectFruit(_player, _fruit)
+    {
+        const fruitPos = new Phaser.Math.Vector2(_fruit.x, _fruit.y);
+        const playerPos = _player.getCenterPixPos();
+        if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
+
+        _fruit.disable();
+        this.addScore(_fruit.points);
+        this.spawnFruitDelayed();
     }
 
     update()
@@ -82,26 +177,34 @@ class level1 extends Phaser.Scene
         {
             this.spaceDown = false;
         }
+
+        
+        if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
+        {
+            this.squishEnemy(this.enemies[0]);
+        }
     }
 
     //// CREATE start
-    loadMap()
+    loadLevel()
     {
         // Draw Level
         // Load the JSON
-        this.map = this.add.tilemap('testLevel1');
+        this.map = this.add.tilemap('level1');
         // Load tilesets
-        this.map.addTilesetImage('test_level_1');
+        this.map.addTilesetImage('digDugTileset');
         // Draw the layers
-        this.borders = this.map.createLayer('layer_borders', 'test_level_1');
-        this.digGround = this.map.createLayer('layer_ground', 'test_level_1');
-        this.surface = this.map.createLayer('layer_surface', 'test_level_1');
+        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');;
+        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
+        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');
 
-        this.map.setCollisionBetween(3, 3, true, true, 'layer_borders');
-        this.map.setCollisionBetween(1, 10, true, true, 'layer_ground');
+        this.map.setCollisionBetween(49, 49, true, true, 'layer_borders');
+        this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
         
-        const levelGroundLayer = this.cache.json.get('levelJSON').layers[0];
+        const levelJSON = this.cache.json.get('level1_JSON');
+        const levelGroundLayer = levelJSON.layers[2];
+        const levelBordersLayer = levelJSON.layers[0];
         this.levelWidth = levelGroundLayer.width;
         this.levelHeight = levelGroundLayer.height;
         this.levelArray = [];
@@ -110,7 +213,9 @@ class level1 extends Phaser.Scene
             this.levelArray.push([]);
             for (var j = 0; j < this.levelWidth; ++j)
             {
-                if (levelGroundLayer.data[(i*this.levelWidth) + j] == 0)
+                const index = (i*this.levelWidth) + j;
+                if (levelGroundLayer.data[index] == 0 && 
+                    levelBordersLayer.data[index] == 0)
                 {
                     this.levelArray[i].push(MapContent.Empty)
                 }
@@ -125,13 +230,58 @@ class level1 extends Phaser.Scene
         }   
     }
 
+    initLevelObjects()
+    {
+        this.enemies = [];
+        this.rocks = [];
+        this.enemyGroup = this.add.group();
+
+        const levelJSON = this.cache.json.get('level1_JSON');
+        const levelObjects = levelJSON.layers[3].objects;
+        for (var i = 0; i < levelObjects.length; ++i)
+        {
+            const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
+            const pixPos = this.cell2pix(cellPos.x, cellPos.y);
+
+            switch (levelObjects[i].class)
+            {
+                case loadPrefs.POOKA_CLASS:
+                    this.spawnPooka(pixPos);
+                    break;
+
+                case loadPrefs.FYGAR_CLASS:
+                    this.spawnFygar(pixPos);
+                    break;
+
+                case loadPrefs.ROCK_CLASS:
+                    this.spawnRock(pixPos);
+                    break;
+
+                case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
+                    this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+
+                case loadPrefs.PLAYER_RESPAWN_CLASS:
+                    this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+
+                case loadPrefs.FRUIT_RESPAWN_CLASS:
+                    this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
     setupDigging()
     {
         shapeMask = this.make.graphics();
         shapeMask.fillStyle(0xffffff);
         shapeMask.beginPath();
 
-        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH+2), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT+2));
+        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT));
 
         this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
         this.renderTexture.mask = this.mask;
@@ -146,27 +296,55 @@ class level1 extends Phaser.Scene
 
     initPlayer()
     {
-        const playerStart = new Phaser.Math.Vector2(gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_LEFT_OFFSET + gamePrefs.HALF_CELL_SIZE,
-                                                   gamePrefs.CELL_SIZE * gamePrefs.NUM_CELL_TOP_OFFSET + gamePrefs.HALF_CELL_SIZE);  
-
         this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
+    }
 
-        this.player = new playerPrefab(this, playerStart.x, playerStart.y, 'player', this.cursorKeys).setScale(1).setOrigin(.5);
+    initCollisionsEnemiesRock()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].initCollisionsWithPlayer();
+            this.enemyGroup.add(this.enemies[i]);
+        }
+        for(var i = 0; i < this.rocks.length; ++i){
 
-        this.player.body.collideWorldBounds = true;
+            this.physics.add.collider
+            (
+            this.rocks[i],
+            this.player
+            ); 
+        }
+    }
+
+    spawnRock(pixPos)
+    {
+        const rock = 
+        new rockPrefab(this,pixPos.x,pixPos.y,'rock');
+        this.rocks.push(rock);
         this.physics.add.collider
         (
-            this.player,
+            rock,
             this.borders
         );
+        this.physics.add.collider
+        (
+            rock,
+            this.digGround
+        );     
+        // TODO
     }
 
-    initEnemies()
+    spawnPooka(pixPos)
     {
-        this.enemies = this.add.group();
-        this.pooka = new enemyBase(this, 200, 88, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting').setOrigin(.5);
-        this.enemies.add(this.pooka);
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 4, 200));
     }
+    
+    spawnFygar(pixPos)
+    {
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
+    }
+
 
     loadAnimations()
     {
@@ -219,11 +397,12 @@ class level1 extends Phaser.Scene
             repeat: -1
         });
 
+     
         // FYGAR
         this.anims.create
         ({
             key: 'fygarWalking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 1, end: 2}),
             frameRate: 2,
             repeat: -1
         });
@@ -231,7 +410,7 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarGhosting',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 6, end: 7}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 4, end: 5}),
             frameRate: 2,
             repeat: -1
         });
@@ -239,9 +418,33 @@ class level1 extends Phaser.Scene
         this.anims.create
         ({
             key: 'fygarAttacking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 3, end: 4}),
+            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
             frameRate: 2,
             repeat: -1
+        });
+
+        this.anims.create
+        ({
+            key: 'fygarFireAttack',
+            frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
+            frameRate: 2,
+            repeat: 0
+        });
+        //ROCK
+        this.anims.create
+        ({
+            key: 'rockStartFalling',
+            frames: this.anims.generateFrameNumbers('rock', {start: 0, end: 1}),
+            frameRate: 2,
+            repeat: 1
+        });
+        this.anims.create
+        ({
+            key: 'rockDestroy',
+            frames:this.anims.generateFrameNumbers('rock',{start:2,end:3}),
+            frameRate:2,
+            repeat:0
+
         });
     }
     //// CREATE end
@@ -249,6 +452,8 @@ class level1 extends Phaser.Scene
 
     inflateEnemy(_enemy)
     {
+        if (!_enemy.canInflate) return;
+
         if (_enemy.isInInflatedState())
         {
             _enemy.addInflation();
@@ -258,6 +463,11 @@ class level1 extends Phaser.Scene
             _enemy.addInflation();
             _enemy.setInfaltedState();
         }
+    }
+
+    squishEnemy(_enemy)
+    {
+        _enemy.setSquished();
     }
 
     
@@ -341,6 +551,12 @@ class level1 extends Phaser.Scene
         return this.levelArray[cellY][cellX] == MapContent.Empty;
     }
 
+    canMoveToCell(cellX, cellY)
+    {
+        if (cellX < 0 || cellX >= this.levelArray.width || cellY < 0 || cellY >= this.levelArray.height) return false;
+        return this.isEmptyCell(cellX, cellY);
+    }
+
     removeGroundCell(cellX, cellY)
     {
         this.levelArray[cellY][cellX] = MapContent.Empty;
@@ -360,5 +576,9 @@ class level1 extends Phaser.Scene
         this.player.onEnemyDiedInflated();
     }
 
+    onPlayerLostAllLives()
+    {
+        //////
+    }
 
 }
