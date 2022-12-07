@@ -112,11 +112,16 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
     hit(_enemy, _player)
     {
+        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING || _player.isDead())
+        {
+           return; 
+        }
+
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
         const distance = enemyPixPos.distance(playerPixPos);
 
-        if (_enemy.currentState == EnemyStates.INFLATED || _player.isDead() || distance > gamePrefs.PLAYER_HIT_DIST)
+        if (distance > gamePrefs.PLAYER_HIT_DIST)
         {
            return; 
         }

@@ -29,9 +29,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.fireSequence.push('fireMedium');
         this.fireSequence.push('fireBig');
         this.fireSizes = [];
-        this.fireSizes.push(16);
-        this.fireSizes.push(32);
-        this.fireSizes.push(48);
+        this.fireSizes.push(16 -8);
+        this.fireSizes.push(32 -8);
+        this.fireSizes.push(48 -8);
         this.fireSequenceIndex = 0;
 
         this.setTexture(this.fireSequence[this.fireSequenceIndex]);
@@ -97,31 +97,30 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     startAttack(_posX, _posY, _flip)
     {
-        if (!this.isAttacking)
+        if (this.isAttacking) return;
+    
+        console.log("startAttack(_posX, _posY, _flip)");
+        if (_flip)
         {
-            console.log("startAttack(_posX, _posY, _flip)");
-            if (_flip)
-            {
-                this.setOrigin(1, 0.5);
-                this.body.setSize(this.fireSizes[this.fireSequenceIndex], 16);
-                _posX -= gamePrefs.HALF_CELL_SIZE;
-            }
-            else
-            {
-                this.setOrigin(0, .5);
-                this.body.setSize(this.fireSizes[this.fireSequenceIndex], 16);
-                _posX += gamePrefs.HALF_CELL_SIZE;
-            }
-            this.flipX = _flip;
-
-            this.visible = true;
-            this.setActive(true);
-
-            this.x = _posX;
-            this.y = _posY;
-
-            this.startFireAnim();
+            this.setOrigin(1, 0.5);
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
+            _posX -= gamePrefs.HALF_CELL_SIZE;
         }
+        else
+        {
+            this.setOrigin(0, .5);
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
+            _posX += gamePrefs.HALF_CELL_SIZE;
+        }
+        this.flipX = _flip;
+
+        this.visible = true;
+        this.setActive(true);
+
+        this.x = _posX;
+        this.y = _posY;
+
+        this.startFireAnim();
     }
 
     startFireAnim()
@@ -139,7 +138,6 @@ class firePrefab extends Phaser.GameObjects.Sprite
         if (this.isInterupted) { return; }
 
         console.log("this.fireSequenceIndex: " + this.fireSequenceIndex);
-        ++this.fireSequenceIndex;
 
         if (this.fireSequenceIndex >= this.fireSequence.length) 
         { 
@@ -149,8 +147,10 @@ class firePrefab extends Phaser.GameObjects.Sprite
         else 
         { 
             this.setTexture(this.fireSequence[this.fireSequenceIndex]); 
-            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 16);
-            this.scene.time.delayedCall(200, this.incrementFire(), [], this);
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
+            this.scene.time.delayedCall(gamePrefs.FIRE_PROGRESS_TIME_MILLISECONDS, this.incrementFire, [], this);
+
+            ++this.fireSequenceIndex;
         }
     }
 
