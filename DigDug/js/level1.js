@@ -57,7 +57,7 @@ class level1 extends Phaser.Scene
        
         this.initLevelObjects();
         this.initPlayer();
-        this.initCollisionsEnemiesRock();
+        this.initPlayerCollisions();
 
         this.initScore();
         this.initFruits();
@@ -179,10 +179,12 @@ class level1 extends Phaser.Scene
         }
 
         
+        /*
         if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
         {
             this.squishEnemy(this.enemies[0]);
         }
+        */
     }
 
     //// CREATE start
@@ -300,27 +302,34 @@ class level1 extends Phaser.Scene
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
     }
 
-    initCollisionsEnemiesRock()
+    initPlayerCollisions()
     {
         for (var i = 0; i < this.enemies.length; ++i)
         {
             this.enemies[i].initCollisionsWithPlayer();
             this.enemyGroup.add(this.enemies[i]);
         }
+
         for(var i = 0; i < this.rocks.length; ++i){
 
+            const rockCollider = 
             this.physics.add.collider
             (
             this.rocks[i],
             this.player
             ); 
+
+            this.rocks[i].setColliderReference(rockCollider);
         }
+    }
+    removeRockCollisions(_rockCollider)
+    {
+        this.physics.world.removeCollider(_rockCollider);
     }
 
     spawnRock(pixPos)
     {
-        const rock = 
-        new rockPrefab(this,pixPos.x,pixPos.y,'rock');
+        const rock = new rockPrefab(this,pixPos.x,pixPos.y,'rock');
         this.rocks.push(rock);
         this.physics.add.collider
         (
@@ -332,7 +341,6 @@ class level1 extends Phaser.Scene
             rock,
             this.digGround
         );     
-        // TODO
     }
 
     spawnPooka(pixPos)
@@ -468,6 +476,11 @@ class level1 extends Phaser.Scene
     squishEnemy(_enemy)
     {
         _enemy.setSquished();
+    }
+
+    squishPlayer()
+    {
+        this.player.setSquished();
     }
 
     
