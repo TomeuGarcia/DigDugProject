@@ -192,6 +192,27 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             if (this.moveY > 0) this.playerMovement = PlayerMovement.DOWN
             else if (this.moveY < 0) this.playerMovement = PlayerMovement.UP
         }
+
+        /// Prevent rock
+        var dirX = 0;
+        var dirY = 0;
+        if (this.playerMovement == PlayerMovement.RIGHT) dirX = 1;
+        else if (this.playerMovement == PlayerMovement.LEFT) dirX = -1;
+        else if (this.playerMovement == PlayerMovement.DOWN) dirY = 1;
+        else if (this.playerMovement == PlayerMovement.UP) dirY = -1;      
+        const cellPosAhead = this.getCellPos().add(new Phaser.Math.Vector2(dirX, dirY));
+
+        if (canMoveHorizontaly && canMoveVertically)
+        {
+            if (this.scene.cellHasRock(cellPosAhead))
+            {
+                this.moveX = 0;
+                this.moveY = 0;
+                this.body.setVelocityX(this.moveX);
+                this.body.setVelocityY(this.moveY);
+            }
+        }
+
     }
 
 

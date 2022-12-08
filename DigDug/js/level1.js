@@ -230,12 +230,14 @@ class level1 extends Phaser.Scene
                 }
             }
         }   
+
     }
 
     initLevelObjects()
     {
-        this.enemies = [];
         this.rocks = [];
+        this.rockCells = [];
+        this.enemies = [];
         this.enemyGroup = this.add.group();
 
         const levelJSON = this.cache.json.get('level1_JSON');
@@ -309,28 +311,27 @@ class level1 extends Phaser.Scene
             this.enemies[i].initCollisionsWithPlayer();
             this.enemyGroup.add(this.enemies[i]);
         }
-
-        for(var i = 0; i < this.rocks.length; ++i){
-
-            const rockCollider = 
-            this.physics.add.collider
-            (
-            this.rocks[i],
-            this.player
-            ); 
-
-            this.rocks[i].setColliderReference(rockCollider);
-        }
     }
-    removeRockCollisions(_rockCollider)
+    removeRockCollisions(_rock)
     {
-        this.physics.world.removeCollider(_rockCollider);
+        const index = this.rockCells.indexOf(_rock.spawnCell);
+
+        if (index != -1)
+        {
+            this.rockCells.splice(index, 1);
+        }
+            
     }
 
     spawnRock(pixPos)
     {
-        const rock = new rockPrefab(this,pixPos.x,pixPos.y,'rock');
+        const rock = new rockPrefab(this, pixPos.x, pixPos.y, 'rock');
         this.rocks.push(rock);
+
+        const rockCell = this.pix2cell(pixPos.x, pixPos.y);
+        rock.spawnCell = rockCell;
+        this.rockCells.push(rockCell);
+
         this.physics.add.collider
         (
             rock,
@@ -340,7 +341,7 @@ class level1 extends Phaser.Scene
         (
             rock,
             this.digGround
-        );     
+        );
     }
 
     spawnPooka(pixPos)
@@ -498,6 +499,19 @@ class level1 extends Phaser.Scene
     canMove(pixel)
     {
         return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
+    }
+
+    cellHasRock(_cellPos)
+    {
+        for (var i = 0; i < this.rockCells.length; ++i)
+        {
+            const itRockCell = this.rockCells[i];
+            if (itRockCell.x == _cellPos.x && itRockCell.y == _cellPos.y)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     dig(pixPos)
