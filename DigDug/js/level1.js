@@ -37,7 +37,8 @@ class level1 extends Phaser.Scene
 
         // Fruits
         this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
-
+        //Rock
+        this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
 
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -45,6 +46,8 @@ class level1 extends Phaser.Scene
         this.load.setPath('assets/tilesets/final/');
         this.load.tilemapTiledJSON('level1', 'level1.json');
         this.load.json('level1_JSON', 'level1.json');        
+
+        
     }
 
     create()
@@ -54,7 +57,7 @@ class level1 extends Phaser.Scene
        
         this.initLevelObjects();
         this.initPlayer();
-        this.initEnemies();
+        this.initPlayerCollisions();
 
         this.initScore();
         this.initFruits();
@@ -226,10 +229,13 @@ class level1 extends Phaser.Scene
                 }
             }
         }   
+
     }
 
     initLevelObjects()
     {
+        this.rocks = [];
+        this.rockCells = [];
         this.enemies = [];
         this.enemyGroup = this.add.group();
 
@@ -297,7 +303,7 @@ class level1 extends Phaser.Scene
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
     }
 
-    initEnemies()
+    initPlayerCollisions()
     {
         for (var i = 0; i < this.enemies.length; ++i)
         {
@@ -305,10 +311,36 @@ class level1 extends Phaser.Scene
             this.enemyGroup.add(this.enemies[i]);
         }
     }
+    removeRockCollisions(_rock)
+    {
+        const index = this.rockCells.indexOf(_rock.spawnCell);
+
+        if (index != -1)
+        {
+            this.rockCells.splice(index, 1);
+        }
+            
+    }
 
     spawnRock(pixPos)
     {
-        // TODO
+        const rock = new rockPrefab(this, pixPos.x, pixPos.y, 'rock');
+        this.rocks.push(rock);
+
+        const rockCell = this.pix2cell(pixPos.x, pixPos.y);
+        rock.spawnCell = rockCell;
+        this.rockCells.push(rockCell);
+
+        this.physics.add.collider
+        (
+            rock,
+            this.borders
+        );
+        this.physics.add.collider
+        (
+            rock,
+            this.digGround
+        );
     }
 
     spawnPooka(pixPos)
@@ -373,6 +405,7 @@ class level1 extends Phaser.Scene
             repeat: -1
         });
 
+     
         // FYGAR
         this.anims.create
         ({
@@ -405,6 +438,22 @@ class level1 extends Phaser.Scene
             frameRate: 2,
             repeat: 0
         });
+        //ROCK
+        this.anims.create
+        ({
+            key: 'rockStartFalling',
+            frames: this.anims.generateFrameNumbers('rock', {start: 0, end: 1}),
+            frameRate: 2,
+            repeat: 1
+        });
+        this.anims.create
+        ({
+            key: 'rockDestroy',
+            frames:this.anims.generateFrameNumbers('rock',{start:2,end:3}),
+            frameRate:2,
+            repeat:0
+
+        });
     }
     //// CREATE end
 
@@ -429,6 +478,11 @@ class level1 extends Phaser.Scene
         _enemy.setSquished();
     }
 
+    squishPlayer()
+    {
+        this.player.setSquished();
+    }
+
     
     //// OTHER
     canMoveHorizontaly(body)
@@ -444,6 +498,19 @@ class level1 extends Phaser.Scene
     canMove(pixel)
     {
         return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
+    }
+
+    cellHasRock(_cellPos)
+    {
+        for (var i = 0; i < this.rockCells.length; ++i)
+        {
+            const itRockCell = this.rockCells[i];
+            if (itRockCell.x == _cellPos.x && itRockCell.y == _cellPos.y)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     dig(pixPos)

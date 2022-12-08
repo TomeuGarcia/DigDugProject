@@ -45,6 +45,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.isDespawning = false;
         this.canInflate = true;    
         this.isBeingSquished = false;
+        this.canHitPlayer = true;
 
         this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
         this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
@@ -111,11 +112,15 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
 
     hit(_enemy, _player)
-    {
-        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING || _player.isDead())
+    {       
+        if (!this.canHitPlayer) return;
+
+        if (_player == null) return;
+        
+        if (_enemy.currentState == EnemyStates.INFLATED || (_player.playerState == PlayerStates.DYING)) 
         {
-           return; 
-        }
+            return;
+        }        
 
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
@@ -473,6 +478,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.resetColliders();
             this.resetMovement();
             this.currentState = EnemyStates.PATROL;
+            this.canHitPlayer = true;
 
             this.scene.notifyPlayerEnemyReleased();
         }
@@ -489,6 +495,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
+        this.canHitPlayer = false;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
@@ -545,7 +552,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.setTexture(this.spriteTag, this.squishedFrameI);
 
         this.body.setVelocityX(0);
-        this.body.setVelocityY(this.ghostMoveSpeed*2);
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
 
         this.canGhost = false;
         this.canUnGhost = false;
