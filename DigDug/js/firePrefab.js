@@ -52,6 +52,18 @@ class firePrefab extends Phaser.GameObjects.Sprite
             this
         );
 
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.borders
+        );
+        
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.digGround
+        );
+
         /*this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
             function () {
                 this.resetOwnerPatrol();
@@ -85,11 +97,16 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hitTerrain()
     {
-        var cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x, this.y));
+        if (!this.isAttacking) { return; }
+
+        var cell;
+        if (this.flipX)
+            cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x - this.fireSizes[this.fireSequenceIndex - 1], this.y));
+        else
+            cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x + this.fireSizes[this.fireSequenceIndex - 1], this.y));
          
-        if (this.isAttacking && !this.scene.isEmptyCell(cell.x, cell.y))
+        if (!this.scene.isEmptyCell(cell.x, cell.y) || this.body.blocked.right || this.body.blocked.left)
         {
-            console.log("hitTerrain()");
             this.resetSelfValues();
             this.resetOwnerPatrol();
         }
@@ -99,7 +116,6 @@ class firePrefab extends Phaser.GameObjects.Sprite
     {
         if (this.isAttacking) return;
     
-        console.log("startAttack(_posX, _posY, _flip)");
         if (_flip)
         {
             this.setOrigin(1, 0.5);
@@ -136,8 +152,6 @@ class firePrefab extends Phaser.GameObjects.Sprite
     incrementFire()
     {
         if (this.isInterupted) { return; }
-
-        console.log("this.fireSequenceIndex: " + this.fireSequenceIndex);
 
         if (this.fireSequenceIndex >= this.fireSequence.length) 
         { 
