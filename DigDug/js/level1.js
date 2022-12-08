@@ -178,7 +178,6 @@ class level1 extends Phaser.Scene
             this.spaceDown = false;
         }
 
-        
         /*
         if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
         {

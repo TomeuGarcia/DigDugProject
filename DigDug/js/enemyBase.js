@@ -57,7 +57,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
-        
 
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
@@ -66,7 +65,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredDown = false;
 
         // Overlap with player
-      
         _scene.physics.add.collider
         (
             this,
@@ -93,7 +91,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         );
     }
 
-
     preUpdate(time,delta)
     {
         super.preUpdate(time, delta);
@@ -106,9 +103,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             this.doCurrentState();
             this.updateMoveSpeed(delta);
-        }       
-
-                
+        }                       
     }
 
     hit(_enemy, _player)
@@ -117,7 +112,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (_player == null) return;
         
-        if (_enemy.currentState == EnemyStates.INFLATED || (_player.playerState == PlayerStates.DYING)) 
+        if (_enemy.currentState == EnemyStates.INFLATED || _player.isDead() || _enemy.currentState == EnemyStates.DYING) 
         {
             return;
         }        
@@ -468,7 +463,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.scene.notifyPlayerEnemyDiedInflated();
         }
         else if (this.inflatedAmount <= 0)
-        {    
+        {
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
