@@ -10,7 +10,9 @@ const PlayerMovement = {
 const PlayerStates = {
     MOVING: 0,
     SHOOTING: 1,
-    PUMPING: 2
+    PUMPING: 2,
+    SQUISHED: 3,
+    DYING: 4
 }
 
 class playerPrefab extends Phaser.GameObjects.Sprite
@@ -23,15 +25,25 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         _scene.add.existing(this);
         _scene.physics.world.enable(this);        
 
+        this.depth = 5;
+        this.setScale(1).setOrigin(.5)
+
         this.scene = _scene;
         this.cursorKeys = _cursors;
         this.moveX = 0;
         this.moveY = 0;
         this.lastMoveX = 0;
         this.lastMoveY = 0;
+        this.spriteTag = _spriteTag;
 
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
+
+        this.squishedSideFrameI = 6;
+        this.squishedTopFrameI = 7;
+        this.hasHitGroundWhileSquished = false;
+
+        this.score = 0;
 
         this.currentCell = this.scene.pix2cell(this.body.x, this.body.y);
         this.isDigging = false;
@@ -43,6 +55,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
 
         this.targetedEnemy = null;
+
+        
+
+        this.respawnTimer = this.scene.time.addEvent({
+            delay: 4000,
+            callback: this.respawn,
+            callbackScope: this,
+            repeat: -1
+        })
+        this.respawnTimer.paused = true;
     }
 
 
@@ -62,6 +84,18 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             {
                 this.quitPumpingToMoving();
             }
+        }
+        else if (this.playerState == PlayerStates.SQUISHED)
+        {
+            if (!this.hasHitGroundWhileSquished)
+            {
+             this.checkSquishedHitGround();   
+            }
+        }
+        else if (this.playerState == PlayerStates.DYING)
+        {
+            this.body.setVelocityX(0);
+            this.body.setVelocityY(0);
         }
     }
 
@@ -318,4 +352,81 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.quitPumpingToMoving();
     }
     
+    die()
+    {        
+        this.playerState = PlayerStates.DYING;
+        this.anims.play('playerDying', true);
+        this.respawnTimer.paused = false;
+
+        this.hasHitGroundWhileSquished = false;
+
+        if (true) // TODO no lives left
+        {
+            this.scene.onPlayerLostAllLives();
+        }
+    }
+
+    isDead()
+    {
+        return this.playerState == PlayerStates.DYING;
+    }
+
+    respawn()
+    {
+        this.playerState = PlayerStates.MOVING;
+        this.anims.play('playerRun', true);
+        this.respawnTimer.paused = true;
+    }
+
+    // == SQUISHED ==
+    setSquished()
+    {        
+        if (this.playerState == PlayerStates.SQUISHED || this.playerState == PlayerStates.DYING)
+        {
+            return;
+        } 
+        
+        this.anims.stop();
+
+        if (this.rotation > 0.01) this.setTexture(this.spriteTag, this.squishedTopFrameI);
+        else this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        this.rotation = 0;
+
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+
+        this.canGhost = false;
+        this.canUnGhost = false;
+        this.isDead = false;
+        this.isDespawning = false;
+        this.canInflate = false; 
+        this.isBeingSquished = true;
+
+        this.playerState = PlayerStates.SQUISHED;        
+
+        this.groundCollision = this.scene.physics.add.collider
+        (
+            this,
+            this.scene.digGround
+        );
+    }
+
+    checkSquishedHitGround()
+    {       
+        if (this.body.blocked.down)
+        {
+            this.hasHitGroundWhileSquished = true;
+            
+            this.removeGroundCollision();
+            this.scene.time.delayedCall(800, this.die, [], this);
+        }
+    }
+
+    removeGroundCollision()
+    {
+        this.scene.physics.world.removeCollider(this.groundCollision);        
+    }
+
+    // == == ==
+
 }

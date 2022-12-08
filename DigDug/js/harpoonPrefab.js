@@ -12,6 +12,7 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         this.lifetime = _lifetime;
+        this.hitDirThreshold = 0.8;
 
         this.lifetimeTimer = _scene.time.addEvent(
             {
@@ -115,17 +116,20 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
 
     onEnemyOverlap(_harpoon, _enemy)
     {
-        if (_harpoon.enemyHit) return;
-
-        const harpoonToEnemy = new Phaser.Math.Vector2(_enemy.body.x - _harpoon.body.x, _enemy.body.y - _harpoon.body.y).normalize();
-        const harpoonDir = new Phaser.Math.Vector2(_harpoon.body.velocity.x, _harpoon.body.velocity.y).normalize();
-        const sameDirThreshold = 0.8;
+        if (_harpoon.enemyHit || _enemy.isDead) return;
         
-        if (harpoonToEnemy.dot(harpoonDir) > sameDirThreshold)
+        const playerPixPos = _harpoon.scene.player.getCenterPixPos();
+        const enemyPixPos = _enemy.getCenterPixPos();
+
+        const harpoonDir = new Phaser.Math.Vector2(_harpoon.body.velocity.x, _harpoon.body.velocity.y).normalize();
+        const playerToEnemy = (enemyPixPos.subtract(playerPixPos).subtract(harpoonDir)).normalize();
+        const dot = playerToEnemy.dot(harpoonDir);
+
+        if (dot > _harpoon.hitDirThreshold)
         {
             _harpoon.enemyHit = true;
 
-            this.inflatePooka();
+            this.inflateEnemy(_enemy);
 
             _harpoon.body.setVelocityY(0);
             _harpoon.body.setVelocityX(0);
