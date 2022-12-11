@@ -605,9 +605,26 @@ class level1 extends Phaser.Scene
         this.player.onEnemyDiedInflated();
     }
 
+    onPlayerLostALive()
+    {
+        // TODO
+        // update HUD
+
+
+        // Respawning alive enemies
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            if (!this.enemies[i].isDead)
+            {
+                this.enemies[i].respawn();
+            }                
+        }
+    }
+
     onPlayerLostAllLives()
     {
-        //////
+        // TODO
+        // update HUD and go to main menu
     }
 
 }

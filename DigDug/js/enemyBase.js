@@ -1,9 +1,10 @@
 const EnemyStates = {
-    PATROL: 0, 
-    GHOST: 1, 
-    INFLATED: 2, 
-    ATTACKING: 3,
-    DYING: 4
+    PAUSED: 0,
+    PATROL: 1, 
+    GHOST: 2, 
+    INFLATED: 3, 
+    ATTACKING: 4,
+    DYING: 5
 };
 
 const MoveDirection = {
@@ -58,7 +59,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
 
-        this.spawnPosition = new Phaser.Math.Vector2(_positionX, _positionY);
+        this.respawnPosition = new Phaser.Math.Vector2(_positionX, _positionY);
 
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
@@ -397,22 +398,27 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Check if it leaves an area with collisions
         if (this.isInEmptyCell() && this.canUnGhost && 
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
-        {
-            // Reset collisions & state
-            this.canUnGhost = false;
-            this.resetColliders();
-            this.resetMovement();
-            
-            this.tint = 0xffffff;
-            this.currentState = EnemyStates.PATROL;
-
-            this.setVelocityMatchMoveDirection();
+        {            
+            this.quitGhost();
         }
 
         
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
+
+    quitGhost()
+    {
+        // Reset collisions & state
+        this.canUnGhost = false;
+        this.resetColliders();
+        this.resetMovement();
+        
+        this.tint = 0xffffff;
+        this.currentState = EnemyStates.PATROL;
+
+        this.setVelocityMatchMoveDirection();
+    }
 
     allowGhost() 
     { 
@@ -609,6 +615,33 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         // Remove from scene
         this.destroy();
+    }
+    // == == ==
+
+    // == RESPAWN ==
+    respawn()
+    {
+        console.log("respawning");
+        if (this.currentState == EnemyStates.GHOST)
+        {
+            this.quitGhost();
+        }
+
+        this.currentState = EnemyStates.PAUSED;
+
+        this.x = this.respawnPosition.x;
+        this.y = this.respawnPosition.y;
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(0);
+
+
+        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+    }
+
+    resetPatrol()
+    {
+        this.currentState = EnemyStates.PATROL;
+        this.computeNewMoveDir();
     }
     // == == ==
 
