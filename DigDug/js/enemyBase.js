@@ -387,13 +387,15 @@ class enemyBase extends Phaser.GameObjects.Sprite
         })
 
         // Chase player
-        this.setMoveDirectionTowardsPlayer();
-        const enemyToPlayer = this.getDirectionTowardsPlayer();
-        const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
-
-        this.body.setVelocityX(enemyToPlayerVelocity.x);
-        this.body.setVelocityY(enemyToPlayerVelocity.y);
-
+        if (this.scene.player.playerState != PlayerStates.DYING)
+        {
+            this.setMoveDirectionTowardsPlayer();
+            const enemyToPlayer = this.getDirectionTowardsPlayer();
+            const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
+    
+            this.body.setVelocityX(enemyToPlayerVelocity.x);
+            this.body.setVelocityY(enemyToPlayerVelocity.y);
+        }
 
         // Check if it leaves an area with collisions
         if (this.isInEmptyCell() && this.canUnGhost && 
@@ -552,6 +554,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             return;
         } 
+
+        if (this.currentState == EnemyStates.GHOST)
+        {
+            this.quitGhost();
+        }
      
         this.anims.stop();
         this.setTexture(this.spriteTag, this.squishedFrameI);
@@ -621,7 +628,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == RESPAWN ==
     respawn()
     {
-        console.log("respawning");
         if (this.currentState == EnemyStates.GHOST)
         {
             this.quitGhost();

@@ -303,7 +303,7 @@ class level1 extends Phaser.Scene
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
-        this.playerLivesUI = this.add.sprite(40,40,'playerLives',0);
+        this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
        
     }
