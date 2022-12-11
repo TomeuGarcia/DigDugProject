@@ -58,6 +58,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
 
+        this.spawnPosition = new Phaser.Math.Vector2(_positionX, _positionY);
+
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
         this.exploredRight = false;
@@ -112,7 +114,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (_player == null) return;
         
-        if (_enemy.currentState == EnemyStates.INFLATED || _player.isDead() || _enemy.currentState == EnemyStates.DYING) 
+        if (_player.playerState == PlayerStates.DYING) return;
+
+        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
         {
             return;
         }        

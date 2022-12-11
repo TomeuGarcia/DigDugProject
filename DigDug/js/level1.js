@@ -178,6 +178,7 @@ class level1 extends Phaser.Scene
             this.spaceDown = false;
         }
 
+        
         /*
         if (Phaser.Input.Keyboard.JustUp(this.cursorKeys.space))
         {
@@ -300,7 +301,7 @@ class level1 extends Phaser.Scene
     initPlayer()
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos);
     }
 
     initPlayerCollisions()
@@ -517,6 +518,8 @@ class level1 extends Phaser.Scene
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
         
+        //---> this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
+
         const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
         
         if (tile)

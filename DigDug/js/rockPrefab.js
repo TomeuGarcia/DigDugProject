@@ -44,7 +44,7 @@ class rockPrefab extends Phaser.GameObjects.Sprite
                 this);
         }
 
-        this.scene.add.rectangle(this.x-.5, this.y-.5, 3, 3, 0x9966ff);
+        //this.scene.add.rectangle(this.x-.5, this.y-.5, 3, 3, 0x9966ff);
     }
 
     startFalling()

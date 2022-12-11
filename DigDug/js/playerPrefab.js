@@ -18,7 +18,7 @@ const PlayerStates = {
 class playerPrefab extends Phaser.GameObjects.Sprite
 {
 
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors)
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors, _respawnPosition)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -56,7 +56,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
 
-        
+        this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
@@ -397,6 +397,10 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
         this.anims.play('playerRun', true);
         this.respawnTimer.paused = true;
+        
+        this.rotation = 0;
+        this.x = this.respawnPosition.x;
+        this.y = this.respawnPosition.y;
     }
 
     // == SQUISHED ==
@@ -414,7 +418,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.rotation = 0;
 
         this.body.setVelocityX(0);
-        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+        this.body.setVelocityY(0);
 
         this.canGhost = false;
         this.canUnGhost = false;
@@ -430,7 +434,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this,
             this.scene.digGround
         );
+
+        this.scene.time.delayedCall(150, this.fallFromSquished, [], this);
     }
+
+    fallFromSquished()
+    {
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+
+    }
+
 
     checkSquishedHitGround()
     {       
