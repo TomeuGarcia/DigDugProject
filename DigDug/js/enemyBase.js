@@ -45,6 +45,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.isDespawning = false;
         this.canInflate = true;    
         this.isBeingSquished = false;
+        this.canHitPlayer = true;
 
         this.moveSpeed = gamePrefs.ENEMY_MIN_SPEED;
         this.ghostMoveSpeed = gamePrefs.ENEMY_MIN_SPEED;
@@ -56,7 +57,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
-        
+
+        this.spawnPosition = new Phaser.Math.Vector2(_positionX, _positionY);
 
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
@@ -65,7 +67,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredDown = false;
 
         // Overlap with player
-      
         _scene.physics.add.collider
         (
             this,
@@ -92,7 +93,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         );
     }
 
-
     preUpdate(time,delta)
     {
         super.preUpdate(time, delta);
@@ -105,18 +105,27 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             this.doCurrentState();
             this.updateMoveSpeed(delta);
-        }       
-
-                
+        }                       
     }
 
     hit(_enemy, _player)
-    {
+    {       
+        if (!this.canHitPlayer) return;
+
+        if (_player == null) return;
+        
+        if (_player.playerState == PlayerStates.DYING) return;
+
+        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
+        {
+            return;
+        }        
+
         const enemyPixPos = _enemy.getCenterPixPos();
         const playerPixPos = _player.getCenterPixPos();
         const distance = enemyPixPos.distance(playerPixPos);
 
-        if (_enemy.currentState == EnemyStates.INFLATED || _player.isDead() || distance > gamePrefs.PLAYER_HIT_DIST)
+        if (distance > gamePrefs.PLAYER_HIT_DIST)
         {
            return; 
         }
@@ -458,7 +467,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.scene.notifyPlayerEnemyDiedInflated();
         }
         else if (this.inflatedAmount <= 0)
-        {    
+        {
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
@@ -468,6 +477,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.resetColliders();
             this.resetMovement();
             this.currentState = EnemyStates.PATROL;
+            this.canHitPlayer = true;
 
             this.scene.notifyPlayerEnemyReleased();
         }
@@ -484,6 +494,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.canGhost = false;
         this.currentState = EnemyStates.INFLATED;
+        this.canHitPlayer = false;
 
         // Start countdown
         this.deflateTimer = this.scene.time.addEvent
@@ -540,7 +551,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.setTexture(this.spriteTag, this.squishedFrameI);
 
         this.body.setVelocityX(0);
-        this.body.setVelocityY(this.ghostMoveSpeed*2);
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
 
         this.canGhost = false;
         this.canUnGhost = false;

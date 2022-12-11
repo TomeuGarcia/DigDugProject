@@ -11,13 +11,14 @@ const PlayerStates = {
     MOVING: 0,
     SHOOTING: 1,
     PUMPING: 2,
-    DYING: 3
+    SQUISHED: 3,
+    DYING: 4
 }
 
 class playerPrefab extends Phaser.GameObjects.Sprite
 {
 
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors)
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors, _respawnPosition)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -33,9 +34,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.moveY = 0;
         this.lastMoveX = 0;
         this.lastMoveY = 0;
+        this.spriteTag = _spriteTag;
 
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
+
+        this.squishedSideFrameI = 6;
+        this.squishedTopFrameI = 7;
+        this.hasHitGroundWhileSquished = false;
 
         this.score = 0;
 
@@ -50,7 +56,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
 
-        
+        this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
@@ -77,6 +83,13 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             if (this.moveX != 0 || this.moveY != 0) 
             {
                 this.quitPumpingToMoving();
+            }
+        }
+        else if (this.playerState == PlayerStates.SQUISHED)
+        {
+            if (!this.hasHitGroundWhileSquished)
+            {
+             this.checkSquishedHitGround();   
             }
         }
         else if (this.playerState == PlayerStates.DYING)
@@ -179,6 +192,27 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             if (this.moveY > 0) this.playerMovement = PlayerMovement.DOWN
             else if (this.moveY < 0) this.playerMovement = PlayerMovement.UP
         }
+
+        /// Prevent rock
+        var dirX = 0;
+        var dirY = 0;
+        if (this.playerMovement == PlayerMovement.RIGHT) dirX = 1;
+        else if (this.playerMovement == PlayerMovement.LEFT) dirX = -1;
+        else if (this.playerMovement == PlayerMovement.DOWN) dirY = 1;
+        else if (this.playerMovement == PlayerMovement.UP) dirY = -1;      
+        const cellPosAhead = this.getCellPos().add(new Phaser.Math.Vector2(dirX, dirY));
+
+        if (canMoveHorizontaly && canMoveVertically)
+        {
+            if (this.scene.cellHasRock(cellPosAhead))
+            {
+                this.moveX = 0;
+                this.moveY = 0;
+                this.body.setVelocityX(this.moveX);
+                this.body.setVelocityY(this.moveY);
+            }
+        }
+
     }
 
 
@@ -345,6 +379,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
 
+        this.hasHitGroundWhileSquished = false;
+
         if (true) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
@@ -361,6 +397,70 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
         this.anims.play('playerRun', true);
         this.respawnTimer.paused = true;
+        
+        this.rotation = 0;
+        this.x = this.respawnPosition.x;
+        this.y = this.respawnPosition.y;
     }
+
+    // == SQUISHED ==
+    setSquished()
+    {        
+        if (this.playerState == PlayerStates.SQUISHED || this.playerState == PlayerStates.DYING)
+        {
+            return;
+        } 
+        
+        this.anims.stop();
+
+        if (this.rotation > 0.01) this.setTexture(this.spriteTag, this.squishedTopFrameI);
+        else this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        this.rotation = 0;
+
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(0);
+
+        this.canGhost = false;
+        this.canUnGhost = false;
+        this.isDead = false;
+        this.isDespawning = false;
+        this.canInflate = false; 
+        this.isBeingSquished = true;
+
+        this.playerState = PlayerStates.SQUISHED;        
+
+        this.groundCollision = this.scene.physics.add.collider
+        (
+            this,
+            this.scene.digGround
+        );
+
+        this.scene.time.delayedCall(150, this.fallFromSquished, [], this);
+    }
+
+    fallFromSquished()
+    {
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+
+    }
+
+
+    checkSquishedHitGround()
+    {       
+        if (this.body.blocked.down)
+        {
+            this.hasHitGroundWhileSquished = true;
+            
+            this.removeGroundCollision();
+            this.scene.time.delayedCall(800, this.die, [], this);
+        }
+    }
+
+    removeGroundCollision()
+    {
+        this.scene.physics.world.removeCollider(this.groundCollision);        
+    }
+
+    // == == ==
 
 }
