@@ -60,7 +60,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
-            callback: this.respawn,
+            callback: this.checkRespawn,
             callbackScope: this,
             repeat: -1
         })
@@ -380,16 +380,24 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.respawnTimer.paused = false;
 
         this.hasHitGroundWhileSquished = false;
-
-        if (true) // TODO no lives left
-        {
-            this.scene.onPlayerLostAllLives();
-        }
     }
 
     isDead()
     {
         return this.playerState == PlayerStates.DYING;
+    }
+
+    checkRespawn()
+    {
+        if (false) // TODO no lives left
+        {
+            this.scene.onPlayerLostAllLives();
+        }
+        else
+        {
+            this.scene.onPlayerLostALive();
+            this.respawn();
+        }
     }
 
     respawn()
