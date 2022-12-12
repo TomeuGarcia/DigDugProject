@@ -24,7 +24,7 @@ var gamePrefs =
     FRUIT_SPAWN_MIN_DELAY: 10000,
     FRUIT_SPAWN_MAX_DELAY: 20000,
     BIG_RED_FLOWER_LVL_COUNT: 30,
-    BIG_FLOWER_LVL_COUNT: 10
+    BIG_FLOWER_LVL_COUNT: 10    
 }
 
 var uiPrefs =
@@ -54,7 +54,7 @@ var config =
     type: Phaser.AUTO,
     width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
     height: gamePrefs.CELL_SIZE * 18, //256,  // window.innerHeight
-    scene:[menu, level1], // levels/screens/scenes array
+    scene:[menu, level1, level2], // levels/screens/scenes array
     render:
     {
         pixelArt: true
