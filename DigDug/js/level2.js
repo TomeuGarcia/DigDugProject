@@ -1,14 +1,14 @@
-class level1 extends level
+class level2 extends level
 {
     constructor()
     {
-        super('level1');
+        super('level2');
     }
    
 
     backToMenu() // override for testing purposes
     {
-        console.log("back to menu from level1");
+        console.log("back to menu from level2");
         super.backToMenu();
     }
 
