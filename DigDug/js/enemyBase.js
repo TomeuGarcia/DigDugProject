@@ -1,9 +1,10 @@
 const EnemyStates = {
-    PATROL: 0, 
-    GHOST: 1, 
-    INFLATED: 2, 
-    ATTACKING: 3,
-    DYING: 4
+    PAUSED: 0,
+    PATROL: 1, 
+    GHOST: 2, 
+    INFLATED: 3, 
+    ATTACKING: 4,
+    DYING: 5
 };
 
 const MoveDirection = {
@@ -57,7 +58,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.directionX = -1;
         this.directionY = 0;
         this.body.setVelocityX(gamePrefs.ENEMY_MIN_SPEED * this.directionX);
-        
+
+        this.respawnPosition = new Phaser.Math.Vector2(_positionX, _positionY);
 
         this.desiredVerticalDirection = MoveDirection.DOWN;
         this.exploredLeft = false;
@@ -66,7 +68,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredDown = false;
 
         // Overlap with player
-      
         _scene.physics.add.collider
         (
             this,
@@ -93,7 +94,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         );
     }
 
-
     preUpdate(time,delta)
     {
         super.preUpdate(time, delta);
@@ -106,9 +106,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             this.doCurrentState();
             this.updateMoveSpeed(delta);
-        }       
-
-                
+        }                       
     }
 
     hit(_enemy, _player)
@@ -117,7 +115,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (_player == null) return;
         
-        if (_enemy.currentState == EnemyStates.INFLATED || (_player.playerState == PlayerStates.DYING)) 
+        if (_player.playerState == PlayerStates.DYING) return;
+
+        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
         {
             return;
         }        
@@ -387,33 +387,40 @@ class enemyBase extends Phaser.GameObjects.Sprite
         })
 
         // Chase player
-        this.setMoveDirectionTowardsPlayer();
-        const enemyToPlayer = this.getDirectionTowardsPlayer();
-        const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
-
-        this.body.setVelocityX(enemyToPlayerVelocity.x);
-        this.body.setVelocityY(enemyToPlayerVelocity.y);
-
+        if (this.scene.player.playerState != PlayerStates.DYING)
+        {
+            this.setMoveDirectionTowardsPlayer();
+            const enemyToPlayer = this.getDirectionTowardsPlayer();
+            const enemyToPlayerVelocity = enemyToPlayer.setLength(this.ghostMoveSpeed);
+    
+            this.body.setVelocityX(enemyToPlayerVelocity.x);
+            this.body.setVelocityY(enemyToPlayerVelocity.y);
+        }
 
         // Check if it leaves an area with collisions
         if (this.isInEmptyCell() && this.canUnGhost && 
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
-        {
-            // Reset collisions & state
-            this.canUnGhost = false;
-            this.resetColliders();
-            this.resetMovement();
-            
-            this.tint = 0xffffff;
-            this.currentState = EnemyStates.PATROL;
-
-            this.setVelocityMatchMoveDirection();
+        {            
+            this.quitGhost();
         }
 
         
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
+
+    quitGhost()
+    {
+        // Reset collisions & state
+        this.canUnGhost = false;
+        this.resetColliders();
+        this.resetMovement();
+        
+        this.tint = 0xffffff;
+        this.currentState = EnemyStates.PATROL;
+
+        this.setVelocityMatchMoveDirection();
+    }
 
     allowGhost() 
     { 
@@ -468,7 +475,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.scene.notifyPlayerEnemyDiedInflated();
         }
         else if (this.inflatedAmount <= 0)
-        {    
+        {
             this.setTexture(this.spriteTag);
             this.inflatedAmount = 0;
             this.deflateTimer.remove(false);
@@ -547,6 +554,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             return;
         } 
+
+        if (this.currentState == EnemyStates.GHOST)
+        {
+            this.quitGhost();
+        }
      
         this.anims.stop();
         this.setTexture(this.spriteTag, this.squishedFrameI);
@@ -610,6 +622,32 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         // Remove from scene
         this.destroy();
+    }
+    // == == ==
+
+    // == RESPAWN ==
+    respawn()
+    {
+        if (this.currentState == EnemyStates.GHOST)
+        {
+            this.quitGhost();
+        }
+
+        this.currentState = EnemyStates.PAUSED;
+
+        this.x = this.respawnPosition.x;
+        this.y = this.respawnPosition.y;
+        this.body.setVelocityX(0);
+        this.body.setVelocityY(0);
+
+
+        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+    }
+
+    resetPatrol()
+    {
+        this.currentState = EnemyStates.PATROL;
+        this.computeNewMoveDir();
     }
     // == == ==
 

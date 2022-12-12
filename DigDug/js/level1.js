@@ -14,6 +14,7 @@ class level1 extends Phaser.Scene
         this.load.setPath('assets/images/');
         
         this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
+        this.load.spritesheet('playerLives', 'playerLives.png', {frameWidth: 32, frameHeight: 16});
         this.load.image('maskDigBottom', 'diggedFromBottom.png');
         this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
         this.load.image('watermelon', 'watermelon.png');
@@ -301,7 +302,10 @@ class level1 extends Phaser.Scene
     initPlayer()
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys);
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
+        this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
+        this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
+       
     }
 
     initPlayerCollisions()
@@ -518,6 +522,8 @@ class level1 extends Phaser.Scene
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
         
+        //---> this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
+
         const tile = this.digGround.getTileAt(cellPos.x, cellPos.y);
         
         if (tile)
@@ -603,9 +609,35 @@ class level1 extends Phaser.Scene
         this.player.onEnemyDiedInflated();
     }
 
+    onPlayerLostALive()
+    {
+        // TODO
+        // update HUD
+        this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
+
+        // Respawning alive enemies
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            if (!this.enemies[i].isDead)
+            {
+                this.enemies[i].respawn();
+            }                
+        }
+    }
+
     onPlayerLostAllLives()
     {
-        //////
+        this.playerLivesUI.visible=false;
+        // TODO
+        this.gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+        // update HUD and go to main menu
+        
+        this.time.delayedCall(3000, this.backToMenu, [], this);
+    }
+
+    backToMenu(){
+        this.scene.start('menu');
     }
 
 }
