@@ -227,7 +227,7 @@ class level extends Phaser.Scene
 
     initLevelObjects()
     {        
-        new levelFlowers(this, gamePrefs.CELL_SIZE * 15, gamePrefs.CELL_SIZE * 3, 'flowers', 1);
+        new levelFlowers(this, gamePrefs.CELL_SIZE * 15, gamePrefs.CELL_SIZE * 3, 'flowers', this.levelNumber);
 
         this.rocks = [];
         this.rockCells = [];
