@@ -38,6 +38,10 @@ class level1 extends Phaser.Scene
 
         // Fruits
         this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
+
+        // Flowers
+        this.load.spritesheet('flowers', 'flowers.png', {frameWidth: 16, frameHeight: 24});
+
         //Rock
         this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
 
@@ -235,7 +239,9 @@ class level1 extends Phaser.Scene
     }
 
     initLevelObjects()
-    {
+    {        
+        new levelFlowers(this, gamePrefs.CELL_SIZE * 15, gamePrefs.CELL_SIZE * 3, 'flowers', 1);
+
         this.rocks = [];
         this.rockCells = [];
         this.enemies = [];
@@ -277,7 +283,7 @@ class level1 extends Phaser.Scene
                 default:
                     break;
             }
-        }
+        }        
     }
 
     setupDigging()
