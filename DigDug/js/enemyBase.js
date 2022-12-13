@@ -69,7 +69,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         // Save audios
         this.enemyBlowUp = this.scene.sound.add('enemyBlowUp');
-        this.enemyMove = this.scene.sound.add('enemyMoving');
+        this.enemyMove = this.scene.sound.add('enemyMoving'); // not doing it 'cause it sucks
 
         // Overlap with player
         _scene.physics.add.collider
@@ -172,13 +172,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
-
-        /*
-        this.computeDesiredMove();
-        var rand = Phaser.Math.Between(1, 4);
-        if (rand <= 2) this.trySwitchToGhost();
-        return;
-        */
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
@@ -406,9 +399,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {            
             this.quitGhost();
-        }
-
-        
+        }        
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
