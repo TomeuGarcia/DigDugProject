@@ -67,10 +67,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredUp = false;
         this.exploredDown = false;
 
-        // Save audios
-        this.enemyBlowUp = this.scene.sound.add('enemyBlowUp');
-        this.enemyMove = this.scene.sound.add('enemyMoving'); // not doing it 'cause it sucks
-
         // Overlap with player
         _scene.physics.add.collider
         (
@@ -466,7 +462,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.setTexture(this.inflatedSpriteTag, 3);
 
             // Play audio
-            this.enemyBlowUp.play();
+            this.scene.enemyBlowUp.play();
 
             // Die
             this.currentState = EnemyStates.DYING;
