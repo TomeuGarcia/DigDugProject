@@ -17,7 +17,6 @@ class fygarPrefab extends enemyBase
             callbackScope: this,
             repeat: -1
         });
-
     }
 
     preUpdate(time, delta)

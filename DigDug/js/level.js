@@ -60,7 +60,11 @@ class level extends Phaser.Scene
         this.load.tilemapTiledJSON('level_tilemap', levelFileJSON);
         this.load.json('level_JSON', levelFileJSON);        
 
-        
+        // Audios
+        this.load.setPath('assets/audios/');
+        this.load.audio('fygarFire', 'FygarFlame.mp3');
+        this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
+        this.load.audio('enemyMoving', 'MonsterMoving.mp3');
     }
 
     create()
