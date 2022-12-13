@@ -17,7 +17,6 @@ class fygarPrefab extends enemyBase
             callbackScope: this,
             repeat: -1
         });
-
     }
 
     preUpdate(time, delta)
@@ -102,12 +101,10 @@ class fygarPrefab extends enemyBase
         super.resetMovement();
     }
 
-
     setSquished()
     {
         super.setSquished();
 
         this.attackTimer.pused = true;
     }
-
 }

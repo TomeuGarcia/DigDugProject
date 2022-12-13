@@ -18,7 +18,7 @@ const PlayerStates = {
 class playerPrefab extends Phaser.GameObjects.Sprite
 {
 
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors)
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors, _respawnPosition,_lives)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -55,12 +55,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
 
         this.targetedEnemy = null;
-
-        
+        this.lives = _lives;
+        this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
             delay: 4000,
-            callback: this.respawn,
+            callback: this.checkRespawn,
             callbackScope: this,
             repeat: -1
         })
@@ -192,6 +192,27 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             if (this.moveY > 0) this.playerMovement = PlayerMovement.DOWN
             else if (this.moveY < 0) this.playerMovement = PlayerMovement.UP
         }
+
+        /// Prevent rock
+        var dirX = 0;
+        var dirY = 0;
+        if (this.playerMovement == PlayerMovement.RIGHT) dirX = 1;
+        else if (this.playerMovement == PlayerMovement.LEFT) dirX = -1;
+        else if (this.playerMovement == PlayerMovement.DOWN) dirY = 1;
+        else if (this.playerMovement == PlayerMovement.UP) dirY = -1;      
+        const cellPosAhead = this.getCellPos().add(new Phaser.Math.Vector2(dirX, dirY));
+
+        if (canMoveHorizontaly && canMoveVertically)
+        {
+            if (this.scene.cellHasRock(cellPosAhead))
+            {
+                this.moveX = 0;
+                this.moveY = 0;
+                this.body.setVelocityX(this.moveX);
+                this.body.setVelocityY(this.moveY);
+            }
+        }
+
     }
 
 
@@ -357,13 +378,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
-
+        this.lives--;
         this.hasHitGroundWhileSquished = false;
-
-        if (true) // TODO no lives left
-        {
-            this.scene.onPlayerLostAllLives();
-        }
     }
 
     isDead()
@@ -371,11 +387,28 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         return this.playerState == PlayerStates.DYING;
     }
 
+    checkRespawn()
+    {
+        if (this.lives <0) // TODO no lives left
+        {
+            this.scene.onPlayerLostAllLives();
+        }
+        else
+        {
+            this.scene.onPlayerLostALive();
+            this.respawn();
+        }
+    }
+
     respawn()
     {
         this.playerState = PlayerStates.MOVING;
         this.anims.play('playerRun', true);
         this.respawnTimer.paused = true;
+        
+        this.rotation = 0;
+        this.x = this.respawnPosition.x;
+        this.y = this.respawnPosition.y;
     }
 
     // == SQUISHED ==
@@ -393,7 +426,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.rotation = 0;
 
         this.body.setVelocityX(0);
-        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+        this.body.setVelocityY(0);
 
         this.canGhost = false;
         this.canUnGhost = false;
@@ -409,7 +442,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this,
             this.scene.digGround
         );
+
+        this.scene.time.delayedCall(150, this.fallFromSquished, [], this);
     }
+
+    fallFromSquished()
+    {
+        this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
+
+    }
+
 
     checkSquishedHitGround()
     {       

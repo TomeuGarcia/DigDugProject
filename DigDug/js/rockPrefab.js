@@ -11,8 +11,6 @@ class rockPrefab extends Phaser.GameObjects.Sprite
         this.cellBelow = this.scene.pix2cell(_positionX,_positionY+gamePrefs.CELL_SIZE);
         this.body.immovable = true;
 
-        this.rockCollider = null;
-
         this.body.setSize(16, 16);
     }
     
@@ -41,17 +39,18 @@ class rockPrefab extends Phaser.GameObjects.Sprite
             this.anims.play('rockStartFalling',true);
             this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
                 function () {
-                    this.startFalling();
-                    
+                    this.startFalling();                    
                 }, 
                 this);
         }
 
-        //this.scene.add.rectangle(this.x-.5, this.y-.5, 10, 10, 0x9966ff);
+        //this.scene.add.rectangle(this.x-.5, this.y-.5, 3, 3, 0x9966ff);
     }
 
     startFalling()
     {
+        if (this.hasHitGround) return;
+
         this.body.immovable = false;
         this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
         this.scene.physics.add.overlap(
@@ -70,7 +69,7 @@ class rockPrefab extends Phaser.GameObjects.Sprite
             this
         );
 
-        this.scene.removeRockCollisions(this.rockCollider);
+        this.scene.removeRockCollisions(this);
     }
 
     destroyRock()
@@ -85,22 +84,26 @@ class rockPrefab extends Phaser.GameObjects.Sprite
     {
         if (this.hasHitGround) return;
 
-        rock.scene.squishEnemy(enemy);
+        if (rock.isTargetInsideHitThreshold(enemy.x, enemy.y, rock))
+        {
+            rock.scene.squishEnemy(enemy);
+        }        
     }
 
     squishPlayer(rock, player)
     {
         if (this.hasHitGround) return;
 
-        console.log(player.x, rock.x);
-
-        if (player.y < rock.y && ((player.x > rock.x -8) || (player.x < rock.x +8))) return;
-        rock.scene.squishPlayer();
+        if (rock.isTargetInsideHitThreshold(player.x, player.y, rock))
+        {
+            rock.scene.squishPlayer();
+        }        
     }
 
-    setColliderReference(_rockCollider)
+    isTargetInsideHitThreshold(_targetX, _targetY, rock)
     {
-        this.rockCollider = _rockCollider;
+        return _targetY > rock.y && (_targetX > rock.x -gamePrefs.ROCK_HIT_WIDTH) && (_targetX < rock.x +gamePrefs.ROCK_HIT_WIDTH)
     }
+
 
 }

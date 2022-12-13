@@ -11,32 +11,32 @@ class firePrefab extends Phaser.GameObjects.Sprite
         _scene.physics.world.enable(this);
         this.body.collideWorldBounds = true;
         this.body.allowGravity = false;
-        this.body.setSize(48, 16);
+        this.body.setSize(16, 16);
+        this.visible = false;
 
-        this.anims.play('fygarFireAttack', true);
+        //this.anims.play('fygarFireAttack', true);
+        this.fygarFire = this.scene.sound.add('fygarFire'); // save audio
 
         this.scene = _scene;
         this.owner = _owner;
         this.ownerEndAttackCallback = _ownerEndAttackCallback;
         this.isAttacking = false;
+        this.isInterupted = false;
         this.initPosX = _positionX;
         this.initPosY = _positionY;
         
         this.fireSequence = [];
-        this.fireSequence.push(this.scene.add.sprite('fireSmall'));
-        this.fireSequence.push(this.scene.add.sprite('fireMedium'));
-        this.fireSequence.push(this.scene.add.sprite('fireBig'));
+        this.fireSequence.push('fireSmall');
+        this.fireSequence.push('fireMedium');
+        this.fireSequence.push('fireBig');
+        this.fireSizes = [];
+        this.fireSizes.push(16 -8);
+        this.fireSizes.push(32 -8);
+        this.fireSizes.push(48 -8);
         this.fireSequenceIndex = 0;
 
-        // Overlap with player
-        /*this.playerOverlap = _scene.physics.add.overlap(
-            this, 
-            this.scene.player,
-            this.hit,
-            null,
-            this
-        );*/
-        
+        this.setTexture(this.fireSequence[this.fireSequenceIndex]);
+
         this.borderOverlap = _scene.physics.add.overlap(
             this,
             _scene.borders,
@@ -53,11 +53,23 @@ class firePrefab extends Phaser.GameObjects.Sprite
             this
         );
 
-        this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.borders
+        );
+        
+        _scene.physics.add.collider
+        (
+            this,
+            _scene.digGround
+        );
+
+        /*this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
             function () {
                 this.resetOwnerPatrol();
             }, 
-            this);
+            this);*/
     }
 
     preUpdate(time, delta)
@@ -78,7 +90,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hit(_fire, _player)
     {
-        if (_player.isDead()) { return; }
+        if (_player.playerState == PlayerStates.DYING) return;
 
         // Kill player
         _player.die();
@@ -86,26 +98,35 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hitTerrain()
     {
-        /*var cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x, this.y));
+        if (!this.isAttacking) { return; }
+
+        var cell;
+        if (this.flipX)
+            cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x - this.fireSizes[this.fireSequenceIndex - 1], this.y));
+        else
+            cell = new Phaser.Math.Vector2(this.scene.pix2cell(this.x + this.fireSizes[this.fireSequenceIndex - 1], this.y));
          
-        if (this.isAttacking && !this.scene.isEmptyCell(cell.x, cell.y))
+        if (!this.scene.isEmptyCell(cell.x, cell.y) || this.body.blocked.right || this.body.blocked.left)
         {
+            this.resetSelfValues();
             this.resetOwnerPatrol();
-        }*/
+        }
     }
 
     startAttack(_posX, _posY, _flip)
     {
+        if (this.isAttacking) return;
+    
         if (_flip)
         {
             this.setOrigin(1, 0.5);
-            this.body.setSize(48, 16);
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
             _posX -= gamePrefs.HALF_CELL_SIZE;
         }
         else
         {
             this.setOrigin(0, .5);
-            this.body.setSize(48, 16);
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
             _posX += gamePrefs.HALF_CELL_SIZE;
         }
         this.flipX = _flip;
@@ -122,37 +143,53 @@ class firePrefab extends Phaser.GameObjects.Sprite
     startFireAnim()
     {
         this.isAttacking = true;
-        this.anims.play('fygarFireAttack', true);
+        this.visible = true;
+        this.setActive(true);
+        //this.anims.play('fygarFireAttack', true);
 
-        /*this.incrementFireTimer = this.scene.time.addEvent({
-            delay: 200,
-            callback: this.incrementFire,
-            callbackScope: this,
-            repeat: -1
-        });*/
+        this.incrementFire();
     }
 
     incrementFire()
     {
-        ++this.fireSequenceIndex;
+        if (this.isInterupted) { return; }
 
-        if (this.fireSequenceIndex >= this.fireSequence.length) { this.resetOwnerPatrol(); }
+        if (this.fireSequenceIndex >= this.fireSequence.length) 
+        { 
+            this.resetSelfValues();
+            this.resetOwnerPatrol(); 
+        }
+        else 
+        { 
+            this.setTexture(this.fireSequence[this.fireSequenceIndex]); 
+            this.body.setSize(this.fireSizes[this.fireSequenceIndex], 10);
+            this.scene.time.delayedCall(gamePrefs.FIRE_PROGRESS_TIME_MILLISECONDS, this.incrementFire, [], this);
+
+            ++this.fireSequenceIndex;
+        
+            // Play audio
+            this.fygarFire.play();
+        }
     }
 
     resetOwnerPatrol()
     {
-        if (this.isAttacking)
-        {
-            if (this.incrementFireTimer != undefined)
-                this.incrementFireTimer.remove(false);
-    
-            this.x = this.initPosX;
-            this.y = this.initPosY;
-            this.isAttacking = false;
-            this.fireSequenceIndex = 0;
-            this.visible = false;
-            this.setActive(false);
-            this.ownerEndAttackCallback(this.owner);
-        }
+        this.ownerEndAttackCallback(this.owner);
+    }
+
+    resetSelfValues()
+    {
+        if (this.incrementFireTimer != undefined)
+            this.incrementFireTimer.remove(false);
+
+        this.x = this.initPosX;
+        this.y = this.initPosY;
+        this.isAttacking = false;
+        this.fireSequenceIndex = 0;
+        this.visible = false;
+        this.setActive(false);
+
+        this.setTexture(this.fireSequence[this.fireSequenceIndex]); 
+        this.body.setSize(this.fireSizes[this.fireSequenceIndex], 16);
     }
 }

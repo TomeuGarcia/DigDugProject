@@ -5,6 +5,7 @@ var gamePrefs =
 {
     PLAYER_MOVE_SPEED: 36,
     ROCK_FALLIN_SPEED: 50,
+    ROCK_HIT_WIDTH: 14,
     CELL_SIZE: 16,
     HALF_CELL_SIZE: 8,
     NUM_CELL_WIDTH: 20,
@@ -14,13 +15,16 @@ var gamePrefs =
     NUM_CELL_TOP_AIR: 1, 
     ENEMY_MIN_SPEED: 20,
     ENEMY_MAX_SPEED: 40,
+    FIRE_PROGRESS_TIME_MILLISECONDS: 800,
     ENEMY_SPEED_INC_SPAN_SECONDS: 30,
     HARPOON_SPEED: 90,
     HARPOON_LIFETIME: 50,
     PLAYER_HIT_DIST: 12,
     NUM_FRUITS: 11,
     FRUIT_SPAWN_MIN_DELAY: 10000,
-    FRUIT_SPAWN_MAX_DELAY: 20000
+    FRUIT_SPAWN_MAX_DELAY: 20000,
+    BIG_RED_FLOWER_LVL_COUNT: 30,
+    BIG_FLOWER_LVL_COUNT: 10    
 }
 
 var uiPrefs =
@@ -50,7 +54,7 @@ var config =
     type: Phaser.AUTO,
     width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
     height: gamePrefs.CELL_SIZE * 18, //256,  // window.innerHeight
-    scene:[menu, level1], // levels/screens/scenes array
+    scene:[menu, level1, level2], // levels/screens/scenes array
     render:
     {
         pixelArt: true
@@ -66,7 +70,7 @@ var config =
         arcade:
         {
             gravity:{y:0},
-            debug:true 
+            debug:false 
         }
     }
 
