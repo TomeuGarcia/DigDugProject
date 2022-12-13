@@ -81,6 +81,7 @@ class level extends Phaser.Scene
 
         
         this.loadAnimations();
+        this.loadAudios();
 
         //this.player.body.collideWorldBounds = true;
         this.physics.add.collider
@@ -456,6 +457,14 @@ class level extends Phaser.Scene
             repeat:0
 
         });
+    }
+
+    loadAudios()
+    {
+        // Enemies
+        this.fygarFire = this.sound.add('fygarFire');
+        this.enemyBlowUp = this.sound.add('enemyBlowUp');
+        this.enemyMove = this.sound.add('enemyMoving'); // not doing it 'cause it sucks
     }
     //// CREATE end
 
