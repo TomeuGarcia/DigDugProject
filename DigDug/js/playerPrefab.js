@@ -18,7 +18,7 @@ const PlayerStates = {
 class playerPrefab extends Phaser.GameObjects.Sprite
 {
 
-    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors, _respawnPosition)
+    constructor(_scene, _positionX, _positionY, _spriteTag = 'player', _cursors, _respawnPosition,_lives)
     {
         super(_scene, _positionX, _positionY, _spriteTag);
 
@@ -55,7 +55,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.MOVING;
 
         this.targetedEnemy = null;
-
+        this.lives = _lives;
         this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
@@ -378,7 +378,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
-
+        this.lives--;
         this.hasHitGroundWhileSquished = false;
     }
 
@@ -389,7 +389,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkRespawn()
     {
-        if (false) // TODO no lives left
+        if (this.lives <0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
         }
