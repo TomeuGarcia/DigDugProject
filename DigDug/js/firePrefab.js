@@ -15,6 +15,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
         this.visible = false;
 
         //this.anims.play('fygarFireAttack', true);
+        this.fygarFire = this.scene.sound.add('fygarFire'); // save audio
 
         this.scene = _scene;
         this.owner = _owner;
@@ -165,6 +166,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
             this.scene.time.delayedCall(gamePrefs.FIRE_PROGRESS_TIME_MILLISECONDS, this.incrementFire, [], this);
 
             ++this.fireSequenceIndex;
+        
+            // Play audio
+            this.fygarFire.play();
         }
     }
 
