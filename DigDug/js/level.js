@@ -180,7 +180,25 @@ class level extends Phaser.Scene
 
     update()
     {
-        ////// nothing
+        this.setPlayerMoveAxis();
+    }
+
+    setPlayerMoveAxis()
+    {
+        this.setPlayerMoveAxisWithInputs();
+    }
+
+    setPlayerMoveAxisWithInputs()
+    {
+        var xAxis = 0;
+        if (this.cursorKeys.right.isDown) xAxis = 1;
+        else if (this.cursorKeys.left.isDown) xAxis = -1;
+
+        var yAxis = 0;
+        if (this.cursorKeys.down.isDown) yAxis = 1;
+        else if (this.cursorKeys.up.isDown) yAxis = -1;
+
+        this.player.setMoveAxis(new Phaser.Math.Vector2(xAxis, yAxis));
     }
 
     //// CREATE start
@@ -245,37 +263,39 @@ class level extends Phaser.Scene
             const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
             const pixPos = this.cell2pix(cellPos.x, cellPos.y);
 
-            switch (levelObjects[i].class)
-            {
-                case loadPrefs.POOKA_CLASS:
-                    this.spawnPooka(pixPos);
-                    break;
-
-                case loadPrefs.FYGAR_CLASS:
-                    this.spawnFygar(pixPos);
-                    break;
-
-                case loadPrefs.ROCK_CLASS:
-                    this.spawnRock(pixPos);
-                    break;
-
-                case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
-                    this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                case loadPrefs.PLAYER_RESPAWN_CLASS:
-                    this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                case loadPrefs.FRUIT_RESPAWN_CLASS:
-                    this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                default:
-                    break;
-            }
+            this.createObjectOfClass(levelObjects[i].class, pixPos);
         }        
     }
+
+    createObjectOfClass(objectClass, pixPos)
+    {
+        switch (objectClass)
+        {
+            case loadPrefs.POOKA_CLASS:
+                this.spawnPooka(pixPos);
+                break;
+
+            case loadPrefs.FYGAR_CLASS:
+                this.spawnFygar(pixPos);
+                break;
+
+            case loadPrefs.ROCK_CLASS:
+                this.spawnRock(pixPos);
+                break;
+
+            case loadPrefs.PLAYER_RESPAWN_CLASS:
+                this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            case loadPrefs.FRUIT_RESPAWN_CLASS:
+                this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            default:
+                break;
+        }
+    }
+
 
     setupDigging()
     {
@@ -301,8 +321,7 @@ class level extends Phaser.Scene
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
-        this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
-       
+        this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
     }
 
     initPlayerCollisions()
