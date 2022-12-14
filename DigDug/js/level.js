@@ -147,18 +147,19 @@ class level extends Phaser.Scene
     {
         var found = -1;
 
-        for (var i = 0; i < this.pointTexts.length; ++i)
+        var i = 0;
+        while (i < this.pointTexts.length && found == -1)
         {
-            if (!this.pointTexts.isActive)
-            {
-                found = i;
-                break;
-            }
+            if (!this.pointTexts.isActive) found = i;
+            ++i;
         }
+
+        _posX += 15;
+        _posY -= 15;
 
         if (found == -1)
         {
-            const pt = new pointsText(this, _posX + 10, _posY - 10, 'pointsHolder');
+            const pt = new pointsText(this, _posX, _posY, 'pointsHolder');
             pt.setScoreText(_score);
             pt.startHide();
 
@@ -182,7 +183,7 @@ class level extends Phaser.Scene
 
         for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
         {
-            const points = (i+1) * 50;
+            const points = (i+1) * 25 + 200;
             this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
             this.fruitsGroup.add(this.fruits[i]);
 
