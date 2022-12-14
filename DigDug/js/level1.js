@@ -57,8 +57,6 @@ class level1 extends level
 
     finishAnimation()
     {
-        console.log("finished");
-
         this.animMoveAxis.x = 0;
         this.animMoveAxis.y = 0;
 

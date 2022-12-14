@@ -609,7 +609,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.cooldownGhostTimer != null) this.cooldownGhostTimer.remove(false);
 
         // Add points
-        this.scene.addScore(this.points);
+        this.scene.addScore(this.points, this.x, this.y);
 
         // Reset points value
         //this.points = 400;
