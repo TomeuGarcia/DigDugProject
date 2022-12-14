@@ -49,8 +49,11 @@ class level extends Phaser.Scene
         // Flowers
         this.load.spritesheet('flowers', 'flowers.png', {frameWidth: 16, frameHeight: 24});
 
-        //Rock
+        // Rock
         this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
+
+        // Points
+        this.load.image('pointsHolder', 'pointsHolder.png', {frameWidth:28,frameHeight:13});
 
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -79,8 +82,8 @@ class level extends Phaser.Scene
         this.initScore();
         this.initFruits();
 
-        
         this.loadAnimations();
+        this.loadAudios();
 
         //this.player.body.collideWorldBounds = true;
         this.physics.add.collider
@@ -108,6 +111,8 @@ class level extends Phaser.Scene
 
     initScore()
     {
+        this.pointTexts = [];
+
         this.highScore = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE * 8, gamePrefs.CELL_SIZE * 2, 'gameFont', 'HI-    \nSCORE:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0, 0);
 
@@ -124,7 +129,7 @@ class level extends Phaser.Scene
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
-    addScore(_score)
+    addScore(_score, _posX, _posY)
     {
         this.player.score += _score;
         this.scoreCountText.setText(this.player.score);
@@ -134,6 +139,40 @@ class level extends Phaser.Scene
             localStorage.setItem(storagePrefs.HIGHEST_SCORE, this.player.score);
         }
         localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
+
+        this.spawnPointsText(_score, _posX, _posY);
+    }
+
+    spawnPointsText(_score, _posX, _posY)
+    {
+        var found = -1;
+
+        for (var i = 0; i < this.pointTexts.length; ++i)
+        {
+            if (!this.pointTexts.isActive)
+            {
+                found = i;
+                break;
+            }
+        }
+
+        if (found == -1)
+        {
+            const pt = new pointsText(this, _posX + 10, _posY - 10, 'pointsHolder');
+            pt.setScoreText(_score);
+            pt.startHide();
+
+            this.pointTexts.push(pt);
+        }
+        else
+        {
+            const pt = this.pointTexts[found];
+            pt.setScoreText(_score);
+            pt.show();
+            pt.resetPosition(_posX, _posY);
+            pt.startHide();
+        }
+
     }
 
     initFruits()
@@ -174,7 +213,7 @@ class level extends Phaser.Scene
         if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
 
         _fruit.disable();
-        this.addScore(_fruit.points);
+        this.addScore(_fruit.points, fruitPos.x, fruitPos.y);
         this.spawnFruitDelayed();
     }
 
@@ -475,6 +514,14 @@ class level extends Phaser.Scene
             repeat:0
 
         });
+    }
+
+    loadAudios()
+    {
+        // Enemies
+        this.fygarFire = this.sound.add('fygarFire');
+        this.enemyBlowUp = this.sound.add('enemyBlowUp');
+        this.enemyMove = this.sound.add('enemyMoving'); // not doing it 'cause it sucks
     }
     //// CREATE end
 

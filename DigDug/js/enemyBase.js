@@ -67,10 +67,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.exploredUp = false;
         this.exploredDown = false;
 
-        // Save audios
-        this.enemyBlowUp = this.scene.sound.add('enemyBlowUp');
-        this.enemyMove = this.scene.sound.add('enemyMoving');
-
         // Overlap with player
         _scene.physics.add.collider
         (
@@ -172,13 +168,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
-
-        /*
-        this.computeDesiredMove();
-        var rand = Phaser.Math.Between(1, 4);
-        if (rand <= 2) this.trySwitchToGhost();
-        return;
-        */
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
@@ -406,9 +395,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {            
             this.quitGhost();
-        }
-
-        
+        }        
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
@@ -475,7 +462,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.setTexture(this.inflatedSpriteTag, 3);
 
             // Play audio
-            this.enemyBlowUp.play();
+            this.scene.enemyBlowUp.play();
 
             // Die
             this.currentState = EnemyStates.DYING;
@@ -622,7 +609,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.cooldownGhostTimer != null) this.cooldownGhostTimer.remove(false);
 
         // Add points
-        this.scene.addScore(this.points);
+        this.scene.addScore(this.points, this.x, this.y);
 
         // Reset points value
         //this.points = 400;
