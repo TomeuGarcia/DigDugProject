@@ -57,6 +57,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
         this.lives = _lives;
+        this.isHit = false;
         this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
@@ -407,6 +408,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;
+
+        this.isHit = true;
     }
 
     isDead()
@@ -416,6 +419,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkRespawn()
     {
+
+
         if (this.lives <0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
@@ -436,6 +441,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.rotation = 0;
         this.x = this.respawnPosition.x;
         this.y = this.respawnPosition.y;
+
+        this.isHit = false;
     }
 
     // == SQUISHED ==

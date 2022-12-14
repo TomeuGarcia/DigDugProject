@@ -15,6 +15,8 @@ class level1 extends level
         super.create();
         
         this.startAnim();
+
+        this.pauseEnemies();
     }
 
 
@@ -51,19 +53,26 @@ class level1 extends level
         this.animMoveAxis.x = 0;
         this.animMoveAxis.y = 1;
 
-        this.time.delayedCall(3750, this.finishAnimation, [], this);
+        this.time.delayedCall(3750, this.animStopMove, [], this);
     }
 
-
-    finishAnimation()
+    animStopMove()
     {
         this.animMoveAxis.x = 0;
         this.animMoveAxis.y = 0;
 
         this.player.flipX = true;
         this.player.rotation = 0;
+        this.player.playerMovement = PlayerMovement.LEFT
 
+        this.time.delayedCall(500, this.finishAnimation, [], this);
+    }
+
+    finishAnimation()
+    {
         this.playerMoveAxisFunction = this.setPlayerMoveAxisWithInputs;
+
+        this.resumeEnemies();
     }
 
 
@@ -75,6 +84,23 @@ class level1 extends level
     setPlayerMoveAxisWithAnimation()
     {
         this.player.setMoveAxis(this.animMoveAxis);
+    }
+
+
+    pauseEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].setPaused();
+        }
+    }
+
+    resumeEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].resetPatrol();
+        }
     }
 
 
