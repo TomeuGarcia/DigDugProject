@@ -49,8 +49,11 @@ class level extends Phaser.Scene
         // Flowers
         this.load.spritesheet('flowers', 'flowers.png', {frameWidth: 16, frameHeight: 24});
 
-        //Rock
+        // Rock
         this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
+
+        // Points
+        this.load.image('pointsHolder', 'pointsHolder.png', {frameWidth:28,frameHeight:13});
 
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
@@ -79,7 +82,6 @@ class level extends Phaser.Scene
         this.initScore();
         this.initFruits();
 
-        
         this.loadAnimations();
         this.loadAudios();
 
@@ -109,6 +111,8 @@ class level extends Phaser.Scene
 
     initScore()
     {
+        this.pointTexts = [];
+
         this.highScore = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE * 8, gamePrefs.CELL_SIZE * 2, 'gameFont', 'HI-    \nSCORE:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(0, 0);
 
@@ -125,7 +129,7 @@ class level extends Phaser.Scene
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
-    addScore(_score)
+    addScore(_score, _posX, _posY)
     {
         this.player.score += _score;
         this.scoreCountText.setText(this.player.score);
@@ -135,6 +139,41 @@ class level extends Phaser.Scene
             localStorage.setItem(storagePrefs.HIGHEST_SCORE, this.player.score);
         }
         localStorage.setItem(storagePrefs.PLAYER_1_SCORE, this.player.score);
+
+        this.spawnPointsText(_score, _posX, _posY);
+    }
+
+    spawnPointsText(_score, _posX, _posY)
+    {
+        var found = -1;
+
+        var i = 0;
+        while (i < this.pointTexts.length && found == -1)
+        {
+            if (!this.pointTexts.isActive) found = i;
+            ++i;
+        }
+
+        _posX += 15;
+        _posY -= 15;
+
+        if (found == -1)
+        {
+            const pt = new pointsText(this, _posX, _posY, 'pointsHolder');
+            pt.setScoreText(_score);
+            pt.startHide();
+
+            this.pointTexts.push(pt);
+        }
+        else
+        {
+            const pt = this.pointTexts[found];
+            pt.setScoreText(_score);
+            pt.show();
+            pt.resetPosition(_posX, _posY);
+            pt.startHide();
+        }
+
     }
 
     initFruits()
@@ -144,7 +183,7 @@ class level extends Phaser.Scene
 
         for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
         {
-            const points = (i+1) * 50;
+            const points = (i+1) * 25 + 200;
             this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
             this.fruitsGroup.add(this.fruits[i]);
 
@@ -175,13 +214,31 @@ class level extends Phaser.Scene
         if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
 
         _fruit.disable();
-        this.addScore(_fruit.points);
+        this.addScore(_fruit.points, fruitPos.x, fruitPos.y);
         this.spawnFruitDelayed();
     }
 
     update()
     {
-        ////// nothing
+        this.setPlayerMoveAxis();
+    }
+
+    setPlayerMoveAxis()
+    {
+        this.setPlayerMoveAxisWithInputs();
+    }
+
+    setPlayerMoveAxisWithInputs()
+    {
+        var xAxis = 0;
+        if (this.cursorKeys.right.isDown) xAxis = 1;
+        else if (this.cursorKeys.left.isDown) xAxis = -1;
+
+        var yAxis = 0;
+        if (this.cursorKeys.down.isDown) yAxis = 1;
+        else if (this.cursorKeys.up.isDown) yAxis = -1;
+
+        this.player.setMoveAxis(new Phaser.Math.Vector2(xAxis, yAxis));
     }
 
     //// CREATE start
@@ -246,37 +303,39 @@ class level extends Phaser.Scene
             const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
             const pixPos = this.cell2pix(cellPos.x, cellPos.y);
 
-            switch (levelObjects[i].class)
-            {
-                case loadPrefs.POOKA_CLASS:
-                    this.spawnPooka(pixPos);
-                    break;
-
-                case loadPrefs.FYGAR_CLASS:
-                    this.spawnFygar(pixPos);
-                    break;
-
-                case loadPrefs.ROCK_CLASS:
-                    this.spawnRock(pixPos);
-                    break;
-
-                case loadPrefs.PLAYER_FIRST_SPAWN_ANIM_CLASS: // only for level 1
-                    this.playerFirstSpawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                case loadPrefs.PLAYER_RESPAWN_CLASS:
-                    this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                case loadPrefs.FRUIT_RESPAWN_CLASS:
-                    this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                    break;
-
-                default:
-                    break;
-            }
+            this.createObjectOfClass(levelObjects[i].class, pixPos);
         }        
     }
+
+    createObjectOfClass(objectClass, pixPos)
+    {
+        switch (objectClass)
+        {
+            case loadPrefs.POOKA_CLASS:
+                this.spawnPooka(pixPos);
+                break;
+
+            case loadPrefs.FYGAR_CLASS:
+                this.spawnFygar(pixPos);
+                break;
+
+            case loadPrefs.ROCK_CLASS:
+                this.spawnRock(pixPos);
+                break;
+
+            case loadPrefs.PLAYER_RESPAWN_CLASS:
+                this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            case loadPrefs.FRUIT_RESPAWN_CLASS:
+                this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            default:
+                break;
+        }
+    }
+
 
     setupDigging()
     {
@@ -302,8 +361,7 @@ class level extends Phaser.Scene
         this.cursorKeys = this.input.keyboard.createCursorKeys();
         this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
-        this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
-       
+        this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
     }
 
     initPlayerCollisions()

@@ -38,6 +38,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
+        this.moveAxis = new Phaser.Math.Vector2(0,0);
 
         this.squishedSideFrameI = 6;
         this.squishedTopFrameI = 7;
@@ -56,6 +57,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
         this.lives = _lives;
+        this.isHit = false;
         this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
@@ -138,6 +140,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     getMoveInputs()
     {
+        this.moveWithAxis();
+    }
+
+    setMoveAxis(_moveAxis)
+    {
+        this.moveAxis = _moveAxis;
+    }
+
+    moveWithCursorKeys()
+    {
         if (this.moveX != 0) this.lastMoveX = this.moveX;
         if (this.moveY != 0) this.lastMoveY = this.moveY;
 
@@ -152,6 +164,22 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
         if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
     }
+
+    moveWithAxis()
+    {
+        if (this.moveX != 0) this.lastMoveX = this.moveX;
+        if (this.moveY != 0) this.lastMoveY = this.moveY;
+
+        this.moveX = 0;
+        this.moveY = 0;
+
+        this.moveX += gamePrefs.PLAYER_MOVE_SPEED * this.moveAxis.x;
+
+        if (this.moveX != 0) return;
+
+        this.moveY += gamePrefs.PLAYER_MOVE_SPEED * this.moveAxis.y;
+    }
+
 
     move()
     {
@@ -380,6 +408,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;
+
+        this.isHit = true;
     }
 
     isDead()
@@ -389,6 +419,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkRespawn()
     {
+
+
         if (this.lives <0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
@@ -409,6 +441,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.rotation = 0;
         this.x = this.respawnPosition.x;
         this.y = this.respawnPosition.y;
+
+        this.isHit = false;
     }
 
     // == SQUISHED ==

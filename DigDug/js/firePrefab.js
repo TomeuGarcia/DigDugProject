@@ -89,7 +89,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hit(_fire, _player)
     {
-        if (_player.playerState == PlayerStates.DYING) return;
+        if (_player.isHit) return;
 
         // Kill player
         _player.die();

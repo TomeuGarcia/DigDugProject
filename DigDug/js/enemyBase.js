@@ -115,7 +115,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (_player == null) return;
         
-        if (_player.playerState == PlayerStates.DYING) return;
+        if (_player.isHit) return;
 
         if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
         {
@@ -138,6 +138,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doCurrentState()
     {
         switch (this.currentState) {
+            case EnemyStates.PAUSED:
+                this.anims.play(this.walkingSpriteTag, true);
+                break;
+            
             case EnemyStates.PATROL:
                 this.doPatrol();
                 break;
@@ -609,7 +613,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.cooldownGhostTimer != null) this.cooldownGhostTimer.remove(false);
 
         // Add points
-        this.scene.addScore(this.points);
+        this.scene.addScore(this.points, this.x, this.y);
 
         // Reset points value
         //this.points = 400;
@@ -627,15 +631,19 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.quitGhost();
         }
 
+        this.setPaused();
+
+        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+    }
+
+    setPaused()
+    {
         this.currentState = EnemyStates.PAUSED;
 
         this.x = this.respawnPosition.x;
         this.y = this.respawnPosition.y;
         this.body.setVelocityX(0);
         this.body.setVelocityY(0);
-
-
-        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
     }
 
     resetPatrol()

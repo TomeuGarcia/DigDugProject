@@ -30,7 +30,8 @@ var gamePrefs =
 var uiPrefs =
 {
     TEXT_COLOR_RED: 0xff3f2f,
-    TEXT_COLOR_WHITE: 0xffffff
+    TEXT_COLOR_WHITE: 0xffffff,
+    TEXT_COLOR_BLUE: 0x28ffff
 }
 
 var storagePrefs =
