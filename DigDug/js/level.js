@@ -68,6 +68,7 @@ class level extends Phaser.Scene
         this.load.audio('fygarFire', 'FygarFlame.mp3');
         this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
         this.load.audio('enemyMoving', 'MonsterMoving.mp3');
+        this.load.audio('enemySquashed', 'MonsterSquashed.mp3');
     }
 
     create()
@@ -520,9 +521,10 @@ class level extends Phaser.Scene
     loadAudios()
     {
         // Enemies
-        this.fygarFire = this.sound.add('fygarFire');
-        this.enemyBlowUp = this.sound.add('enemyBlowUp');
-        this.enemyMove = this.sound.add('enemyMoving'); // not doing it 'cause it sucks
+        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
+        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
     }
     //// CREATE end
 
