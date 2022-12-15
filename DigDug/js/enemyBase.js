@@ -575,7 +575,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
 
     killedByRock()
-    {
+    {   
+        // Stop audio
+        this.scene.fygarFire.stop();
+        
+        // Play audio
+        this.scene.enemySquashed.play();
+
         this.points *= 2;
         this.currentState = EnemyStates.DYING;
     }
