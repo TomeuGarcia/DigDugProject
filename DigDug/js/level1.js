@@ -3,15 +3,14 @@ class level1 extends level
     constructor()
     {
         super('level1');
-
-        this.playerMoveAxisFunction = this.setPlayerMoveAxisWithAnimation;
-
-        this.animMoveAxis = new Phaser.Math.Vector2(0, 0);
     }
    
 
     create()
     {
+        this.animMoveAxis = new Phaser.Math.Vector2(0, 0);
+        this.playerMoveAxisFunction = this.setPlayerMoveAxisWithAnimation;
+
         super.create();
         
         this.startAnim();
@@ -66,7 +65,7 @@ class level1 extends level
 
         this.time.delayedCall(500, this.finishAnimation, [], this);
     }
-
+ 
     finishAnimation()
     {
         this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
