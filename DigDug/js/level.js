@@ -13,7 +13,6 @@ class level extends Phaser.Scene
         console.log("Starting Level Nº ", levelInitData.levelNumber);
     }
 
-
     preload()
     {
         this.cameras.main.setBackgroundColor("#00A");
@@ -59,9 +58,13 @@ class level extends Phaser.Scene
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
 
         this.load.setPath('assets/tilesets/final/');
-        const levelFileJSON = 'level'+this.levelNumber+'.json';
-        this.load.tilemapTiledJSON('level_tilemap', levelFileJSON);
-        this.load.json('level_JSON', levelFileJSON);        
+        const levelFileJSON = 'level' + this.levelNumber + '.json';
+        this.tilemap_tag = 'level_' + this.levelNumber + '_tilemap';
+        this.json_tag = 'level_' + this.levelNumber + '_JSON';
+
+
+        this.load.tilemapTiledJSON(this.tilemap_tag, levelFileJSON);
+        this.load.json(this.json_tag, levelFileJSON);        
 
         // Audios
         this.load.setPath('assets/audios/');
@@ -224,6 +227,23 @@ class level extends Phaser.Scene
         this.setPlayerInputs();
     }
 
+    checkIfWon()
+    {
+        if (this.enemyCount <= 0)
+        {
+            if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
+            {
+                this.scene.start('menu');
+            }
+            else
+            {
+                const nextLevelNumber = this.levelNumber + 1;
+                console.log(nextLevelNumber);
+                this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
+            }
+        }
+    }
+
     setPlayerInputs()
     {
         this.setPlayerMoveAndHarpoonInputs();
@@ -250,7 +270,7 @@ class level extends Phaser.Scene
     {
         // Draw Level
         // Load the JSON
-        this.map = this.add.tilemap('level_tilemap');
+        this.map = this.add.tilemap(this.tilemap_tag);
         // Load tilesets
         this.map.addTilesetImage('digDugTileset');
         // Draw the layers
@@ -262,7 +282,7 @@ class level extends Phaser.Scene
         this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
         
-        const levelJSON = this.cache.json.get('level_JSON');
+        const levelJSON = this.cache.json.get(this.json_tag);
         const levelGroundLayer = levelJSON.layers[2];
         const levelBordersLayer = levelJSON.layers[0];
         this.levelWidth = levelGroundLayer.width;
@@ -299,8 +319,9 @@ class level extends Phaser.Scene
         this.rockCells = [];
         this.enemies = [];
         this.enemyGroup = this.add.group();
+        this.enemyCount = 0;
 
-        const levelJSON = this.cache.json.get('level_JSON');
+        const levelJSON = this.cache.json.get(this.json_tag);
         const levelObjects = levelJSON.layers[3].objects;
         for (var i = 0; i < levelObjects.length; ++i)
         {
