@@ -32,6 +32,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.allowGravity = false;
         this.setOrigin(.5);
 
+        _scene.enemyCount++;
+
         this.scene = _scene;
         this.spriteTag = _spriteTag;
         this.inflatedSpriteTag = _inflatedSpriteTag;
@@ -620,9 +622,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         // Add points
         this.scene.addScore(this.points, this.x, this.y);
-
-        // Reset points value
-        //this.points = 400;
+        
+        // Check if won
+        this.scene.enemyCount--;
+        this.scene.checkIfWon();
 
         // Remove from scene
         this.destroy();
