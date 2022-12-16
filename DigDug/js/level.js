@@ -224,6 +224,15 @@ class level extends Phaser.Scene
         this.setPlayerInputs();
     }
 
+    checkIfWon()
+    {
+        if (this.enemyCount <= 0)
+        {
+            const nextLevelNumber = this.levelNumber + 1;
+            this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
+        }
+    }
+
     setPlayerInputs()
     {
         this.setPlayerMoveAndHarpoonInputs();
@@ -299,6 +308,7 @@ class level extends Phaser.Scene
         this.rockCells = [];
         this.enemies = [];
         this.enemyGroup = this.add.group();
+        this.enemyCount = 0;
 
         const levelJSON = this.cache.json.get('level_JSON');
         const levelObjects = levelJSON.layers[3].objects;

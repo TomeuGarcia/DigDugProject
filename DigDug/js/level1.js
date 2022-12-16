@@ -30,7 +30,6 @@ class level1 extends level
         }
     }
 
-
     startAnim()
     {
         this.player.x = this.playerFirstSpawnPos.x;
