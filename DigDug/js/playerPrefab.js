@@ -30,6 +30,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         this.cursorKeys = _cursors;
+        this.harpoonKeyPressed = false;
         this.moveX = 0;
         this.moveY = 0;
         this.lastMoveX = 0;
@@ -125,12 +126,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this.digHere();
         }
 
-        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput && (this.harpoonH.canBeShoot() && this.harpoonV.canBeShoot()))
+        if (this.harpoonKeyPressed && !this.alreadyUsedHarpoonInput && (this.harpoonH.canBeShoot() && this.harpoonV.canBeShoot()))
         {
             this.shootHarpoon();
             this.alreadyUsedHarpoonInput = true;
         }
-        else if (this.cursorKeys.space.isUp)
+        else if (!this.harpoonKeyPressed)
         {
             this.alreadyUsedHarpoonInput = false;
         }
@@ -378,14 +379,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     updatePumpingState()
     {
-        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput)
+        if (this.harpoonKeyPressed && !this.alreadyUsedHarpoonInput)
         {
             this.targetedEnemy.addInflation();
             this.alreadyUsedHarpoonInput = true;
 
             this.anims.play('playerPumping', true);            
         }
-        else if (!this.cursorKeys.space.isDown && this.alreadyUsedHarpoonInput)
+        else if (!this.harpoonKeyPressed && this.alreadyUsedHarpoonInput)
         {
             this.alreadyUsedHarpoonInput = false;
         }

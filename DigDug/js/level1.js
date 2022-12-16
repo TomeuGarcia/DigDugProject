@@ -70,13 +70,13 @@ class level1 extends level
 
     finishAnimation()
     {
-        this.playerMoveAxisFunction = this.setPlayerMoveAxisWithInputs;
+        this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
 
         this.resumeEnemies();
     }
 
 
-    setPlayerMoveAxis() // override
+    setPlayerInputs() // override
     {
         this.playerMoveAxisFunction();
     }

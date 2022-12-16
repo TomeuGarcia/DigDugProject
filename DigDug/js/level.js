@@ -221,15 +221,15 @@ class level extends Phaser.Scene
 
     update()
     {
-        this.setPlayerMoveAxis();
+        this.setPlayerInputs();
     }
 
-    setPlayerMoveAxis()
+    setPlayerInputs()
     {
-        this.setPlayerMoveAxisWithInputs();
+        this.setPlayerMoveAndHarpoonInputs();
     }
 
-    setPlayerMoveAxisWithInputs()
+    setPlayerMoveAndHarpoonInputs()
     {
         var xAxis = 0;
         if (this.cursorKeys.right.isDown) xAxis = 1;
@@ -240,6 +240,9 @@ class level extends Phaser.Scene
         else if (this.cursorKeys.up.isDown) yAxis = -1;
 
         this.player.setMoveAxis(new Phaser.Math.Vector2(xAxis, yAxis));
+
+        if (this.cursorKeys.space.isDown) this.player.harpoonKeyPressed = true;
+        else if (this.cursorKeys.space.isUp) this.player.harpoonKeyPressed = false;        
     }
 
     //// CREATE start
