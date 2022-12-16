@@ -41,8 +41,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.lastPlayerMovement = PlayerMovement.NONE;
         this.moveAxis = new Phaser.Math.Vector2(0,0);
 
-        this.squishedSideFrameI = 6;
-        this.squishedTopFrameI = 7;
+        this.squishedTopFrameI = 6;
+        this.squishedSideFrameI = 7;
         this.hasHitGroundWhileSquished = false;
 
         this.score = 0;
@@ -357,20 +357,26 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     onHarpoonLifetimeEnd()
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.MOVING;
         this.anims.play('playerRun', true);
     }
 
     onHarpoonHitEnemy(_enemy)
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.PUMPING;
         this.targetedEnemy = _enemy;
         this.alreadyUsedHarpoonInput = false;
-        this.anims.play('playerPumping', true);  
+        this.anims.play('playerPumping', true);             
     }
 
     quitPumpingToMoving()
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.MOVING;
         this.harpoonH.hide();
         this.harpoonV.hide();
@@ -409,6 +415,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;
+
+        if (this.harpoonH.isBeingShot)
+        {
+            this.harpoonH.hide();
+        }
+        if (this.harpoonV.isBeingShot)
+        {
+            this.harpoonV.hide();
+        }
+
 
         this.isHit = true;
     }
@@ -456,8 +472,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         
         this.anims.stop();
 
-        if (this.rotation > 0.01) this.setTexture(this.spriteTag, this.squishedTopFrameI);
-        else this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        if (this.playerMovement == PlayerMovement.DOWN || this.playerMovement == PlayerMovement.UP) 
+        {
+            this.setTexture(this.spriteTag, this.squishedTopFrameI);
+        }
+        else 
+        {
+            this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        }
         this.rotation = 0;
 
         this.body.setVelocityX(0);

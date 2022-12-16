@@ -680,6 +680,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(-1, 0)) > dirThreshold) this.moveDirection = MoveDirection.LEFT;
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, -1)) > dirThreshold) this.moveDirection = MoveDirection.UP;
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, 1)) > dirThreshold) this.moveDirection = MoveDirection.DOWN;
+        else this.moveDirection = MoveDirection.RIGHT;
     }
 
     setVelocityMatchMoveDirection()
@@ -691,6 +692,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
         else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
         else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
+        else this.directionX = 1;
 
         this.body.setVelocityX(this.moveSpeed * this.directionX);
         this.body.setVelocityY(this.moveSpeed * this.directionY);

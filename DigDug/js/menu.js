@@ -101,7 +101,6 @@ class menu extends Phaser.Scene
 
 	startGame()
 	{
-		console.log("START GAME");
 		this.changeScene();
 	}
 
