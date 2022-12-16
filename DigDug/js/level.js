@@ -231,16 +231,20 @@ class level extends Phaser.Scene
     {
         if (this.enemyCount <= 0)
         {
-            if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
-            {
-                this.scene.start('menu');
-            }
-            else
-            {
-                const nextLevelNumber = this.levelNumber + 1;
-                console.log(nextLevelNumber);
-                this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
-            }
+            this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
+        }
+    }
+
+    loadNextScene()
+    {
+        if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
+        {
+            this.scene.start('menu');
+        }
+        else
+        {
+            const nextLevelNumber = this.levelNumber + 1;
+            this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
         }
     }
 
@@ -361,7 +365,6 @@ class level extends Phaser.Scene
         }
     }
 
-
     setupDigging()
     {
         shapeMask = this.make.graphics();
@@ -397,6 +400,7 @@ class level extends Phaser.Scene
             this.enemyGroup.add(this.enemies[i]);
         }
     }
+
     removeRockCollisions(_rock)
     {
         const index = this.rockCells.indexOf(_rock.spawnCell);
@@ -438,7 +442,6 @@ class level extends Phaser.Scene
     {
         this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
     }
-
 
     loadAnimations()
     {
