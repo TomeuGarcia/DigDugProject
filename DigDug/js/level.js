@@ -10,7 +10,6 @@ class level extends Phaser.Scene
     init(levelInitData)
     {
         this.levelNumber = levelInitData.levelNumber;
-        console.log("Starting Level Nº ", levelInitData.levelNumber);
     }
 
     preload()
@@ -76,6 +75,7 @@ class level extends Phaser.Scene
 
     create()
     {
+
         this.loadLevel();
         this.setupDigging();
        
@@ -111,6 +111,22 @@ class level extends Phaser.Scene
             null,
             this
         );
+
+        this.startAnim();
+    }
+
+    startAnim()
+    {
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+
+        this.pauseEnemies();
+
+        this.time.delayedCall(1500, this.finishAnimation, [], this);        
+    }
+    finishAnimation()
+    {
+        this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
+        this.resumeEnemies();
     }
 
     initScore()
@@ -238,7 +254,6 @@ class level extends Phaser.Scene
             else
             {
                 const nextLevelNumber = this.levelNumber + 1;
-                console.log(nextLevelNumber);
                 this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
             }
         }
@@ -246,7 +261,11 @@ class level extends Phaser.Scene
 
     setPlayerInputs()
     {
-        this.setPlayerMoveAndHarpoonInputs();
+        this.playerMoveAxisFunction();
+    }
+
+    setPlayerAnimationInputs()
+    {
     }
 
     setPlayerMoveAndHarpoonInputs()
@@ -728,6 +747,22 @@ class level extends Phaser.Scene
 
     backToMenu(){
         this.scene.start('menu');
+    }
+
+    pauseEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].setPaused();
+        }
+    }
+
+    resumeEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].resetPatrol();
+        }
     }
 
 }

@@ -167,7 +167,6 @@ class firePrefab extends Phaser.GameObjects.Sprite
             ++this.fireSequenceIndex;
         
             // Play audio
-            console.log("FIRE");
             this.scene.fygarFire.play();
         }
     }

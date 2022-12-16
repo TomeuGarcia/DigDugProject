@@ -9,13 +9,10 @@ class level1 extends level
     create()
     {
         this.animMoveAxis = new Phaser.Math.Vector2(0, 0);
-        this.playerMoveAxisFunction = this.setPlayerMoveAxisWithAnimation;
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
 
         super.create();
-        
-        this.startAnim();
-
-        this.pauseEnemies();
+                
     }
 
 
@@ -29,8 +26,10 @@ class level1 extends level
         }
     }
 
-    startAnim()
+    startAnim() // override
     {
+        this.pauseEnemies();
+
         this.player.x = this.playerFirstSpawnPos.x;
         this.player.y = this.playerFirstSpawnPos.y;
         this.player.flipX = true;
@@ -66,10 +65,9 @@ class level1 extends level
         this.time.delayedCall(500, this.finishAnimation, [], this);
     }
  
-    finishAnimation()
+    finishAnimation() // override
     {
         this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
-
         this.resumeEnemies();
     }
 
@@ -79,26 +77,9 @@ class level1 extends level
         this.playerMoveAxisFunction();
     }
 
-    setPlayerMoveAxisWithAnimation()
+    setPlayerAnimationInputs() // override
     {
         this.player.setMoveAxis(this.animMoveAxis);
-    }
-
-
-    pauseEnemies()
-    {
-        for (var i = 0; i < this.enemies.length; ++i)
-        {
-            this.enemies[i].setPaused();
-        }
-    }
-
-    resumeEnemies()
-    {
-        for (var i = 0; i < this.enemies.length; ++i)
-        {
-            this.enemies[i].resetPatrol();
-        }
     }
 
 
