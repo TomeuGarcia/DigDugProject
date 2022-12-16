@@ -68,6 +68,8 @@ class level extends Phaser.Scene
 
         // Audios
         this.load.setPath('assets/audios/');
+        this.load.audio('stageClear', 'StageClear.mp3');
+        // enemies
         this.load.audio('fygarFire', 'FygarFlame.mp3');
         this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
         this.load.audio('enemyMoving', 'MonsterMoving.mp3');
@@ -231,6 +233,7 @@ class level extends Phaser.Scene
     {
         if (this.enemyCount <= 0)
         {
+            this.stageClear.play();
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
         }
     }
@@ -547,6 +550,7 @@ class level extends Phaser.Scene
 
     loadAudios()
     {
+        this.stageClear = this.sound.add('stageClear', {volume: .5});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: .5});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
