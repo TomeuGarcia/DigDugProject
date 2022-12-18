@@ -58,17 +58,6 @@ class loadingScene extends Phaser.Scene
         // Tilemap
         this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
 
-        // == MOVE ==
-        this.load.setPath('assets/tilesets/final/');
-        const levelFileJSON = 'level' + this.levelNumber + '.json';
-        this.tilemap_tag = 'level_' + this.levelNumber + '_tilemap';
-        this.json_tag = 'level_' + this.levelNumber + '_JSON';
-
-
-        this.load.tilemapTiledJSON(this.tilemap_tag, levelFileJSON);
-        this.load.json(this.json_tag, levelFileJSON);        
-        // == MOVE ==
-
         // Audios
         this.load.setPath('assets/audios/');
         this.load.audio('stageClear', 'StageClear.mp3');
@@ -88,7 +77,7 @@ class loadingScene extends Phaser.Scene
     create()
     {
         this.loadAnimations();
-        this.loadAudios();
+        //this.loadAudios();
 
         this.time.delayedCall(100, this.changeScene, [], this);
     }
@@ -177,6 +166,7 @@ class loadingScene extends Phaser.Scene
             frameRate: 2,
             repeat: 0
         });
+
         //ROCK
         this.anims.create
         ({
@@ -185,6 +175,7 @@ class loadingScene extends Phaser.Scene
             frameRate: 2,
             repeat: 1
         });
+
         this.anims.create
         ({
             key: 'rockDestroy',
@@ -193,16 +184,6 @@ class loadingScene extends Phaser.Scene
             repeat:0
 
         });
-    }
-
-    loadAudios()
-    {
-        this.stageClear = this.sound.add('stageClear', {volume: .5});
-        // Enemies
-        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
-        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
-        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
     }
 
     changeScene()

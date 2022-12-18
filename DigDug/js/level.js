@@ -15,6 +15,15 @@ class level extends Phaser.Scene
     preload()
     {
         this.cameras.main.setBackgroundColor("#00A");
+
+        this.load.setPath('assets/tilesets/final/');
+        const levelFileJSON = 'level' + this.levelNumber + '.json';
+        this.tilemap_tag = 'level_' + this.levelNumber + '_tilemap';
+        this.json_tag = 'level_' + this.levelNumber + '_JSON';
+
+
+        this.load.tilemapTiledJSON(this.tilemap_tag, levelFileJSON);
+        this.load.json(this.json_tag, levelFileJSON);   
     }
 
     create()
@@ -30,7 +39,7 @@ class level extends Phaser.Scene
         this.initScore();
         this.initFruits();
 
-        this.loadAnimations();
+        //this.loadAnimations();
         this.loadAudios();
 
         //this.player.body.collideWorldBounds = true;
@@ -57,6 +66,16 @@ class level extends Phaser.Scene
         );
 
         this.startAnim();
+    }
+
+    loadAudios()
+    {
+        this.stageClear = this.sound.add('stageClear', {volume: .5});
+        // Enemies
+        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
+        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
     }
 
     startAnim()
