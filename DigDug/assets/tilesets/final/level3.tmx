@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.8" tiledversion="1.8.5" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="12">
  <editorsettings>
-  <export target="level2.json" format="json"/>
+  <export target="level3.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="digDugTileset.tsx"/>
  <layer id="1" name="layer_borders" width="20" height="18">
