@@ -140,8 +140,8 @@
                  "rotation":0,
                  "visible":true,
                  "width":0,
-                 "x":39.5715,
-                 "y":106.642
+                 "x":71.429907079646,
+                 "y":205.906089427108
                 }, 
                 {
                  "class":"pooka",
@@ -190,6 +190,30 @@
                  "width":0,
                  "x":200.205,
                  "y":42.2543
+                }, 
+                {
+                 "class":"pooka",
+                 "height":0,
+                 "id":13,
+                 "name":"pooka2",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":38.2300884955752,
+                 "y":105.635770843037
+                }, 
+                {
+                 "class":"pooka",
+                 "height":0,
+                 "id":14,
+                 "name":"pooka3",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":168.011178388449,
+                 "y":233.740102468561
                 }],
          "opacity":1,
          "tintcolor":"#000000",
@@ -199,7 +223,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":13,
+ "nextobjectid":15,
  "orientation":"orthogonal",
  "renderorder":"left-up",
  "tiledversion":"1.9.2",
