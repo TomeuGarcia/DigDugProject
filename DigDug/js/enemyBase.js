@@ -32,6 +32,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
         this.body.allowGravity = false;
         this.setOrigin(.5);
 
+        _scene.enemyCount++;
+
         this.scene = _scene;
         this.spriteTag = _spriteTag;
         this.inflatedSpriteTag = _inflatedSpriteTag;
@@ -115,7 +117,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         if (_player == null) return;
         
-        if (_player.playerState == PlayerStates.DYING) return;
+        if (_player.isHit) return;
 
         if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
         {
@@ -138,6 +140,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
     doCurrentState()
     {
         switch (this.currentState) {
+            case EnemyStates.PAUSED:
+                this.anims.play(this.walkingSpriteTag, true);
+                break;
+            
             case EnemyStates.PATROL:
                 this.doPatrol();
                 break;
@@ -168,13 +174,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
     {
         this.anims.play(this.walkingSpriteTag, true);
         this.setFlip();
-
-        /*
-        this.computeDesiredMove();
-        var rand = Phaser.Math.Between(1, 4);
-        if (rand <= 2) this.trySwitchToGhost();
-        return;
-        */
 
         if (this.body.blocked.right || this.body.blocked.left)
         {
@@ -402,9 +401,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
             (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
         {            
             this.quitGhost();
-        }
-
-        
+        }        
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
@@ -469,6 +466,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         {
             this.deflateTimer.remove();
             this.setTexture(this.inflatedSpriteTag, 3);
+
+            // Play audio
+            this.scene.enemyBlowUp.play();
 
             // Die
             this.currentState = EnemyStates.DYING;
@@ -577,7 +577,13 @@ class enemyBase extends Phaser.GameObjects.Sprite
     }
 
     killedByRock()
-    {
+    {   
+        // Stop audio
+        this.scene.fygarFire.stop();
+        
+        // Play audio
+        this.scene.enemySquashed.play();
+
         this.points *= 2;
         this.currentState = EnemyStates.DYING;
     }
@@ -615,10 +621,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         if (this.cooldownGhostTimer != null) this.cooldownGhostTimer.remove(false);
 
         // Add points
-        this.scene.addScore(this.points);
-
-        // Reset points value
-        //this.points = 400;
+        this.scene.addScore(this.points, this.x, this.y);
+        
+        // Check if won
+        this.scene.enemyCount--;
+        this.scene.checkIfWon();
 
         // Remove from scene
         this.destroy();
@@ -633,15 +640,19 @@ class enemyBase extends Phaser.GameObjects.Sprite
             this.quitGhost();
         }
 
+        this.setPaused();
+
+        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+    }
+
+    setPaused()
+    {
         this.currentState = EnemyStates.PAUSED;
 
         this.x = this.respawnPosition.x;
         this.y = this.respawnPosition.y;
         this.body.setVelocityX(0);
         this.body.setVelocityY(0);
-
-
-        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
     }
 
     resetPatrol()
@@ -669,6 +680,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(-1, 0)) > dirThreshold) this.moveDirection = MoveDirection.LEFT;
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, -1)) > dirThreshold) this.moveDirection = MoveDirection.UP;
         else if (enemyToPlayer.dot(new Phaser.Math.Vector2(0, 1)) > dirThreshold) this.moveDirection = MoveDirection.DOWN;
+        else this.moveDirection = MoveDirection.RIGHT;
     }
 
     setVelocityMatchMoveDirection()
@@ -680,6 +692,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         else if (this.moveDirection == MoveDirection.LEFT) this.directionX = -1;
         else if (this.moveDirection == MoveDirection.UP) this.directionY = -1;
         else if (this.moveDirection == MoveDirection.DOWN) this.directionY = 1;
+        else this.directionX = 1;
 
         this.body.setVelocityX(this.moveSpeed * this.directionX);
         this.body.setVelocityY(this.moveSpeed * this.directionY);

@@ -89,7 +89,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     hit(_fire, _player)
     {
-        if (_player.playerState == PlayerStates.DYING) return;
+        if (_player.isHit) return;
 
         // Kill player
         _player.die();
@@ -165,6 +165,9 @@ class firePrefab extends Phaser.GameObjects.Sprite
             this.scene.time.delayedCall(gamePrefs.FIRE_PROGRESS_TIME_MILLISECONDS, this.incrementFire, [], this);
 
             ++this.fireSequenceIndex;
+        
+            // Play audio
+            this.scene.fygarFire.play();
         }
     }
 

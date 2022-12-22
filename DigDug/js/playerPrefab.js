@@ -30,6 +30,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         this.cursorKeys = _cursors;
+        this.harpoonKeyPressed = false;
         this.moveX = 0;
         this.moveY = 0;
         this.lastMoveX = 0;
@@ -38,9 +39,10 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.playerMovement = PlayerMovement.RIGHT;
         this.lastPlayerMovement = PlayerMovement.NONE;
+        this.moveAxis = new Phaser.Math.Vector2(0,0);
 
-        this.squishedSideFrameI = 6;
-        this.squishedTopFrameI = 7;
+        this.squishedTopFrameI = 6;
+        this.squishedSideFrameI = 7;
         this.hasHitGroundWhileSquished = false;
 
         this.score = 0;
@@ -56,6 +58,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         this.targetedEnemy = null;
         this.lives = _lives;
+        this.isHit = false;
         this.respawnPosition = _respawnPosition;
 
         this.respawnTimer = this.scene.time.addEvent({
@@ -123,12 +126,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this.digHere();
         }
 
-        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput && (this.harpoonH.canBeShoot() && this.harpoonV.canBeShoot()))
+        if (this.harpoonKeyPressed && !this.alreadyUsedHarpoonInput && (this.harpoonH.canBeShoot() && this.harpoonV.canBeShoot()))
         {
             this.shootHarpoon();
             this.alreadyUsedHarpoonInput = true;
         }
-        else if (this.cursorKeys.space.isUp)
+        else if (!this.harpoonKeyPressed)
         {
             this.alreadyUsedHarpoonInput = false;
         }
@@ -137,6 +140,16 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
 
     getMoveInputs()
+    {
+        this.moveWithAxis();
+    }
+
+    setMoveAxis(_moveAxis)
+    {
+        this.moveAxis = _moveAxis;
+    }
+
+    moveWithCursorKeys()
     {
         if (this.moveX != 0) this.lastMoveX = this.moveX;
         if (this.moveY != 0) this.lastMoveY = this.moveY;
@@ -152,6 +165,22 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         if (this.cursorKeys.up.isDown) this.moveY -= gamePrefs.PLAYER_MOVE_SPEED;
         if (this.cursorKeys.down.isDown) this.moveY += gamePrefs.PLAYER_MOVE_SPEED;
     }
+
+    moveWithAxis()
+    {
+        if (this.moveX != 0) this.lastMoveX = this.moveX;
+        if (this.moveY != 0) this.lastMoveY = this.moveY;
+
+        this.moveX = 0;
+        this.moveY = 0;
+
+        this.moveX += gamePrefs.PLAYER_MOVE_SPEED * this.moveAxis.x;
+
+        if (this.moveX != 0) return;
+
+        this.moveY += gamePrefs.PLAYER_MOVE_SPEED * this.moveAxis.y;
+    }
+
 
     move()
     {
@@ -328,20 +357,26 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     onHarpoonLifetimeEnd()
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.MOVING;
         this.anims.play('playerRun', true);
     }
 
     onHarpoonHitEnemy(_enemy)
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.PUMPING;
         this.targetedEnemy = _enemy;
         this.alreadyUsedHarpoonInput = false;
-        this.anims.play('playerPumping', true);  
+        this.anims.play('playerPumping', true);             
     }
 
     quitPumpingToMoving()
     {
+        if (this.playerState == PlayerStates.DYING) return;
+
         this.playerState = PlayerStates.MOVING;
         this.harpoonH.hide();
         this.harpoonV.hide();
@@ -350,14 +385,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     updatePumpingState()
     {
-        if (this.cursorKeys.space.isDown && !this.alreadyUsedHarpoonInput)
+        if (this.harpoonKeyPressed && !this.alreadyUsedHarpoonInput)
         {
             this.targetedEnemy.addInflation();
             this.alreadyUsedHarpoonInput = true;
 
             this.anims.play('playerPumping', true);            
         }
-        else if (!this.cursorKeys.space.isDown && this.alreadyUsedHarpoonInput)
+        else if (!this.harpoonKeyPressed && this.alreadyUsedHarpoonInput)
         {
             this.alreadyUsedHarpoonInput = false;
         }
@@ -380,6 +415,18 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;
+
+        if (this.harpoonH.isBeingShot)
+        {
+            this.harpoonH.hide();
+        }
+        if (this.harpoonV.isBeingShot)
+        {
+            this.harpoonV.hide();
+        }
+
+
+        this.isHit = true;
     }
 
     isDead()
@@ -389,6 +436,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkRespawn()
     {
+
+
         if (this.lives <0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
@@ -409,6 +458,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.rotation = 0;
         this.x = this.respawnPosition.x;
         this.y = this.respawnPosition.y;
+
+        this.isHit = false;
     }
 
     // == SQUISHED ==
@@ -421,8 +472,14 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         
         this.anims.stop();
 
-        if (this.rotation > 0.01) this.setTexture(this.spriteTag, this.squishedTopFrameI);
-        else this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        if (this.playerMovement == PlayerMovement.DOWN || this.playerMovement == PlayerMovement.UP) 
+        {
+            this.setTexture(this.spriteTag, this.squishedTopFrameI);
+        }
+        else 
+        {
+            this.setTexture(this.spriteTag, this.squishedSideFrameI);
+        }
         this.rotation = 0;
 
         this.body.setVelocityX(0);
