@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="13">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="15">
  <editorsettings>
   <export target="level1.json" format="json"/>
  </editorsettings>
@@ -80,7 +80,7 @@
   <object id="5" name="rock3" class="rock" x="70.7592" y="235.752">
    <point/>
   </object>
-  <object id="8" name="fygar1" class="fygar" x="39.5715" y="106.642">
+  <object id="8" name="fygar1" class="fygar" x="71.4299" y="205.906">
    <point/>
   </object>
   <object id="9" name="pooka1" class="pooka" x="199.87" y="91.551">
@@ -93,6 +93,12 @@
    <point/>
   </object>
   <object id="12" name="playerFirstSpawnAnim1" class="playerFirstSpawnAnim" x="200.205" y="42.2543">
+   <point/>
+  </object>
+  <object id="13" name="pooka2" class="pooka" x="38.2301" y="105.636">
+   <point/>
+  </object>
+  <object id="14" name="pooka3" class="pooka" x="168.011" y="233.74">
    <point/>
   </object>
  </objectgroup>

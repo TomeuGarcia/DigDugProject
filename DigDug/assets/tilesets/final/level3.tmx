@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.8" tiledversion="1.8.5" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="12">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="12">
  <editorsettings>
-  <export target="level2.json" format="json"/>
+  <export target="level3.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="digDugTileset.tsx"/>
  <layer id="1" name="layer_borders" width="20" height="18">
@@ -57,51 +57,51 @@
 0,2,2,2,2,2,2,0,2,0,2,0,0,0,2,0,0,0,0,0,
 0,2,2,2,2,2,2,0,2,0,2,2,2,2,2,0,0,0,0,0,
 0,2,2,2,2,2,2,0,2,0,2,2,2,2,2,0,0,0,0,0,
-0,13,0,0,0,13,14,0,14,0,15,15,15,15,15,0,0,0,0,0,
-0,16,16,16,16,16,16,0,16,16,16,16,16,16,16,0,0,0,0,0,
+0,2,0,0,0,2,2,0,2,0,2,2,2,2,2,0,0,0,0,0,
+0,13,13,13,13,14,14,0,14,14,15,15,15,15,15,0,0,0,0,0,
 0,16,16,16,16,16,16,0,16,16,16,16,16,16,16,0,0,0,0,0,
 0,16,16,16,16,16,0,0,0,16,16,16,16,16,16,0,0,0,0,0,
-0,25,25,25,25,25,26,26,26,26,27,27,27,27,27,0,0,0,0,0,
+0,25,25,25,25,25,26,26,26,26,26,27,27,27,27,0,0,0,0,0,
 0,28,28,28,28,28,28,28,28,28,28,28,28,28,28,0,0,0,0,0,
 0,28,28,28,28,28,0,28,28,28,28,28,28,28,28,0,0,0,0,0,
-0,37,37,37,37,37,0,38,38,38,39,39,39,39,39,0,0,0,0,0,
+0,37,37,37,37,37,0,38,38,38,38,39,39,39,39,0,0,0,0,0,
 0,40,40,40,40,40,0,40,40,0,0,0,40,40,40,0,0,0,0,0,
 0,40,40,40,40,40,40,40,40,40,40,40,40,40,40,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
  <objectgroup id="4" name="layer_objects">
-  <object id="1" name="fygar1" x="183.68" y="75.3147">
+  <object id="1" name="playerRespawn1" class="playerRespawn" x="119.721" y="173.041">
    <point/>
   </object>
-  <object id="2" name="pooka1" x="72.7632" y="124.941">
+  <object id="2" name="rock1" class="rock" x="55.6684" y="90.8803">
    <point/>
   </object>
-  <object id="3" name="pooka2" x="104.238" y="217.465">
+  <object id="3" name="pooka1" class="pooka" x="72.1006" y="122.739">
    <point/>
   </object>
-  <object id="4" name="pooka3" x="152.385" y="77.223">
+  <object id="4" name="pooka2" class="pooka" x="151.579" y="74.7834">
    <point/>
   </object>
-  <object id="5" name="fygar2" x="151.769" y="251.742">
+  <object id="5" name="fygar1" class="fygar" x="183.437" y="73.7774">
    <point/>
   </object>
-  <object id="6" name="rock1" x="55.6684" y="90.8803">
+  <object id="6" name="rock2" class="rock" x="199.87" y="137.494">
    <point/>
   </object>
-  <object id="7" name="rock2" x="87.7673" y="216.655">
+  <object id="7" name="rock4" class="rock" x="199.87" y="232.399">
    <point/>
   </object>
-  <object id="8" name="rock3" x="200.246" y="138.98">
+  <object id="8" name="fygar2" class="fygar" x="150.573" y="250.843">
    <point/>
   </object>
-  <object id="9" name="rock4" x="199.97" y="235.459">
+  <object id="9" name="rock3" class="rock" x="89.2035" y="218.649">
    <point/>
   </object>
-  <object id="10" name="playerRespawn1" x="119.721" y="170.694">
+  <object id="10" name="pooka3" class="pooka" x="103.288" y="219.991">
    <point/>
   </object>
-  <object id="11" name="fruitRespawn1" x="119.385" y="172.706">
+  <object id="11" name="fruitRespawn1" class="fruitRespawn" x="117.038" y="173.041">
    <point/>
   </object>
  </objectgroup>
