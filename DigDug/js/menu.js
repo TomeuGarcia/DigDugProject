@@ -96,7 +96,7 @@ class menu extends Phaser.Scene
 
 	changeScene()
 	{
-		const levelNumber = 3;
+		const levelNumber = gamePrefs.FIRST_LEVEL_NUMBER;
 
 		this.scene.start('level'+levelNumber, {levelNumber: levelNumber});
 	}

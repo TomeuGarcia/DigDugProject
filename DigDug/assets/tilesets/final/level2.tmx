@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="12">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="left-up" width="20" height="18" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="15">
  <editorsettings>
-  <export target="level2.json" format="json"/>
+  <export target="level1.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="digDugTileset.tsx"/>
- <layer id="1" name="layer_borders" width="20" height="18">
+ <layer id="2" name="layer_borders" width="20" height="18">
   <data encoding="csv">
 49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,
 49,3,3,3,3,3,3,3,3,3,3,3,3,3,3,49,49,49,49,49,
@@ -26,11 +26,11 @@
 49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49
 </data>
  </layer>
- <layer id="2" name="layer_surface" width="20" height="18">
+ <layer id="3" name="layer_surface" width="20" height="18">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,
+0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -48,60 +48,57 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer id="3" name="layer_ground" width="20" height="18">
+ <layer id="1" name="layer_ground" width="20" height="18">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,2,2,2,2,2,2,0,2,2,2,2,2,2,2,0,0,0,0,0,
-0,2,2,2,2,2,2,0,2,2,2,2,2,2,2,0,0,0,0,0,
-0,2,2,2,2,2,2,0,2,2,2,2,2,2,2,0,0,0,0,0,
-0,2,2,2,2,2,2,0,2,2,0,0,0,0,2,0,0,0,0,0,
-0,13,13,13,13,13,14,0,14,14,15,15,15,15,15,0,0,0,0,0,
-0,16,16,16,16,16,16,0,16,16,16,16,16,16,16,0,0,0,0,0,
-0,16,0,0,0,16,16,0,16,16,16,16,16,16,16,0,0,0,0,0,
+0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,
+0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,
+0,2,0,2,2,2,2,2,2,2,0,0,0,0,2,0,0,0,0,0,
+0,2,0,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,
+0,13,0,13,13,13,14,14,14,14,14,15,15,15,15,0,0,0,0,0,
+0,16,0,16,16,16,16,16,16,16,16,16,16,16,16,0,0,0,0,0,
+0,16,0,16,16,16,16,16,16,16,16,16,16,16,16,0,0,0,0,0,
 0,16,16,16,16,16,0,0,0,16,16,16,16,16,16,0,0,0,0,0,
-0,25,0,25,25,25,26,26,26,26,27,27,27,27,27,0,0,0,0,0,
-0,28,0,28,28,28,28,0,0,0,0,28,28,28,28,0,0,0,0,0,
-0,28,0,28,28,28,28,28,28,28,28,28,28,28,28,0,0,0,0,0,
-0,37,37,37,37,37,38,38,38,38,39,0,0,0,39,0,0,0,0,0,
-0,40,40,40,40,40,40,40,40,40,40,40,40,40,40,0,0,0,0,0,
+0,25,25,25,25,26,26,26,26,26,27,27,27,27,27,0,0,0,0,0,
+0,28,28,0,0,0,0,28,28,28,0,28,28,28,28,0,0,0,0,0,
+0,28,28,28,28,28,28,28,28,28,0,28,28,28,28,0,0,0,0,0,
+0,37,37,37,37,37,38,38,38,38,0,39,39,39,39,0,0,0,0,0,
+0,40,40,40,40,40,40,40,40,40,0,40,40,40,40,0,0,0,0,0,
 0,40,40,40,40,40,40,40,40,40,40,40,40,40,40,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="4" name="layer_objects">
-  <object id="1" name="fygar1" class="fygar" x="168.347" y="107.648">
+ <objectgroup id="4" name="layer_objects" class="rock" tintcolor="#000000">
+  <object id="3" name="rock2" class="rock" x="183.773" y="219.32">
    <point/>
   </object>
-  <object id="2" name="pooka1" class="pooka" x="71.4299" y="156.274">
+  <object id="4" name="rock1" class="rock" x="71.7653" y="106.642">
    <point/>
   </object>
-  <object id="3" name="pooka2" class="pooka" x="39.5715" y="188.132">
+  <object id="5" name="rock3" class="rock" x="70.7592" y="235.752">
    <point/>
   </object>
-  <object id="4" name="pooka3" class="pooka" x="119.385" y="203.223">
+  <object id="8" name="fygar1" class="fygar" x="71.4299" y="205.906">
    <point/>
   </object>
-  <object id="5" name="fygar2" class="fygar" x="183.102" y="234.075">
+  <object id="9" name="pooka1" class="pooka" x="199.87" y="91.551">
    <point/>
   </object>
-  <object id="6" name="rock1" class="rock" x="55.6684" y="90.8803">
+  <object id="10" name="playerRespawn1" class="playerRespawn" x="117.038" y="168.347">
    <point/>
   </object>
-  <object id="7" name="rock2" class="rock" x="72.1006" y="219.655">
+  <object id="11" name="fruitRespawn1" class="fruitRespawn" x="122.068" y="172.706">
    <point/>
   </object>
-  <object id="8" name="rock3" class="rock" x="151.579" y="107.313">
+  <object id="12" name="playerFirstSpawnAnim1" class="playerFirstSpawnAnim" x="200.205" y="42.2543">
    <point/>
   </object>
-  <object id="9" name="rock4" class="rock" x="216.637" y="187.126">
+  <object id="13" name="pooka2" class="pooka" x="38.2301" y="105.636">
    <point/>
   </object>
-  <object id="10" name="playerRespawn1" class="playerRespawn" x="119.721" y="170.694">
-   <point/>
-  </object>
-  <object id="11" name="fruitRespawn1" class="fruitRespawn" x="119.385" y="172.706">
+  <object id="14" name="pooka3" class="pooka" x="168.011" y="233.74">
    <point/>
   </object>
  </objectgroup>
