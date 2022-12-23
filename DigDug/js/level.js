@@ -10,6 +10,9 @@ class level extends Phaser.Scene
     init(levelInitData)
     {
         this.levelNumber = levelInitData.levelNumber;
+        this.playerLivesCount = levelInitData.playerLivesCount;
+        this.playerScoreCount = levelInitData.playerScoreCount;
+        console.log(this.playerScoreCount);
     }
 
     preload()
@@ -108,7 +111,7 @@ class level extends Phaser.Scene
         this.firstPlayerScore = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE * 2, gamePrefs.CELL_SIZE * 5, 'gameFont', '1UP:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(1, 0);
 
-        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', '0', 8)
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', this.playerScoreCount, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
@@ -224,7 +227,8 @@ class level extends Phaser.Scene
         else
         {
             const nextLevelNumber = this.levelNumber + 1;
-            this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
+            this.scene.start('level' + nextLevelNumber, 
+                            {levelNumber: nextLevelNumber, playerLivesCount: this.player.lives, playerScoreCount: this.player.score});
         }
     }
 
@@ -371,7 +375,10 @@ class level extends Phaser.Scene
     initPlayer()
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', 
+                                       this.cursorKeys, this.playerRespawnPos, this.playerLivesCount);
+        this.player.score = this.playerScoreCount;
+
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
     }
