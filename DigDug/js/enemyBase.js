@@ -76,11 +76,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
             _scene.borders
         );
 
-        this.groundCollider = _scene.physics.add.collider
-        (
-            this,
-            _scene.digGround
-        );
+
+        this.resetColliders();    
 
         this.startGhostCooldownTimer();
     }
@@ -375,8 +372,9 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Play ghost animation
         this.anims.play(this.ghostSpriteTag, true);
 
-        // Reomve collisions
+        // Remove collisions
         this.scene.physics.world.removeCollider(this.groundCollider);
+        this.groundCollider = null;
 
         // UnGhost timer        
         this.unGhostTimer = this.scene.time.addEvent({
@@ -397,11 +395,26 @@ class enemyBase extends Phaser.GameObjects.Sprite
         }
 
         // Check if it leaves an area with collisions
-        if (this.isInEmptyCell() && this.canUnGhost && 
-            (this.scene.canMoveHorizontaly(this.body) || this.scene.canMoveVertically(this.body)))
+        if (this.canQuitGhost())
         {            
             this.quitGhost();
         }        
+    }
+
+    canQuitGhost()
+    {
+        if (!this.canUnGhost) return false;
+        if (!this.isInEmptyCell()) return false;
+
+        //if (!this.scene.canMoveHorizontaly(this.body) && !this.scene.canMoveVertically(this.body)) return false;
+
+        const cellPos = this.getCellPos();
+        if (this.scene.cell2pix(cellPos.x, cellPos.y).distance(this.getCenterPixPos()) <= 6)
+        {
+            return true;
+        }
+        
+        return false;
     }
 
     canRetrunNormal() { this.canUnGhost = true; }
@@ -415,6 +428,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
         
         this.tint = 0xffffff;
         this.currentState = EnemyStates.PATROL;
+
+        const cellPos = this.getCellPos();
+        const cellPixPos = this.scene.cell2pix(cellPos.x, cellPos.y);
+        this.x = cellPixPos.x;
+        this.y = cellPixPos.y;
 
         this.setVelocityMatchMoveDirection();
     }
@@ -515,7 +533,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.canInflateTimer = this.scene.time.addEvent
         ({
-            delay: 500,
+            delay: 300,
             callback: this.resetCanInflate,
             callbackScope: this,
             repeat: -1
@@ -642,7 +660,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.setPaused();
 
-        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+        this.scene.time.delayedCall(gamePrefs.TIME_PAUSE_PLAYER_KILLED, this.resetPatrol, [], this);
     }
 
     setPaused()
