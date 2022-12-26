@@ -22,6 +22,15 @@ class fygarPrefab extends enemyBase
     preUpdate(time, delta)
     {
         super.preUpdate(time, delta);
+
+        if (this.currentState == EnemyStates.PAUSED)
+        {
+            console.log("paused");
+        }
+
+        if (this.groundCollider == null && this.currentState != EnemyStates.GHOST){
+            this.resetColliders();
+        }
     }    
     
     initCollisionsWithPlayer()
@@ -107,4 +116,12 @@ class fygarPrefab extends enemyBase
 
         this.attackTimer.pused = true;
     }
+
+    respawn()
+    {
+        super.respawn();
+
+        this.fire.stopFire();
+    }
+
 }
