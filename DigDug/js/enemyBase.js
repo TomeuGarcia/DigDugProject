@@ -660,7 +660,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.setPaused();
 
-        this.scene.time.delayedCall(2000, this.resetPatrol, [], this);
+        this.scene.time.delayedCall(gamePrefs.TIME_PAUSE_PLAYER_KILLED, this.resetPatrol, [], this);
     }
 
     setPaused()

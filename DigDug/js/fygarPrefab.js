@@ -23,11 +23,6 @@ class fygarPrefab extends enemyBase
     {
         super.preUpdate(time, delta);
 
-        if (this.currentState == EnemyStates.PAUSED)
-        {
-            console.log("paused");
-        }
-
         if (this.groundCollider == null && this.currentState != EnemyStates.GHOST){
             this.resetColliders();
         }
@@ -86,10 +81,18 @@ class fygarPrefab extends enemyBase
         // Change animation
         this.anims.play('fygarAttacking', true);
 
+        this.scene.time.delayedCall(1000, this.doFireAttack, [], this);
+    }
+
+    doFireAttack()
+    {
+        if (this.currentState != EnemyStates.ATTACKING) return;
+
         // Spawn fire in front of fygar
         const pos = this.getCenterPixPos();
         this.fire.startAttack(pos.x, pos.y, this.flipX);
     }
+
 
     resetToPatrol(thisFygar)
     {        
@@ -119,9 +122,8 @@ class fygarPrefab extends enemyBase
 
     respawn()
     {
-        super.respawn();
-
         this.fire.stopFire();
+        super.respawn();                
     }
 
 }
