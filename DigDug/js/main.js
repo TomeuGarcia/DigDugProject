@@ -54,6 +54,12 @@ var loadPrefs =
     FRUIT_RESPAWN_CLASS: 'fruitRespawn'
 }
 
+var audioPrefs =
+{
+    VOLUME: 0.05
+}
+
+
 var config = 
 {
     type: Phaser.AUTO,
