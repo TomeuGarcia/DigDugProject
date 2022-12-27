@@ -583,8 +583,12 @@ class level extends Phaser.Scene
     }
 
     onPlayerLostALive()
-    {
-        // TODO
+    {     
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        this.time.delayedCall(2000, 
+                              () => this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs, [], 
+                              this);
+
         // update HUD
         this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
 
