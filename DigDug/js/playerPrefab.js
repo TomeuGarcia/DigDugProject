@@ -456,8 +456,6 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     checkRespawn()
     {
-
-
         if (this.lives < 0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
@@ -472,6 +470,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     respawn()
     {
         this.playerState = PlayerStates.MOVING;
+        this.playerMovement = PlayerMovement.RIGHT;
+
         this.anims.play('playerRun', true);
         this.respawnTimer.paused = true;
         
