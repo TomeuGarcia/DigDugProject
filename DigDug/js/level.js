@@ -31,7 +31,6 @@ class level extends Phaser.Scene
 
     create()
     {
-
         this.loadLevel();
         this.setupDigging();
        
@@ -207,6 +206,7 @@ class level extends Phaser.Scene
     collectFruit(_player, _fruit)
     {
         if (!_fruit.canBePickedUp) return;
+        if (_player.playerState == PlayerStates.DYING) return;
 
         const fruitPos = new Phaser.Math.Vector2(_fruit.x, _fruit.y);
         const playerPos = _player.getCenterPixPos();
@@ -239,10 +239,16 @@ class level extends Phaser.Scene
 
     checkIfWon()
     {
-        if (this.enemyCount <= 0)
+        const isPlayerBeingKilledByRock = this.player.isBeingSquished && this.player.lives == 1;
+
+        if (this.enemyCount <= 0 && !isPlayerBeingKilledByRock)
         {
+            this.sceneIsOver = true;
+
             this.stageClear.play();
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
+
+            this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
         }
     }
 
@@ -409,6 +415,8 @@ class level extends Phaser.Scene
 
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
+
+        this.sceneIsOver = false;
     }
 
     initPlayerCollisions()
@@ -655,10 +663,13 @@ class level extends Phaser.Scene
 
     onPlayerLostAllLives()
     {
+        this.sceneIsOver = true;
+
         this.playerLivesUI.visible=false;
-        // TODO
-        this.gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
+
+        const gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+        gameOverText.depth = 20;
         // update HUD and go to main menu
 
         this.gameOver.play();
@@ -684,6 +695,11 @@ class level extends Phaser.Scene
         {
             this.enemies[i].resetPatrol();
         }
+    }
+
+    isSceneOver()
+    {
+        return this.sceneIsOver;
     }
 
 }

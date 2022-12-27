@@ -50,6 +50,7 @@ class rockPrefab extends Phaser.GameObjects.Sprite
     startFalling()
     {
         if (this.hasHitGround) return;
+        if (this.scene.isSceneOver()) return;
 
         this.body.immovable = false;
         this.body.setVelocityY(gamePrefs.ROCK_FALLIN_SPEED);
@@ -93,6 +94,7 @@ class rockPrefab extends Phaser.GameObjects.Sprite
     squishPlayer(rock, player)
     {
         if (this.hasHitGround) return;
+        if (player.playerState == PlayerStates.DYING) return;
 
         if (rock.isTargetInsideHitThreshold(player.x, player.y, rock))
         {
