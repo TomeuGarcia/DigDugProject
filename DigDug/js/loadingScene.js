@@ -66,6 +66,11 @@ class loadingScene extends Phaser.Scene
         this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
         this.load.audio('enemyMoving', 'MonsterMoving.mp3');
         this.load.audio('enemySquashed', 'MonsterSquashed.mp3');
+        // player
+        this.load.audio('playerHarpoon', 'PlayerHarpoon.mp3');
+        this.load.audio('playerMiss', 'PlayerMiss.mp3');
+        this.load.audio('playerPumping', 'PlayerPumping.mp3');
+        this.load.audio('playerWalking', 'PlayerWalking.mp3');
 
         
         this.load.on('progress', function(value) 
