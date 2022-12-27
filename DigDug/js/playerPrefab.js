@@ -432,6 +432,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {        
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
+        this.scene.playerDisappearing.play();
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;
@@ -445,7 +446,6 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             this.harpoonV.hide();
         }
 
-
         this.isHit = true;
     }
 
@@ -458,7 +458,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
 
 
-        if (this.lives <0) // TODO no lives left
+        if (this.lives < 0) // TODO no lives left
         {
             this.scene.onPlayerLostAllLives();
         }

@@ -74,6 +74,7 @@ class level extends Phaser.Scene
     loadAudios()
     {
         this.stageClear = this.sound.add('stageClear', {volume: .5});
+        this.gameOver = this.sound.add('gameOver', {volume: .5});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: .5});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
@@ -84,6 +85,8 @@ class level extends Phaser.Scene
         this.playerHarpoon = this.sound.add('playerHarpoon', {volume: .5});
         this.playerMiss = this.sound.add('playerMiss', {volume: .5});
         this.playerPumping = this.sound.add('playerPumping', {volume: .5});
+        this.playerDisappearing = this.sound.add('playerDisappearing', {volume: .5});
+        this.playerTouched = this.sound.add('playerTouched', {volume: .5});
         this.playerWalking = this.sound.add('playerWalking', {volume: .5});
         this.playerWalking.loop = true;
     }
@@ -616,6 +619,8 @@ class level extends Phaser.Scene
         this.gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
         // update HUD and go to main menu
+
+        this.gameOver.play();
         
         this.time.delayedCall(3000, this.backToMenu, [], this);
     }
