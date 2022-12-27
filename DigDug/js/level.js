@@ -73,10 +73,10 @@ class level extends Phaser.Scene
 
     loadAudios()
     {
-        this.stageClear = this.sound.add('stageClear', {volume: .5});
-        this.gameOver = this.sound.add('gameOver', {volume: .5});
-        this.lastOneSound = this.sound.add('lastOneSound', {volume: .5});
-        this.lastOneMusic = this.sound.add('lastOneMusic', {volume: .5});
+        this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
+        this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
+        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
+        this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -92,9 +92,9 @@ class level extends Phaser.Scene
         this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
         this.playerWalking.loop = true;
         // Rock
-        this.rockBroken = this.sound.add('rockBroken', {volume: .5});
-        this.rockHit = this.sound.add('rockHit', {volume: .5});
-        this.rockDropping = this.sound.add('rockDropping', {volume: .5});
+        this.rockBroken = this.sound.add('rockBroken', {volume: audioPrefs.VOLUME});
+        this.rockHit = this.sound.add('rockHit', {volume: audioPrefs.VOLUME});
+        this.rockDropping = this.sound.add('rockDropping', {volume: audioPrefs.VOLUME});
         this.rockDropping.loop = true;
     }
 

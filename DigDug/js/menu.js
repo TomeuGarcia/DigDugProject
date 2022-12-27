@@ -16,7 +16,7 @@ class menu extends Phaser.Scene
 
 		this.pointer = this.add.sprite(config.width/2 - 45, config.height/2 + 3, 'pointer').setOrigin(0.5).setScale(.7);
 
-		this.credit = this.sound.add('credit', {volume: .5});
+		this.credit = this.sound.add('credit', {volume: audioPrefs.VOLUME});
 
 		// Player 1 score
 		this.firstPlayerScoreText = this.add.bitmapText(50, 30, 'gameFont', '1UP', 10)
