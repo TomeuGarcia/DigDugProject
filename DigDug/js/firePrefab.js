@@ -64,11 +64,6 @@ class firePrefab extends Phaser.GameObjects.Sprite
             _scene.digGround
         );
 
-        /*this.on(Phaser.Animations.Events.ANIMATION_COMPLETE, 
-            function () {
-                this.resetOwnerPatrol();
-            }, 
-            this);*/
     }
 
     preUpdate(time, delta)
@@ -107,8 +102,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
          
         if (!this.scene.isEmptyCell(cell.x, cell.y) || this.body.blocked.right || this.body.blocked.left)
         {
-            this.resetSelfValues();
-            this.resetOwnerPatrol();
+            this.stopFire();
         }
     }
 
@@ -155,8 +149,7 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
         if (this.fireSequenceIndex >= this.fireSequence.length) 
         { 
-            this.resetSelfValues();
-            this.resetOwnerPatrol(); 
+            this.stopFire(); 
         }
         else 
         { 
@@ -169,6 +162,12 @@ class firePrefab extends Phaser.GameObjects.Sprite
             // Play audio
             this.scene.fygarFire.play();
         }
+    }
+
+    stopFire()
+    {
+        this.resetSelfValues();
+        this.resetOwnerPatrol(); 
     }
 
     resetOwnerPatrol()

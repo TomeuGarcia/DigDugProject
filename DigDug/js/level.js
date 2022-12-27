@@ -10,6 +10,9 @@ class level extends Phaser.Scene
     init(levelInitData)
     {
         this.levelNumber = levelInitData.levelNumber;
+        this.playerLivesCount = levelInitData.playerLivesCount;
+        this.playerScoreCount = levelInitData.playerScoreCount;
+        console.log(this.playerScoreCount);
     }
 
     preload()
@@ -71,11 +74,21 @@ class level extends Phaser.Scene
     loadAudios()
     {
         this.stageClear = this.sound.add('stageClear', {volume: .5});
+        this.gameOver = this.sound.add('gameOver', {volume: .5});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: .5});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
         this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.enemyMove.loop = true;
+        // Player
+        this.playerHarpoon = this.sound.add('playerHarpoon', {volume: .5});
+        this.playerMiss = this.sound.add('playerMiss', {volume: .5});
+        this.playerPumping = this.sound.add('playerPumping', {volume: .5});
+        this.playerDisappearing = this.sound.add('playerDisappearing', {volume: .5});
+        this.playerTouched = this.sound.add('playerTouched', {volume: .5});
+        this.playerWalking = this.sound.add('playerWalking', {volume: .5});
+        this.playerWalking.loop = true;
     }
 
     startAnim()
@@ -108,7 +121,7 @@ class level extends Phaser.Scene
         this.firstPlayerScore = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE * 2, gamePrefs.CELL_SIZE * 5, 'gameFont', '1UP:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(1, 0);
 
-        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', '0', 8)
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', this.playerScoreCount, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
@@ -224,7 +237,8 @@ class level extends Phaser.Scene
         else
         {
             const nextLevelNumber = this.levelNumber + 1;
-            this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
+            this.scene.start('level' + nextLevelNumber, 
+                            {levelNumber: nextLevelNumber, playerLivesCount: this.player.lives, playerScoreCount: this.player.score});
         }
     }
 
@@ -371,7 +385,10 @@ class level extends Phaser.Scene
     initPlayer()
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', 
+                                       this.cursorKeys, this.playerRespawnPos, this.playerLivesCount);
+        this.player.score = this.playerScoreCount;
+
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
     }
@@ -576,8 +593,12 @@ class level extends Phaser.Scene
     }
 
     onPlayerLostALive()
-    {
-        // TODO
+    {     
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        this.time.delayedCall(2000, 
+                              () => this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs, [], 
+                              this);
+
         // update HUD
         this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
 
@@ -598,6 +619,8 @@ class level extends Phaser.Scene
         this.gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
         // update HUD and go to main menu
+
+        this.gameOver.play();
         
         this.time.delayedCall(3000, this.backToMenu, [], this);
     }
