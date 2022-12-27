@@ -41,7 +41,7 @@ class loadingScene extends Phaser.Scene
         this.load.image('fireMedium', 'fireMedium.png');
         this.load.image('fireBig', 'fireBig.png');
         
-        this.load.image('brush','diggedFromBottom.png');
+        this.load.image('brush','diggedBottom.png');
 
         // Fruits
         this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
