@@ -77,8 +77,15 @@ class level extends Phaser.Scene
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: .5});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
         this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.enemyMove.loop = true;
+        // Player
+        this.playerHarpoon = this.sound.add('playerHarpoon', {volume: .5});
+        this.playerMiss = this.sound.add('playerMiss', {volume: .5});
+        this.playerPumping = this.sound.add('playerPumping', {volume: .5});
+        this.playerWalking = this.sound.add('playerWalking', {volume: .5});
+        this.playerWalking.loop = true;
     }
 
     startAnim()
