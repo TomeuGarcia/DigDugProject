@@ -130,6 +130,8 @@ class enemyBase extends Phaser.GameObjects.Sprite
            return; 
         }
 
+        this.scene.playerTouched.play();
+
         // Kill player
         _player.die();
     }
