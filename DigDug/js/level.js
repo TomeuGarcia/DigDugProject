@@ -73,21 +73,21 @@ class level extends Phaser.Scene
 
     loadAudios()
     {
-        this.stageClear = this.sound.add('stageClear', {volume: .5});
-        this.gameOver = this.sound.add('gameOver', {volume: .5});
+        this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
+        this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
         // Enemies
-        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
-        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
+        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
+        this.enemySquashed = this.sound.add('enemySquashed', {volume: audioPrefs.VOLUME});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: audioPrefs.VOLUME}); // not doing it 'cause it sucks
         this.enemyMove.loop = true;
         // Player
-        this.playerHarpoon = this.sound.add('playerHarpoon', {volume: .5});
-        this.playerMiss = this.sound.add('playerMiss', {volume: .5});
-        this.playerPumping = this.sound.add('playerPumping', {volume: .5});
-        this.playerDisappearing = this.sound.add('playerDisappearing', {volume: .5});
-        this.playerTouched = this.sound.add('playerTouched', {volume: .5});
-        this.playerWalking = this.sound.add('playerWalking', {volume: .5});
+        this.playerHarpoon = this.sound.add('playerHarpoon', {volume: audioPrefs.VOLUME});
+        this.playerMiss = this.sound.add('playerMiss', {volume: audioPrefs.VOLUME});
+        this.playerPumping = this.sound.add('playerPumping', {volume: audioPrefs.VOLUME});
+        this.playerDisappearing = this.sound.add('playerDisappearing', {volume: audioPrefs.VOLUME});
+        this.playerTouched = this.sound.add('playerTouched', {volume: audioPrefs.VOLUME});
+        this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
         this.playerWalking.loop = true;
     }
 
