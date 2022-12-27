@@ -7,16 +7,6 @@ class menu extends Phaser.Scene
 
 	preload()
 	{
-		this.cameras.main.setBackgroundColor("#000");
-
-		this.load.setPath('assets/images/');
-		this.load.image('namcoLogo', 'namcoLogo.png');
-		this.load.image('digDugTitle', 'digDugTitle.png');
-		this.load.image('pointer', 'mainMenuPointer.png');
-
-        // ---- FONTS ----
-        this.load.setPath('assets/fonts/');
-        this.load.bitmapFont('gameFont', 'GameFont.png', 'GameFont.xml');
 	}
 
 	create()
@@ -106,9 +96,12 @@ class menu extends Phaser.Scene
 
 	changeScene()
 	{
-		const levelNumber = 1;
+		const levelNumber = gamePrefs.FIRST_LEVEL_NUMBER;
+		const playerLivesCount = 2;
+		const playerScoreCount = 0;
 
-		this.scene.start('level'+levelNumber, {levelNumber: levelNumber});
+		this.scene.start('level'+levelNumber, 
+						{levelNumber: levelNumber, playerLivesCount: playerLivesCount, playerScoreCount : playerScoreCount});
 	}
 
 	update()

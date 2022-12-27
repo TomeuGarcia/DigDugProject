@@ -10,51 +10,14 @@ class level extends Phaser.Scene
     init(levelInitData)
     {
         this.levelNumber = levelInitData.levelNumber;
+        this.playerLivesCount = levelInitData.playerLivesCount;
+        this.playerScoreCount = levelInitData.playerScoreCount;
+        console.log(this.playerScoreCount);
     }
 
     preload()
     {
         this.cameras.main.setBackgroundColor("#00A");
-
-        this.load.setPath('assets/images/');
-        
-        this.load.spritesheet('player', 'player.png', {frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('playerLives', 'playerLives.png', {frameWidth: 32, frameHeight: 16});
-        this.load.image('maskDigBottom', 'diggedFromBottom.png');
-        this.load.image('maskDigBottomRight', 'diggedCornerBottomRight.png');
-        this.load.image('watermelon', 'watermelon.png');
-        this.load.image('harpoonH', 'harpoonHorizontal.png');
-        this.load.image('harpoonV', 'harpoonVertical.png');
-        this.load.image('maskHarpoonH', 'harpoonHorizontalMask.png');
-        this.load.image('maskHarpoonV', 'harpoonVerticalMask.png');
-
-        // Pooka enemy
-        this.load.spritesheet('pooka', 'pookaNormal.png', {frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('pookaInflate', 'pookaInflate.png', {frameWidth: 24, frameHeight: 24});
-        // Fygar enemy
-        this.load.spritesheet('fygar', 'fygarNormal2.png', {frameWidth: 16, frameHeight: 16});
-        this.load.spritesheet('fygarInflate', 'fygarInflate.png', {frameWidth: 24, frameHeight: 24});
-        this.load.spritesheet('fygarFire', 'fygarFire.png', {frameWidth: 48, frameHeight: 16});
-        this.load.image('fireSmall', 'fireSmall.png');
-        this.load.image('fireMedium', 'fireMedium.png');
-        this.load.image('fireBig', 'fireBig.png');
-        
-        this.load.image('brush','diggedFromBottom.png');
-
-        // Fruits
-        this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
-
-        // Flowers
-        this.load.spritesheet('flowers', 'flowers.png', {frameWidth: 16, frameHeight: 24});
-
-        // Rock
-        this.load.spritesheet('rock','rock.png', {frameWidth:16,frameHeight:16});
-
-        // Points
-        this.load.image('pointsHolder', 'pointsHolder.png', {frameWidth:28,frameHeight:13});
-
-        // Tilemap
-        this.load.image('digDugTileset','digDugTilesetPalette.png'); // MUST HAVE SAME TAG AS IN TILED
 
         this.load.setPath('assets/tilesets/final/');
         const levelFileJSON = 'level' + this.levelNumber + '.json';
@@ -63,14 +26,7 @@ class level extends Phaser.Scene
 
 
         this.load.tilemapTiledJSON(this.tilemap_tag, levelFileJSON);
-        this.load.json(this.json_tag, levelFileJSON);        
-
-        // Audios
-        this.load.setPath('assets/audios/');
-        this.load.audio('fygarFire', 'FygarFlame.mp3');
-        this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
-        this.load.audio('enemyMoving', 'MonsterMoving.mp3');
-        this.load.audio('enemySquashed', 'MonsterSquashed.mp3');
+        this.load.json(this.json_tag, levelFileJSON);   
     }
 
     create()
@@ -86,7 +42,7 @@ class level extends Phaser.Scene
         this.initScore();
         this.initFruits();
 
-        this.loadAnimations();
+        //this.loadAnimations();
         this.loadAudios();
 
         //this.player.body.collideWorldBounds = true;
@@ -113,6 +69,16 @@ class level extends Phaser.Scene
         );
 
         this.startAnim();
+    }
+
+    loadAudios()
+    {
+        this.stageClear = this.sound.add('stageClear', {volume: .5});
+        // Enemies
+        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
+        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
+        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
     }
 
     startAnim()
@@ -145,7 +111,7 @@ class level extends Phaser.Scene
         this.firstPlayerScore = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE * 2, gamePrefs.CELL_SIZE * 5, 'gameFont', '1UP:', 8)
                                             .setTint(uiPrefs.TEXT_COLOR_RED).setOrigin(1, 0);
 
-        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', '0', 8)
+        this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', this.playerScoreCount, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
     
@@ -247,15 +213,22 @@ class level extends Phaser.Scene
     {
         if (this.enemyCount <= 0)
         {
-            if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
-            {
-                this.scene.start('menu');
-            }
-            else
-            {
-                const nextLevelNumber = this.levelNumber + 1;
-                this.scene.start('level' + nextLevelNumber, {levelNumber: nextLevelNumber});
-            }
+            this.stageClear.play();
+            this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
+        }
+    }
+
+    loadNextScene()
+    {
+        if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
+        {
+            this.scene.start('menu');
+        }
+        else
+        {
+            const nextLevelNumber = this.levelNumber + 1;
+            this.scene.start('level' + nextLevelNumber, 
+                            {levelNumber: nextLevelNumber, playerLivesCount: this.player.lives, playerScoreCount: this.player.score});
         }
     }
 
@@ -380,7 +353,6 @@ class level extends Phaser.Scene
         }
     }
 
-
     setupDigging()
     {
         shapeMask = this.make.graphics();
@@ -403,7 +375,10 @@ class level extends Phaser.Scene
     initPlayer()
     {
         this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', this.cursorKeys, this.playerRespawnPos,2);
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', 
+                                       this.cursorKeys, this.playerRespawnPos, this.playerLivesCount);
+        this.player.score = this.playerScoreCount;
+
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
     }
@@ -416,6 +391,7 @@ class level extends Phaser.Scene
             this.enemyGroup.add(this.enemies[i]);
         }
     }
+
     removeRockCollisions(_rock)
     {
         const index = this.rockCells.indexOf(_rock.spawnCell);
@@ -456,118 +432,6 @@ class level extends Phaser.Scene
     spawnFygar(pixPos)
     {
         this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
-    }
-
-
-    loadAnimations()
-    {
-        this.anims.create
-        ({
-            key: 'playerRun',
-            frames: this.anims.generateFrameNumbers('player', {start: 0, end: 1}),
-            frameRate: 10,
-            repeat: -1
-        })
-
-        this.anims.create
-        ({
-            key: 'playerRunDigging',
-            frames: this.anims.generateFrameNumbers('player', {start: 2, end: 3}),
-            frameRate: 10,
-            repeat: -1
-        })
-
-        this.anims.create // Only plays when the player presses (if not it stays on frame 4)
-        ({
-            key: 'playerPumping',
-            frames: this.anims.generateFrameNumbers('player', {start: 4, end: 5}),
-            frameRate: 10,
-            repeat: 0
-        })
-
-        this.anims.create
-        ({
-            key: 'playerDying',
-            frames: this.anims.generateFrameNumbers('player', {start: 8, end: 13}),
-            frameRate: 2,
-            repeat: 0
-        })
-
-        // POOKA
-        this.anims.create
-        ({
-            key: 'pookaWalking',
-            frames: this.anims.generateFrameNumbers('pooka', {start: 0, end: 1}),
-            frameRate: 2,
-            repeat: -1
-        });
-
-        this.anims.create
-        ({
-            key: 'pookaGhosting',
-            frames: this.anims.generateFrameNumbers('pooka', {start: 2, end: 3}),
-            frameRate: 2,
-            repeat: -1
-        });
-
-     
-        // FYGAR
-        this.anims.create
-        ({
-            key: 'fygarWalking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 1, end: 2}),
-            frameRate: 2,
-            repeat: -1
-        });
-
-        this.anims.create
-        ({
-            key: 'fygarGhosting',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 4, end: 5}),
-            frameRate: 2,
-            repeat: -1
-        });
-
-        this.anims.create
-        ({
-            key: 'fygarAttacking',
-            frames: this.anims.generateFrameNumbers('fygar', {start: 0, end: 1}),
-            frameRate: 2,
-            repeat: -1
-        });
-
-        this.anims.create
-        ({
-            key: 'fygarFireAttack',
-            frames: this.anims.generateFrameNumbers('fygarFire', {start: 0, end: 2}),
-            frameRate: 2,
-            repeat: 0
-        });
-        //ROCK
-        this.anims.create
-        ({
-            key: 'rockStartFalling',
-            frames: this.anims.generateFrameNumbers('rock', {start: 0, end: 1}),
-            frameRate: 2,
-            repeat: 1
-        });
-        this.anims.create
-        ({
-            key: 'rockDestroy',
-            frames:this.anims.generateFrameNumbers('rock',{start:2,end:3}),
-            frameRate:2,
-            repeat:0
-
-        });
-    }
-
-    loadAudios()
-    {
-        // Enemies
-        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
-        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
-        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
     }
     //// CREATE end
 
@@ -719,8 +583,12 @@ class level extends Phaser.Scene
     }
 
     onPlayerLostALive()
-    {
-        // TODO
+    {     
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        this.time.delayedCall(2000, 
+                              () => this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs, [], 
+                              this);
+
         // update HUD
         this.playerLivesUI.setTexture('playerLives',2-this.player.lives)
 
