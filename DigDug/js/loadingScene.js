@@ -62,6 +62,9 @@ class loadingScene extends Phaser.Scene
         this.load.setPath('assets/audios/');
         this.load.audio('stageClear', 'StageClear.mp3');
         this.load.audio('gameOver', 'GameOver.mp3');
+        this.load.audio('credit', 'Credit.mp3');
+        this.load.audio('lastOneSound', 'LastOneSound.mp3');
+        this.load.audio('lastOneMusic', 'LastOneMusic.mp3');
         // enemies
         this.load.audio('fygarFire', 'FygarFlame.mp3');
         this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
@@ -74,7 +77,10 @@ class loadingScene extends Phaser.Scene
         this.load.audio('playerDisappearing', 'PlayerDisappearing.mp3');
         this.load.audio('playerTouched', 'PlayerTouched.mp3');
         this.load.audio('playerWalking', 'PlayerWalking.mp3');
-
+        // rock
+        this.load.audio('rockBroken', 'RockBroken.mp3');
+        this.load.audio('rockDropping', 'RockDropping.mp3');
+        this.load.audio('rockHit', 'RockHit.mp3');
         
         this.load.on('progress', function(value) 
         {

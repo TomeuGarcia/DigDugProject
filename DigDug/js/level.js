@@ -75,6 +75,8 @@ class level extends Phaser.Scene
     {
         this.stageClear = this.sound.add('stageClear', {volume: .5});
         this.gameOver = this.sound.add('gameOver', {volume: .5});
+        this.lastOneSound = this.sound.add('lastOneSound', {volume: .5});
+        this.lastOneMusic = this.sound.add('lastOneMusic', {volume: .5});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: .5});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
@@ -89,6 +91,11 @@ class level extends Phaser.Scene
         this.playerTouched = this.sound.add('playerTouched', {volume: .5});
         this.playerWalking = this.sound.add('playerWalking', {volume: .5});
         this.playerWalking.loop = true;
+        // Rock
+        this.rockBroken = this.sound.add('rockBroken', {volume: .5});
+        this.rockHit = this.sound.add('rockHit', {volume: .5});
+        this.rockDropping = this.sound.add('rockDropping', {volume: .5});
+        this.rockDropping.loop = true;
     }
 
     startAnim()
