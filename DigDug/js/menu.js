@@ -71,6 +71,7 @@ class menu extends Phaser.Scene
 
 		// == BUTTONS ==
 		// 1 player button
+		this.hasPressedStartGame = false;
 		this.player1Button = this.add.bitmapText(config.width/2, config.height/2, 'gameFont', '1 PLAYER', 8)
 										.setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0)
 										.setInteractive({useHandCursor: true})
@@ -97,10 +98,25 @@ class menu extends Phaser.Scene
 
 	startGame()
 	{
+		if (this.hasPressedStartGame) return;
+
+		this.hasPressedStartGame = true;
+
+		this.clickAnimation(this.player1Button);
+
 		this.menuMusic.stop();
 		this.credit.play();
 		this.time.delayedCall(1000, this.changeScene, [], this);
 	}
+
+	clickAnimation(button)
+	{
+		this.time.delayedCall(200, () => button.visible = false, [], button);
+		this.time.delayedCall(400, () => button.visible = true, [], button);
+		this.time.delayedCall(500, () => button.visible = false, [], button);
+		this.time.delayedCall(600, () => button.visible = true, [], button);
+	}
+
 
 	changeScene()
 	{
