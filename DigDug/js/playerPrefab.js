@@ -69,6 +69,10 @@ class playerPrefab extends Phaser.GameObjects.Sprite
             repeat: -1
         })
         this.respawnTimer.paused = true;
+
+        
+        this.scene.playerWalking.play();
+        this.scene.playerWalking.pause();
     }
 
 
@@ -99,7 +103,7 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         }
         else if (this.playerState == PlayerStates.DYING)
         {
-            this.scene.playerWalking.stop(); 
+            this.scene.playerWalking.pause();
             this.body.setVelocityX(0);
             this.body.setVelocityY(0);
         }
@@ -187,12 +191,12 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         if ((this.moveX != 0 || this.moveY != 0) && !this.isMovingSoundPlaying) 
         { 
-            this.scene.playerWalking.play(); 
+            this.scene.playerWalking.resume();
             this.isMovingSoundPlaying = true;
         }
         else if (this.moveX == 0 && this.moveY == 0 && this.isMovingSoundPlaying)
         { 
-            this.scene.playerWalking.stop(); 
+            this.scene.playerWalking.pause(); 
             this.isMovingSoundPlaying = false;
         }
     }
@@ -429,8 +433,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     }
     
     die()
-    {        
+    {
         this.playerState = PlayerStates.DYING;
+        this.scene.playerDisappearing.play();
         this.anims.play('playerDying', true);
         this.respawnTimer.paused = false;
         this.lives--;

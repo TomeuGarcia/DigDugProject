@@ -158,14 +158,15 @@ class firePrefab extends Phaser.GameObjects.Sprite
             this.scene.time.delayedCall(gamePrefs.FIRE_PROGRESS_TIME_MILLISECONDS, this.incrementFire, [], this);
 
             ++this.fireSequenceIndex;
-        
-            // Play audio
-            this.scene.fygarFire.play();
+            
+            if (this.isAttacking)
+                this.scene.fygarFire.play();
         }
     }
 
     stopFire()
     {
+        this.scene.fygarFire.stop();
         this.resetSelfValues();
         this.resetOwnerPatrol(); 
     }
