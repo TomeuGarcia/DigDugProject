@@ -27,7 +27,7 @@ var gamePrefs =
     BIG_FLOWER_LVL_COUNT: 10,
     FIRST_LEVEL_NUMBER: 1,
     LAST_LEVEL_NUMBER: 3,
-    TIME_UNTIL_NEXT_SCENE: 3000,
+    TIME_UNTIL_NEXT_SCENE: 4000,
     TIME_PAUSE_PLAYER_KILLED: 2000
 }
 
@@ -53,6 +53,12 @@ var loadPrefs =
     PLAYER_RESPAWN_CLASS: 'playerRespawn',
     FRUIT_RESPAWN_CLASS: 'fruitRespawn'
 }
+
+var audioPrefs =
+{
+    VOLUME: 0.05
+}
+
 
 var config = 
 {

@@ -4,7 +4,7 @@
   <export target="level3.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="digDugTileset.tsx"/>
- <layer id="1" name="layer_borders" width="20" height="18">
+ <layer id="2" name="layer_borders" width="20" height="18">
   <data encoding="csv">
 49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,
 49,3,3,3,3,3,3,3,3,3,3,3,3,3,3,49,49,49,49,49,
@@ -26,7 +26,7 @@
 49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49,49
 </data>
  </layer>
- <layer id="2" name="layer_surface" width="20" height="18">
+ <layer id="4" name="layer_surface" width="20" height="18">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

@@ -79,7 +79,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
 
         this.resetColliders();    
 
-        this.startGhostCooldownTimer();
+        this.startGhostCooldownTimer(Phaser.Math.Between(5, 15) * 1000);
     }
 
     initCollisionsWithPlayer()
@@ -116,7 +116,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         
         if (_player.isHit) return;
 
-        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING) 
+        if (_enemy.currentState == EnemyStates.INFLATED || _enemy.currentState == EnemyStates.DYING || this.isBeingSquished) 
         {
             return;
         }        
@@ -411,7 +411,7 @@ class enemyBase extends Phaser.GameObjects.Sprite
         //if (!this.scene.canMoveHorizontaly(this.body) && !this.scene.canMoveVertically(this.body)) return false;
 
         const cellPos = this.getCellPos();
-        if (this.scene.cell2pix(cellPos.x, cellPos.y).distance(this.getCenterPixPos()) <= 6)
+        if (this.scene.cell2pix(cellPos.x, cellPos.y).distance(this.getCenterPixPos()) < 6)
         {
             return true;
         }
@@ -458,12 +458,12 @@ class enemyBase extends Phaser.GameObjects.Sprite
         return false;
     }
 
-    startGhostCooldownTimer()
+    startGhostCooldownTimer(extraTime)
     {
         if (!this.canGhost)
         {
             this.cooldownGhostTimer = this.scene.time.addEvent({
-                delay: 3000,
+                delay: 3000 + extraTime,
                 callback: this.allowGhost,
                 callbackScope: this
             });  
@@ -632,6 +632,10 @@ class enemyBase extends Phaser.GameObjects.Sprite
             callback: this.destroySelf,
             callbackScope: this,
         });
+
+        // Check if won
+        this.scene.enemyCount--;
+        this.scene.checkIfWon();
     }
 
     destroySelf()
@@ -643,10 +647,6 @@ class enemyBase extends Phaser.GameObjects.Sprite
         // Add points
         this.scene.addScore(this.points, this.x, this.y);
         
-        // Check if won
-        this.scene.enemyCount--;
-        this.scene.checkIfWon();
-
         // Remove from scene
         this.destroy();
     }
