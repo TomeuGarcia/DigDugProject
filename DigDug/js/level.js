@@ -74,8 +74,11 @@ class level extends Phaser.Scene
     {
         this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
-        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
+        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
+        this.lastOneSound.on('complete', function() {
+            this.lastOneMusic.play();
+        }, this);
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -88,6 +91,9 @@ class level extends Phaser.Scene
         this.playerPumping = this.sound.add('playerPumping', {volume: audioPrefs.VOLUME});
         this.playerDisappearing = this.sound.add('playerDisappearing', {volume: audioPrefs.VOLUME});
         this.playerTouched = this.sound.add('playerTouched', {volume: audioPrefs.VOLUME});
+        this.playerTouched.on('complete', function() {
+            this.playerDisappearing.play();
+        }, this);
         this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
         this.playerWalking.loop = true;
         // Rock
@@ -250,12 +256,20 @@ class level extends Phaser.Scene
 
         if (this.enemyCount <= 0 && !isPlayerBeingKilledByRock)
         {
+            this.playerWalking.stop();
+            this.lastOneSound.stop();
+            this.lastOneMusic.stop();
+            
             this.sceneIsOver = true;
 
             this.stageClear.play();
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
 
             this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        }
+        else if (this.enemyCount == 1)
+        {
+            this.lastOneSound.play();
         }
     }
 

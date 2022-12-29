@@ -432,7 +432,6 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {        
         this.playerState = PlayerStates.DYING;
         this.anims.play('playerDying', true);
-        this.scene.playerDisappearing.play();
         this.respawnTimer.paused = false;
         this.lives--;
         this.hasHitGroundWhileSquished = false;

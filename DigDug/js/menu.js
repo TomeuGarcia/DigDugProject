@@ -93,7 +93,8 @@ class menu extends Phaser.Scene
 
 	startGame()
 	{
-		this.changeScene();
+		this.credit.play();
+		this.time.delayedCall(1000, this.changeScene, [], this);
 	}
 
 	changeScene()
@@ -102,7 +103,7 @@ class menu extends Phaser.Scene
 		const playerLivesCount = 2;
 		const playerScoreCount = 0;
 
-		this.scene.start('level'+levelNumber, 
+		this.scene.start('level' + levelNumber, 
 						{levelNumber: levelNumber, playerLivesCount: playerLivesCount, playerScoreCount : playerScoreCount});
 	}
 
@@ -110,16 +111,15 @@ class menu extends Phaser.Scene
 	{
         if (this.cursors.down.isDown) 
 		{
-			this.pointer.setY(config.height/2 + 23);
+			this.pointer.setY(config.height / 2 + 23);
 		}
 		else if (this.cursors.up.isDown)
 		{
-			this.pointer.setY(config.height/2 + 3);
+			this.pointer.setY(config.height / 2 + 3);
 		}
 		else if (this.enterKey.isDown || this.cursors.space.isDown)
 		{
-			this.credit.play();
-			this.time.delayedCall(1000, this.startGame, [], this);
+			this.startGame();
 		}
 	}
 }
