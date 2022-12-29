@@ -613,7 +613,11 @@ class enemyBase extends Phaser.GameObjects.Sprite
     // == DIE ==
     doDie()
     {
-        if (this.isDead) return;
+        if (this.isDead) 
+        {
+            this.setTexture(this.inflatedSpriteTag, 3);
+            return;
+        }
 
         this.isDead = true;
         this.anims.stop();
