@@ -77,7 +77,9 @@ class level extends Phaser.Scene
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
         this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
-        this.lastOneSound.on('complete', this.playLastOneMusic());
+        this.lastOneSound.on('complete', function() {
+            this.lastOneMusic.play();
+        }, this);
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -90,6 +92,9 @@ class level extends Phaser.Scene
         this.playerPumping = this.sound.add('playerPumping', {volume: audioPrefs.VOLUME});
         this.playerDisappearing = this.sound.add('playerDisappearing', {volume: audioPrefs.VOLUME});
         this.playerTouched = this.sound.add('playerTouched', {volume: audioPrefs.VOLUME});
+        this.playerTouched.on('complete', function() {
+            this.playerDisappearing.play();
+        }, this);
         this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
         this.playerWalking.loop = true;
         // Rock
@@ -260,11 +265,6 @@ class level extends Phaser.Scene
         {
             this.lastOneSound.play();
         }
-    }
-
-    playLastOneMusic()
-    {
-        this.lastOneMusic.play();
     }
 
     loadNextScene()
