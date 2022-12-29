@@ -75,8 +75,9 @@ class level extends Phaser.Scene
     {
         this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
-        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
+        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
+        this.lastOneSound.on('complete', this.playLastOneMusic());
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -248,9 +249,22 @@ class level extends Phaser.Scene
     {
         if (this.enemyCount <= 0)
         {
+            this.playerWalking.stop();
+            this.lastOneSound.stop();
+            this.lastOneMusic.stop();
+            
             this.stageClear.play();
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
         }
+        else if (this.enemyCount == 1)
+        {
+            this.lastOneSound.play();
+        }
+    }
+
+    playLastOneMusic()
+    {
+        this.lastOneMusic.play();
     }
 
     loadNextScene()
