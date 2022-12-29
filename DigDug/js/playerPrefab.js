@@ -470,6 +470,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     {
         this.playerState = PlayerStates.MOVING;
         this.playerMovement = PlayerMovement.RIGHT;
+        this.rotateSprite();
+        this.lastPlayerMovement = PlayerMovement.RIGHT;
 
         this.anims.play('playerRun', true);
         this.respawnTimer.paused = true;
