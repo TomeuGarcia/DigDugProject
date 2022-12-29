@@ -11,10 +11,17 @@ class level1 extends level
         this.animMoveAxis = new Phaser.Math.Vector2(0, 0);
         this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
 
+        this.playerWalkingHolder;
+
         super.create();
                 
     }
 
+    loadAudios()
+    {
+        super.loadAudios();
+        this.startMusic = this.sound.add('startMusic', {volume: audioPrefs.VOLUME});
+    }
 
     createObjectOfClass(objectClass, pixPos)
     {
@@ -29,6 +36,11 @@ class level1 extends level
     startAnim() // override
     {
         this.pauseEnemies();
+        
+        this.playerWalkingHolder = this.playerWalking;
+        this.playerWalking = this.startMusic;
+        this.playerWalking.play();
+        this.playerWalking.pause();
 
         this.player.x = this.playerFirstSpawnPos.x;
         this.player.y = this.playerFirstSpawnPos.y;
@@ -67,6 +79,10 @@ class level1 extends level
  
     finishAnimation() // override
     {
+        this.playerWalking = this.playerWalkingHolder;
+        this.playerWalking.play();
+        this.playerWalking.pause();
+
         this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
         this.resumeEnemies();
     }
