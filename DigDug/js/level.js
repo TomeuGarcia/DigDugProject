@@ -31,6 +31,7 @@ class level extends Phaser.Scene
 
     create()
     {
+        this.loadAudios();
         this.loadLevel();
         this.setupDigging();
        
@@ -42,7 +43,6 @@ class level extends Phaser.Scene
         this.initFruits();
 
         //this.loadAnimations();
-        this.loadAudios();
 
         //this.player.body.collideWorldBounds = true;
         this.physics.add.collider
@@ -76,9 +76,6 @@ class level extends Phaser.Scene
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
         this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
-        this.lastOneSound.on('complete', function() {
-            this.lastOneMusic.play();
-        }, this);
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -91,9 +88,9 @@ class level extends Phaser.Scene
         this.playerPumping = this.sound.add('playerPumping', {volume: audioPrefs.VOLUME});
         this.playerDisappearing = this.sound.add('playerDisappearing', {volume: audioPrefs.VOLUME});
         this.playerTouched = this.sound.add('playerTouched', {volume: audioPrefs.VOLUME});
-        this.playerTouched.on('complete', function() {
+        /*this.playerTouched.on('complete', function() {
             this.playerDisappearing.play();
-        }, this);
+        }, this);*/
         this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
         this.playerWalking.loop = true;
         // Rock
@@ -262,13 +259,16 @@ class level extends Phaser.Scene
             
             this.sceneIsOver = true;
 
-            this.stageClear.play();
+            this.time.delayedCall(2000, () => { this.stageClear.play(); }, [], this);
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
 
             this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
         }
         else if (this.enemyCount == 1)
         {
+            this.playerWalking = this.lastOneMusic;
+            this.playerWalking.play();
+            this.playerWalking.pause();
             this.lastOneSound.play();
         }
     }
