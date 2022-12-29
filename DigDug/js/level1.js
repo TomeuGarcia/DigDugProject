@@ -37,10 +37,9 @@ class level1 extends level
     {
         this.pauseEnemies();
         
+        this.startMusic.play();
         this.playerWalkingHolder = this.playerWalking;
-        this.playerWalking = this.startMusic;
-        this.playerWalking.play();
-        this.playerWalking.pause();
+        this.playerWalking = null;
 
         this.player.x = this.playerFirstSpawnPos.x;
         this.player.y = this.playerFirstSpawnPos.y;
@@ -78,7 +77,9 @@ class level1 extends level
     }
  
     finishAnimation() // override
-    {
+    {        
+        this.startMusic.stop();
+
         this.playerWalking = this.playerWalkingHolder;
         this.playerWalking.play();
         this.playerWalking.pause();

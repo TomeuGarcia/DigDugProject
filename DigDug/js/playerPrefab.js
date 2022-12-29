@@ -189,6 +189,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
     tryPlayMoveSound()
     {        
+        if (this.scene.playerWalking == null) return;
+
         const isMoving = !((this.moveX < 0.1 && this.moveX > -0.1) && (this.moveY < 0.1 && this.moveY > -0.1));
 
         if (isMoving && !this.isMovingSoundPlaying) 
