@@ -103,6 +103,8 @@ class fygarPrefab extends enemyBase
 
     resetToPatrol(thisFygar)
     {        
+        if (this.currentState == EnemyStates.INFLATED) return;
+
         if (this.isBeingSquished) 
         {
             this.setTexture(this.spriteTag, this.squishedFrameI);

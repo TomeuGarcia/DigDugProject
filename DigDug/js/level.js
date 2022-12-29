@@ -103,6 +103,9 @@ class level extends Phaser.Scene
     startAnim()
     {
         this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        this.player.body.setVelocityX(0);
+        this.player.body.setVelocityY(0);
+
 
         this.pauseEnemies();
 
