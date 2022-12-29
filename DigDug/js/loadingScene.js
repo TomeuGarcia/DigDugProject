@@ -41,7 +41,7 @@ class loadingScene extends Phaser.Scene
         this.load.image('fireMedium', 'fireMedium.png');
         this.load.image('fireBig', 'fireBig.png');
         
-        this.load.image('brush','diggedFromBottom.png');
+        this.load.image('brush','diggedBottom.png');
 
         // Fruits
         this.load.spritesheet('fruits', 'fruits.png', {frameWidth: 16, frameHeight: 16});
@@ -61,12 +61,26 @@ class loadingScene extends Phaser.Scene
         // Audios
         this.load.setPath('assets/audios/');
         this.load.audio('stageClear', 'StageClear.mp3');
+        this.load.audio('gameOver', 'GameOver.mp3');
+        this.load.audio('credit', 'Credit.mp3');
+        this.load.audio('lastOneSound', 'LastOneSound.mp3');
+        this.load.audio('lastOneMusic', 'LastOneMusic.mp3');
         // enemies
         this.load.audio('fygarFire', 'FygarFlame.mp3');
         this.load.audio('enemyBlowUp', 'MonsterBlow.mp3');
         this.load.audio('enemyMoving', 'MonsterMoving.mp3');
         this.load.audio('enemySquashed', 'MonsterSquashed.mp3');
-
+        // player
+        this.load.audio('playerHarpoon', 'PlayerHarpoon.mp3');
+        this.load.audio('playerMiss', 'PlayerMiss.mp3');
+        this.load.audio('playerPumping', 'PlayerPumping.mp3');
+        this.load.audio('playerDisappearing', 'PlayerDisappearing.mp3');
+        this.load.audio('playerTouched', 'PlayerTouched.mp3');
+        this.load.audio('playerWalking', 'PlayerWalking.mp3');
+        // rock
+        this.load.audio('rockBroken', 'RockBroken.mp3');
+        this.load.audio('rockDropping', 'RockDropping.mp3');
+        this.load.audio('rockHit', 'RockHit.mp3');
         
         this.load.on('progress', function(value) 
         {

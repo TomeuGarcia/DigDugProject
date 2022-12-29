@@ -13,11 +13,12 @@ class fruitPrefab extends Phaser.GameObjects.Sprite
         this.depth = 1;
 
         this.points = _points;
+
+        this.canBePickedUp = true;
     }
 
     preUpdate(time, delta)
     {
-
     }
 
     enable(_positionX, _positionY)
@@ -35,6 +36,16 @@ class fruitPrefab extends Phaser.GameObjects.Sprite
         this.setActive(false);
         this.visible = false;
         this.body.checkCollision.none = true;
+    }
+
+
+    resetState()
+    {
+        this.canBePickedUp = true;
+
+        this.rotation = 0;
+        this.displayWidth = 16;
+        this.displayHeight = 16;
     }
 
 }

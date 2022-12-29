@@ -31,7 +31,6 @@ class level extends Phaser.Scene
 
     create()
     {
-
         this.loadLevel();
         this.setupDigging();
        
@@ -73,12 +72,35 @@ class level extends Phaser.Scene
 
     loadAudios()
     {
-        this.stageClear = this.sound.add('stageClear', {volume: .5});
+        this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
+        this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
+        this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
+        this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
+        this.lastOneSound.on('complete', function() {
+            this.lastOneMusic.play();
+        }, this);
         // Enemies
-        this.fygarFire = this.sound.add('fygarFire', {volume: .5});
-        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: .5});
-        this.enemyMove = this.sound.add('enemyMoving', {volume: .5}); // not doing it 'cause it sucks
-        this.enemySquashed = this.sound.add('enemySquashed', {volume: .5});
+        this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
+        this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
+        this.enemySquashed = this.sound.add('enemySquashed', {volume: audioPrefs.VOLUME});
+        this.enemyMove = this.sound.add('enemyMoving', {volume: audioPrefs.VOLUME}); // not doing it 'cause it sucks
+        this.enemyMove.loop = true;
+        // Player
+        this.playerHarpoon = this.sound.add('playerHarpoon', {volume: audioPrefs.VOLUME});
+        this.playerMiss = this.sound.add('playerMiss', {volume: audioPrefs.VOLUME});
+        this.playerPumping = this.sound.add('playerPumping', {volume: audioPrefs.VOLUME});
+        this.playerDisappearing = this.sound.add('playerDisappearing', {volume: audioPrefs.VOLUME});
+        this.playerTouched = this.sound.add('playerTouched', {volume: audioPrefs.VOLUME});
+        this.playerTouched.on('complete', function() {
+            this.playerDisappearing.play();
+        }, this);
+        this.playerWalking = this.sound.add('playerWalking', {volume: audioPrefs.VOLUME});
+        this.playerWalking.loop = true;
+        // Rock
+        this.rockBroken = this.sound.add('rockBroken', {volume: audioPrefs.VOLUME});
+        this.rockHit = this.sound.add('rockHit', {volume: audioPrefs.VOLUME});
+        this.rockDropping = this.sound.add('rockDropping', {volume: audioPrefs.VOLUME});
+        this.rockDropping.loop = true;
     }
 
     startAnim()
@@ -191,15 +213,34 @@ class level extends Phaser.Scene
     {
         const randomFruitIndex = Phaser.Math.Between(0, gamePrefs.NUM_FRUITS-1);        
         this.fruits[randomFruitIndex].enable(this.fruitRespawnPos.x, this.fruitRespawnPos.y);
+        this.fruits[randomFruitIndex].resetState();
     }
 
     collectFruit(_player, _fruit)
     {
+        if (!_fruit.canBePickedUp) return;
+        if (_player.playerState == PlayerStates.DYING) return;
+
         const fruitPos = new Phaser.Math.Vector2(_fruit.x, _fruit.y);
         const playerPos = _player.getCenterPixPos();
         if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
 
-        _fruit.disable();
+
+        //_fruit.disable();
+        _fruit.canBePickedUp = false;
+
+        this.add.tween(
+            {
+                targets: [_fruit],
+                duration: 800,
+                rotation: 360 * 2 * Phaser.Math.DEG_TO_RAD,
+                displayWidth: 0,
+                displayHeight: 0,                
+                onComplete: _fruit.disable,
+                onCompleteScope: _fruit
+            }
+        )
+
         this.addScore(_fruit.points, fruitPos.x, fruitPos.y);
         this.spawnFruitDelayed();
     }
@@ -211,10 +252,24 @@ class level extends Phaser.Scene
 
     checkIfWon()
     {
-        if (this.enemyCount <= 0)
+        const isPlayerBeingKilledByRock = this.player.isBeingSquished && this.player.lives == 1;
+
+        if (this.enemyCount <= 0 && !isPlayerBeingKilledByRock)
         {
+            this.playerWalking.stop();
+            this.lastOneSound.stop();
+            this.lastOneMusic.stop();
+            
+            this.sceneIsOver = true;
+
             this.stageClear.play();
             this.time.delayedCall(gamePrefs.TIME_UNTIL_NEXT_SCENE, this.loadNextScene, [], this);
+
+            this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        }
+        else if (this.enemyCount == 1)
+        {
+            this.lastOneSound.play();
         }
     }
 
@@ -369,7 +424,7 @@ class level extends Phaser.Scene
         this.digGround.alpha = 0.5; // make layer invisible
         this.surface.alpha = 0.5;
 
-        this.brush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
+        this.digBrush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
     }
 
     initPlayer()
@@ -381,6 +436,8 @@ class level extends Phaser.Scene
 
         this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
+
+        this.sceneIsOver = false;
     }
 
     initPlayerCollisions()
@@ -508,30 +565,53 @@ class level extends Phaser.Scene
             }
         }
         
+        
+        if (false) // Smooth digging
+        {
+            // remove decimal part
+            var desiredX = ~~pixPos.x;
+            var desiredY = ~~pixPos.y;
 
-        // remove decimal part
-        var desiredX = ~~pixPos.x;
-        var desiredY = ~~pixPos.y;
+            desiredX -= gamePrefs.HALF_CELL_SIZE;
+            desiredY -= gamePrefs.HALF_CELL_SIZE;
 
-        desiredX -= gamePrefs.HALF_CELL_SIZE;
-        desiredY -= gamePrefs.HALF_CELL_SIZE;
+            if (desiredX % gamePrefs.CELL_SIZE != 1){
+                desiredX--;
+            }
+            if (desiredY % gamePrefs.CELL_SIZE != 1){
+                desiredY--;
+            }
 
-        if (desiredX % gamePrefs.CELL_SIZE != 1){
-            desiredX--;
+            shapeMask.fillRect(desiredX-1, desiredY-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
         }
-        if (desiredY % gamePrefs.CELL_SIZE != 1){
-            desiredY--;
-        }
+        else // Not smooth digging, but with sprite
+        {
+            const cellPixPos = this.cell2pix(cellPos.x, cellPos.y);
 
-        //shapeMask.fillRect(desiredX, desiredY, gamePrefs.CELL_SIZE-2, gamePrefs.CELL_SIZE-2);
-        shapeMask.fillRect(desiredX-1, desiredY-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
-
-        /*
-        const pixPos2 = this.cell2pix(cellPos.x, cellPos.y);
-        if (this.player.moveY > 0) this.brush.flipY = true;
-        else this.brush.flipY = false;
-        this.renderTexture.erase(this.brush, pixPos2.x, pixPos2.y);
-        */
+            if (this.player.playerMovement == PlayerMovement.DOWN)
+            {
+                this.digBrush.flipY = pixPos.y <= cellPixPos.y;
+                this.digBrush.rotation = 0;
+            }
+            else if (this.player.playerMovement == PlayerMovement.UP)
+            {
+                this.digBrush.flipY = pixPos.y <= cellPixPos.y;
+                this.digBrush.rotation = 0;
+            }
+            else if (this.player.playerMovement == PlayerMovement.RIGHT)
+            {
+                this.digBrush.flipY = false;
+                this.digBrush.rotation = (pixPos.x <= cellPixPos.x ? 90 : 270) * Phaser.Math.DEG_TO_RAD;
+            }
+            else 
+            {
+                this.digBrush.flipY = false;
+                this.digBrush.rotation = (pixPos.x <= cellPixPos.x ? 90 : 270) * Phaser.Math.DEG_TO_RAD;
+            }
+    
+            this.renderTexture.erase(this.digBrush, cellPixPos.x, cellPixPos.y);
+        }    
+        
     }
 
     pix2cell(pixelX, pixelY)
@@ -585,7 +665,7 @@ class level extends Phaser.Scene
     onPlayerLostALive()
     {     
         this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
-        this.time.delayedCall(2000, 
+        this.time.delayedCall(gamePrefs.TIME_PAUSE_PLAYER_KILLED, 
                               () => this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs, [], 
                               this);
 
@@ -604,11 +684,16 @@ class level extends Phaser.Scene
 
     onPlayerLostAllLives()
     {
+        this.sceneIsOver = true;
+
         this.playerLivesUI.visible=false;
-        // TODO
-        this.gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
+
+        const gameOverText = this.add.bitmapText(config.width/2 -20, config.height/2, 'gameFont', 'GAME OVER', 12)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+        gameOverText.depth = 20;
         // update HUD and go to main menu
+
+        this.gameOver.play();
         
         this.time.delayedCall(3000, this.backToMenu, [], this);
     }
@@ -631,6 +716,11 @@ class level extends Phaser.Scene
         {
             this.enemies[i].resetPatrol();
         }
+    }
+
+    isSceneOver()
+    {
+        return this.sceneIsOver;
     }
 
 }
