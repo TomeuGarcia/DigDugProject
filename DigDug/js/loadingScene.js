@@ -76,7 +76,7 @@ class loadingScene extends Phaser.Scene
         this.load.audio('playerPumping', 'PlayerPumping.mp3');
         this.load.audio('playerDisappearing', 'PlayerDisappearing.mp3');
         this.load.audio('playerTouched', 'PlayerTouched.mp3');
-        this.load.audio('playerWalking', 'PlayerWalking.mp3');
+        this.load.audio('playerWalking', 'PlayerWalking.mp3');//'LaXalana_1.mp3');
         // rock
         this.load.audio('rockBroken', 'RockBroken.mp3');
         this.load.audio('rockDropping', 'RockDropping.mp3');

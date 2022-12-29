@@ -44,6 +44,13 @@ class fygarPrefab extends enemyBase
             this.startTryAttackTimer();
         }        
     }
+    
+    doDie()
+    {
+        super.doDie();
+
+        this.fire.stopFire();
+    }
 
     startTryAttackTimer()
     {
