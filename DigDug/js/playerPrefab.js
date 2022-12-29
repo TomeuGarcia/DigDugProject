@@ -83,8 +83,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
 
         if (this.playerState == PlayerStates.MOVING)
         {
-            this.tryPlayMoveSound();
             this.updateMovingState();
+            this.tryPlayMoveSound();
         }
         else if (this.playerState == PlayerStates.PUMPING)
         {
@@ -188,13 +188,15 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     }
 
     tryPlayMoveSound()
-    {
-        if ((this.moveX != 0 || this.moveY != 0) && !this.isMovingSoundPlaying) 
+    {        
+        const isMoving = !((this.moveX < 0.1 && this.moveX > -0.1) && (this.moveY < 0.1 && this.moveY > -0.1));
+
+        if (isMoving && !this.isMovingSoundPlaying) 
         { 
             this.scene.playerWalking.resume();
             this.isMovingSoundPlaying = true;
         }
-        else if (this.moveX == 0 && this.moveY == 0 && this.isMovingSoundPlaying)
+        else if (!isMoving && this.isMovingSoundPlaying)
         { 
             this.scene.playerWalking.pause(); 
             this.isMovingSoundPlaying = false;
