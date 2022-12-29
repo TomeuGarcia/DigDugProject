@@ -17,6 +17,10 @@ class menu extends Phaser.Scene
 		this.pointer = this.add.sprite(config.width/2 - 45, config.height/2 + 3, 'pointer').setOrigin(0.5).setScale(.7);
 
 		this.credit = this.sound.add('credit', {volume: audioPrefs.VOLUME});
+		this.menuMusic = this.sound.add('nameEntry', {volume: audioPrefs.VOLUME});
+		this.menuMusic.loop = true;
+
+		this.musicIsPlaying = false;
 
 		// Player 1 score
 		this.firstPlayerScoreText = this.add.bitmapText(50, 30, 'gameFont', '1UP', 10)
@@ -93,6 +97,7 @@ class menu extends Phaser.Scene
 
 	startGame()
 	{
+		this.menuMusic.stop();
 		this.credit.play();
 		this.time.delayedCall(1000, this.changeScene, [], this);
 	}
@@ -109,6 +114,12 @@ class menu extends Phaser.Scene
 
 	update()
 	{
+		if (!this.musicIsPlaying)
+		{
+			this.menuMusic.play();
+			this.musicIsPlaying = true;
+		}
+
         if (this.cursors.down.isDown) 
 		{
 			this.pointer.setY(config.height / 2 + 23);
