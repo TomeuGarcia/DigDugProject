@@ -76,6 +76,7 @@ class level extends Phaser.Scene
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
         this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
+        this.fruitBonus = this.sound.add('bonusSound', {volume: audioPrefs.VOLUME});
         // Enemies
         this.fygarFire = this.sound.add('fygarFire', {volume: audioPrefs.VOLUME});
         this.enemyBlowUp = this.sound.add('enemyBlowUp', {volume: audioPrefs.VOLUME});
@@ -222,6 +223,7 @@ class level extends Phaser.Scene
         const playerPos = _player.getCenterPixPos();
         if (fruitPos.distance(playerPos) > gamePrefs.PLAYER_HIT_DIST) return;
 
+        this.fruitBonus.play();
 
         //_fruit.disable();
         _fruit.canBePickedUp = false;
@@ -275,6 +277,8 @@ class level extends Phaser.Scene
 
     loadNextScene()
     {
+        this.playerWalking.stop();
+
         if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
         {
             this.scene.start('menu');
