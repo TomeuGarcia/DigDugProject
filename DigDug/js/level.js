@@ -1,5 +1,6 @@
 var shapeMask;
 
+
 class level extends Phaser.Scene
 {
     constructor(_sceneKey)
@@ -12,7 +13,7 @@ class level extends Phaser.Scene
         this.levelNumber = levelInitData.levelNumber;
         this.playerLivesCount = levelInitData.playerLivesCount;
         this.playerScoreCount = levelInitData.playerScoreCount;
-        console.log(this.playerScoreCount);
+        this.digMode = levelInitData.digMode;
     }
 
     preload()
@@ -42,32 +43,9 @@ class level extends Phaser.Scene
         this.initScore();
         this.initFruits();
 
-        //this.loadAnimations();
-
-        //this.player.body.collideWorldBounds = true;
-        this.physics.add.collider
-        (
-            this.player,
-            this.borders
-        );
-
-        this.physics.add.overlap(
-            this.player.harpoonH,
-            this.enemyGroup,
-            this.player.harpoonH.onEnemyOverlap,
-            null,
-            this
-        );
-
-        this.physics.add.overlap(
-            this.player.harpoonV,
-            this.enemyGroup,
-            this.player.harpoonV.onEnemyOverlap,
-            null,
-            this
-        );
-
         this.startAnim();
+
+        this.digModeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     }
 
     loadAudios()
@@ -251,7 +229,8 @@ class level extends Phaser.Scene
     update()
     {
         this.setPlayerInputs();
-    }
+        this.checkDigMode();
+    }    
 
     checkIfWon()
     {
@@ -291,7 +270,11 @@ class level extends Phaser.Scene
         {
             const nextLevelNumber = this.levelNumber + 1;
             this.scene.start('level' + nextLevelNumber, 
-                            {levelNumber: nextLevelNumber, playerLivesCount: this.player.lives, playerScoreCount: this.player.score});
+                            { levelNumber: nextLevelNumber, 
+                              playerLivesCount: this.player.lives, 
+                              playerScoreCount: this.player.score,
+                              digMode: this.digMode }
+                            );
         }
     }
 
@@ -455,6 +438,28 @@ class level extends Phaser.Scene
             this.enemies[i].initCollisionsWithPlayer();
             this.enemyGroup.add(this.enemies[i]);
         }
+
+        this.physics.add.collider
+        (
+            this.player,
+            this.borders
+        );
+
+        this.physics.add.overlap(
+            this.player.harpoonH,
+            this.enemyGroup,
+            this.player.harpoonH.onEnemyOverlap,
+            null,
+            this
+        );
+
+        this.physics.add.overlap(
+            this.player.harpoonV,
+            this.enemyGroup,
+            this.player.harpoonV.onEnemyOverlap,
+            null,
+            this
+        );
     }
 
     removeRockCollisions(_rock)
@@ -556,6 +561,16 @@ class level extends Phaser.Scene
         return false;
     }
 
+
+    checkDigMode()
+    {
+        if (Phaser.Input.Keyboard.JustDown(this.digModeKey))
+        {
+            const newDigMode = (this.digMode + 1) % DigMode.COUNT;
+            this.digMode = newDigMode;
+        }
+    }
+
     dig(pixPos)
     {
         const cellPos = this.pix2cell(pixPos.x, pixPos.y);
@@ -574,7 +589,7 @@ class level extends Phaser.Scene
         }
         
         
-        if (false) // Smooth digging
+        if (this.digMode == DigMode.SHAPE_MASK) // Smooth digging
         {
             // remove decimal part
             var desiredX = ~~pixPos.x;

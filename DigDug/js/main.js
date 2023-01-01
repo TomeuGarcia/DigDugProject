@@ -54,6 +54,14 @@ var loadPrefs =
     FRUIT_RESPAWN_CLASS: 'fruitRespawn'
 }
 
+
+const DigMode = {
+    SHAPE_MASK: 0,
+    SPRITE_MASK: 1,
+    COUNT: 2
+}
+
+
 var audioPrefs =
 {
     VOLUME: 0.05
