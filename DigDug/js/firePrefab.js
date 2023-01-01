@@ -173,7 +173,10 @@ class firePrefab extends Phaser.GameObjects.Sprite
 
     resetOwnerPatrol()
     {
-        this.ownerEndAttackCallback(this.owner);
+        if (this.owner != null)
+        {
+            this.ownerEndAttackCallback(this.owner);
+        }        
     }
 
     resetSelfValues()

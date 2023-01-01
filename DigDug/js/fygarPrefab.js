@@ -47,9 +47,8 @@ class fygarPrefab extends enemyBase
     
     doDie()
     {
+        if (this.fire.isAttacking) this.fire.stopFire();
         super.doDie();
-
-        this.fire.stopFire();
     }
 
     startTryAttackTimer()
@@ -133,6 +132,13 @@ class fygarPrefab extends enemyBase
     {
         this.fire.stopFire();
         super.respawn();                
+    }
+
+
+    setInfaltedState()
+    {
+        this.fire.stopFire();
+        super.setInfaltedState();
     }
 
 }

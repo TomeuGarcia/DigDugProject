@@ -26,7 +26,7 @@ var gamePrefs =
     BIG_RED_FLOWER_LVL_COUNT: 30,
     BIG_FLOWER_LVL_COUNT: 10,
     FIRST_LEVEL_NUMBER: 1,
-    LAST_LEVEL_NUMBER: 3,
+    LAST_LEVEL_NUMBER: 5,
     TIME_UNTIL_NEXT_SCENE: 4000,
     TIME_PAUSE_PLAYER_KILLED: 2000
 }
@@ -65,7 +65,7 @@ var config =
     type: Phaser.AUTO,
     width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
     height: gamePrefs.CELL_SIZE * 18, // window.innerHeight
-    scene:[loadingScene, menu, level1, level2, level3], // levels/screens/scenes array
+    scene:[loadingScene, menu, level1, level2, level3, level4, level5], // levels/screens/scenes array
     render:
     {
         pixelArt: true

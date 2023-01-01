@@ -75,6 +75,7 @@ class level extends Phaser.Scene
         this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
         this.gameOver = this.sound.add('gameOver', {volume: audioPrefs.VOLUME});
         this.lastOneMusic = this.sound.add('lastOneMusic', {volume: audioPrefs.VOLUME});
+        this.lastOneMusic.loop = true
         this.lastOneSound = this.sound.add('lastOneSound', {volume: audioPrefs.VOLUME});
         this.fruitBonus = this.sound.add('bonusSound', {volume: audioPrefs.VOLUME});
         // Enemies
