@@ -12,7 +12,7 @@ class harpoonPrefab extends Phaser.GameObjects.Sprite
 
         this.scene = _scene;
         this.lifetime = _lifetime;
-        this.hitDirThreshold = 0.95;
+        this.hitDirThreshold = 0.98;
 
         this.lifetimeTimer = _scene.time.addEvent(
             {
