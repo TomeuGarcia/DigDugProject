@@ -619,16 +619,20 @@ class enemyBase extends Phaser.GameObjects.Sprite
             return;
         }
 
-        this.isDead = true;
         this.anims.stop();
         if (this.deflateTimer != null) this.deflateTimer.remove(false);
 
         this.startDespawnTimer();
+
+        this.isDead = true;
     }
 
     startDespawnTimer()
     {
-        this.playerOverlap.destroy();
+        if (this.isDead || this.isDespawning) return;
+
+        if (this.playerOverlap != null)
+            this.playerOverlap.destroy();            
 
         this.isDespawning = true;
         this.despawnTimer = this.scene.time.addEvent({
