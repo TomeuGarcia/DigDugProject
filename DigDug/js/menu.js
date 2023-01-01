@@ -5,6 +5,11 @@ class menu extends Phaser.Scene
         super({key: 'menu'});
 	}
 
+	init(menuInitData)
+	{
+		this.digMode = menuInitData.digMode;
+	}
+
 	preload()
 	{
 	}
@@ -125,7 +130,11 @@ class menu extends Phaser.Scene
 		const playerScoreCount = 0;
 
 		this.scene.start('level' + levelNumber, 
-						{levelNumber: levelNumber, playerLivesCount: playerLivesCount, playerScoreCount : playerScoreCount});
+						{ levelNumber: levelNumber, 
+						  playerLivesCount: playerLivesCount, 
+						  playerScoreCount : playerScoreCount,
+						  digMode: this.digMode }
+					);
 	}
 
 	update()
