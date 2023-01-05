@@ -48,6 +48,13 @@ class level extends Phaser.Scene
         this.digModeKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     }
 
+    update()
+    {
+        this.setPlayerInputs();
+        this.checkDigMode();
+    }   
+
+    //// CREATE start
     loadAudios()
     {
         this.stageClear = this.sound.add('stageClear', {volume: audioPrefs.VOLUME});
@@ -80,21 +87,196 @@ class level extends Phaser.Scene
         this.rockDropping.loop = true;
     }
 
-    startAnim()
+    loadLevel()
     {
-        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
-        this.player.body.setVelocityX(0);
-        this.player.body.setVelocityY(0);
+        // Draw Level
+        // Load the JSON
+        this.map = this.add.tilemap(this.tilemap_tag);
+        // Load tilesets
+        this.map.addTilesetImage('digDugTileset');
+        // Draw the layers
+        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');;
+        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
+        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');
 
+        this.map.setCollisionBetween(3, 49, true, true, 'layer_borders');
+        this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
-        this.pauseEnemies();
+        
+        const levelJSON = this.cache.json.get(this.json_tag);
+        const levelGroundLayer = levelJSON.layers[2];
+        const levelBordersLayer = levelJSON.layers[0];
+        this.levelWidth = levelGroundLayer.width;
+        this.levelHeight = levelGroundLayer.height;
+        this.levelArray = [];
+        for (var i = 0; i < this.levelHeight; ++i)
+        {
+            this.levelArray.push([]);
+            for (var j = 0; j < this.levelWidth; ++j)
+            {
+                const index = (i*this.levelWidth) + j;
+                if (levelGroundLayer.data[index] == 0 && 
+                    levelBordersLayer.data[index] == 0)
+                {
+                    this.levelArray[i].push(MapContent.Empty)
+                }
+                else
+                {
+                    const x = i % this.levelWidth;
+                    const y = i / this.levelHeight;
+    
+                    this.levelArray[i].push(MapContent.Ground);                    
+                }
+            }
+        }   
 
-        this.time.delayedCall(1500, this.finishAnimation, [], this);        
     }
-    finishAnimation()
+
+    // create objects
+    createObjectOfClass(objectClass, pixPos)
     {
-        this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
-        this.resumeEnemies();
+        switch (objectClass)
+        {
+            case loadPrefs.POOKA_CLASS:
+                this.spawnPooka(pixPos);
+                break;
+
+            case loadPrefs.FYGAR_CLASS:
+                this.spawnFygar(pixPos);
+                break;
+
+            case loadPrefs.ROCK_CLASS:
+                this.spawnRock(pixPos);
+                break;
+
+            case loadPrefs.PLAYER_RESPAWN_CLASS:
+                this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            case loadPrefs.FRUIT_RESPAWN_CLASS:
+                this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    spawnRock(pixPos)
+    {
+        const rock = new rockPrefab(this, pixPos.x, pixPos.y, 'rock');
+        this.rocks.push(rock);
+
+        const rockCell = this.pix2cell(pixPos.x, pixPos.y);
+        rock.spawnCell = rockCell;
+        this.rockCells.push(rockCell);
+
+        this.physics.add.collider
+        (
+            rock,
+            this.borders
+        );
+        this.physics.add.collider
+        (
+            rock,
+            this.digGround
+        );
+    }
+
+    spawnPooka(pixPos)
+    {
+        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 4, 200));
+    }
+    
+    spawnFygar(pixPos)
+    {
+        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
+    }
+    // create objects (END)
+
+
+    setupDigging()
+    {
+        shapeMask = this.make.graphics();
+        shapeMask.fillStyle(0xffffff);
+        shapeMask.beginPath();
+
+        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT));
+
+        this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
+        this.renderTexture.mask = this.mask;
+
+        this.renderTexture.draw(this.digGround);
+        this.renderTexture.draw(this.surface);
+        this.digGround.alpha = 0.5; // make layer invisible
+        this.surface.alpha = 0.5;
+
+        this.digBrush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
+    }
+
+    initLevelObjects()
+    {        
+        new levelFlowers(this, gamePrefs.CELL_SIZE * 15, gamePrefs.CELL_SIZE * 3, 'flowers', this.levelNumber);
+
+        this.rocks = [];
+        this.rockCells = [];
+        this.enemies = [];
+        this.enemyGroup = this.add.group();
+        this.enemyCount = 0;
+
+        const levelJSON = this.cache.json.get(this.json_tag);
+        const levelObjects = levelJSON.layers[3].objects;
+        for (var i = 0; i < levelObjects.length; ++i)
+        {
+            const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
+            const pixPos = this.cell2pix(cellPos.x, cellPos.y);
+
+            this.createObjectOfClass(levelObjects[i].class, pixPos);
+        }        
+    }
+
+    initPlayer()
+    {
+        this.cursorKeys = this.input.keyboard.createCursorKeys();
+        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', 
+                                       this.cursorKeys, this.playerRespawnPos, this.playerLivesCount);
+        this.player.score = this.playerScoreCount;
+
+        this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
+        this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
+
+        this.sceneIsOver = false;
+    }
+
+    initPlayerCollisions()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].initCollisionsWithPlayer();
+            this.enemyGroup.add(this.enemies[i]);
+        }
+
+        this.physics.add.collider
+        (
+            this.player,
+            this.borders
+        );
+
+        this.physics.add.overlap(
+            this.player.harpoonH,
+            this.enemyGroup,
+            this.player.harpoonH.onEnemyOverlap,
+            null,
+            this
+        );
+
+        this.physics.add.overlap(
+            this.player.harpoonV,
+            this.enemyGroup,
+            this.player.harpoonV.onEnemyOverlap,
+            null,
+            this
+        );
     }
 
     initScore()
@@ -116,7 +298,45 @@ class level extends Phaser.Scene
         this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', this.playerScoreCount, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
     }
-    
+
+    initFruits()
+    {
+        this.fruits = [];
+        this.fruitsGroup = this.add.group();
+
+        for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
+        {
+            const points = (i+1) * 25 + 200;
+            this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
+            this.fruitsGroup.add(this.fruits[i]);
+
+            this.fruits[i].setActive(false);
+            this.fruits[i].visible = false;
+        }
+
+        this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
+        this.spawnFruitDelayed();     
+    }
+
+    startAnim()
+    {
+        this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
+        this.player.body.setVelocityX(0);
+        this.player.body.setVelocityY(0);
+
+
+        this.pauseEnemies();
+
+        this.time.delayedCall(1500, this.finishAnimation, [], this);        
+    }
+    finishAnimation()
+    {
+        this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
+        this.resumeEnemies();
+    }
+
+
+    // Score points
     addScore(_score, _posX, _posY)
     {
         this.player.score += _score;
@@ -164,25 +384,8 @@ class level extends Phaser.Scene
 
     }
 
-    initFruits()
-    {
-        this.fruits = [];
-        this.fruitsGroup = this.add.group();
 
-        for (var i = 0; i < gamePrefs.NUM_FRUITS; ++i)
-        {
-            const points = (i+1) * 25 + 200;
-            this.fruits.push(new fruitPrefab(this, 0, 0, 'fruits', i, points));
-            this.fruitsGroup.add(this.fruits[i]);
-
-            this.fruits[i].setActive(false);
-            this.fruits[i].visible = false;
-        }
-
-        this.physics.add.overlap(this.player, this.fruitsGroup, this.collectFruit, null, this);
-        this.spawnFruitDelayed();     
-    }
-
+    // Fruits
     spawnFruitDelayed()
     {
         const randomDelay = Phaser.Math.Between(gamePrefs.FRUIT_SPAWN_MIN_DELAY, gamePrefs.FRUIT_SPAWN_MAX_DELAY);
@@ -225,12 +428,7 @@ class level extends Phaser.Scene
         this.addScore(_fruit.points, fruitPos.x, fruitPos.y);
         this.spawnFruitDelayed();
     }
-
-    update()
-    {
-        this.setPlayerInputs();
-        this.checkDigMode();
-    }    
+ 
 
     checkIfWon()
     {
@@ -278,6 +476,8 @@ class level extends Phaser.Scene
         }
     }
 
+
+    // Player inputs
     setPlayerInputs()
     {
         this.playerMoveAxisFunction();
@@ -302,166 +502,11 @@ class level extends Phaser.Scene
         if (this.cursorKeys.space.isDown) this.player.harpoonKeyPressed = true;
         else if (this.cursorKeys.space.isUp) this.player.harpoonKeyPressed = false;        
     }
+    // Player inputs (END)
 
-    //// CREATE start
-    loadLevel()
-    {
-        // Draw Level
-        // Load the JSON
-        this.map = this.add.tilemap(this.tilemap_tag);
-        // Load tilesets
-        this.map.addTilesetImage('digDugTileset');
-        // Draw the layers
-        this.borders = this.map.createLayer('layer_borders', 'digDugTileset');;
-        this.digGround = this.map.createLayer('layer_ground', 'digDugTileset');
-        this.surface = this.map.createLayer('layer_surface', 'digDugTileset');
 
-        this.map.setCollisionBetween(3, 49, true, true, 'layer_borders');
-        this.map.setCollisionBetween(1, 60, true, true, 'layer_ground');
 
-        
-        const levelJSON = this.cache.json.get(this.json_tag);
-        const levelGroundLayer = levelJSON.layers[2];
-        const levelBordersLayer = levelJSON.layers[0];
-        this.levelWidth = levelGroundLayer.width;
-        this.levelHeight = levelGroundLayer.height;
-        this.levelArray = [];
-        for (var i = 0; i < this.levelHeight; ++i)
-        {
-            this.levelArray.push([]);
-            for (var j = 0; j < this.levelWidth; ++j)
-            {
-                const index = (i*this.levelWidth) + j;
-                if (levelGroundLayer.data[index] == 0 && 
-                    levelBordersLayer.data[index] == 0)
-                {
-                    this.levelArray[i].push(MapContent.Empty)
-                }
-                else
-                {
-                    const x = i % this.levelWidth;
-                    const y = i / this.levelHeight;
-    
-                    this.levelArray[i].push(MapContent.Ground);                    
-                }
-            }
-        }   
-
-    }
-
-    initLevelObjects()
-    {        
-        new levelFlowers(this, gamePrefs.CELL_SIZE * 15, gamePrefs.CELL_SIZE * 3, 'flowers', this.levelNumber);
-
-        this.rocks = [];
-        this.rockCells = [];
-        this.enemies = [];
-        this.enemyGroup = this.add.group();
-        this.enemyCount = 0;
-
-        const levelJSON = this.cache.json.get(this.json_tag);
-        const levelObjects = levelJSON.layers[3].objects;
-        for (var i = 0; i < levelObjects.length; ++i)
-        {
-            const cellPos = this.pix2cell(levelObjects[i].x, levelObjects[i].y);
-            const pixPos = this.cell2pix(cellPos.x, cellPos.y);
-
-            this.createObjectOfClass(levelObjects[i].class, pixPos);
-        }        
-    }
-
-    createObjectOfClass(objectClass, pixPos)
-    {
-        switch (objectClass)
-        {
-            case loadPrefs.POOKA_CLASS:
-                this.spawnPooka(pixPos);
-                break;
-
-            case loadPrefs.FYGAR_CLASS:
-                this.spawnFygar(pixPos);
-                break;
-
-            case loadPrefs.ROCK_CLASS:
-                this.spawnRock(pixPos);
-                break;
-
-            case loadPrefs.PLAYER_RESPAWN_CLASS:
-                this.playerRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                break;
-
-            case loadPrefs.FRUIT_RESPAWN_CLASS:
-                this.fruitRespawnPos = new Phaser.Math.Vector2(pixPos.x, pixPos.y);
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    setupDigging()
-    {
-        shapeMask = this.make.graphics();
-        shapeMask.fillStyle(0xffffff);
-        shapeMask.beginPath();
-
-        this.renderTexture = this.add.renderTexture(0, 0, gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_WIDTH), gamePrefs.CELL_SIZE * (gamePrefs.NUM_CELL_HEIGHT));
-
-        this.mask = shapeMask.createGeometryMask().setInvertAlpha(true);
-        this.renderTexture.mask = this.mask;
-
-        this.renderTexture.draw(this.digGround);
-        this.renderTexture.draw(this.surface);
-        this.digGround.alpha = 0.5; // make layer invisible
-        this.surface.alpha = 0.5;
-
-        this.digBrush = this.make.image({key: 'brush'}, false).setOrigin(0.5); //////////
-    }
-
-    initPlayer()
-    {
-        this.cursorKeys = this.input.keyboard.createCursorKeys();
-        this.player = new playerPrefab(this, this.playerRespawnPos.x, this.playerRespawnPos.y, 'player', 
-                                       this.cursorKeys, this.playerRespawnPos, this.playerLivesCount);
-        this.player.score = this.playerScoreCount;
-
-        this.playerLivesUI = this.add.sprite(gamePrefs.CELL_SIZE * 17, gamePrefs.CELL_SIZE * 10,'playerLives',0);
-        this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
-
-        this.sceneIsOver = false;
-    }
-
-    initPlayerCollisions()
-    {
-        for (var i = 0; i < this.enemies.length; ++i)
-        {
-            this.enemies[i].initCollisionsWithPlayer();
-            this.enemyGroup.add(this.enemies[i]);
-        }
-
-        this.physics.add.collider
-        (
-            this.player,
-            this.borders
-        );
-
-        this.physics.add.overlap(
-            this.player.harpoonH,
-            this.enemyGroup,
-            this.player.harpoonH.onEnemyOverlap,
-            null,
-            this
-        );
-
-        this.physics.add.overlap(
-            this.player.harpoonV,
-            this.enemyGroup,
-            this.player.harpoonV.onEnemyOverlap,
-            null,
-            this
-        );
-    }
-
+    // Rock
     removeRockCollisions(_rock)
     {
         const index = this.rockCells.indexOf(_rock.spawnCell);
@@ -473,39 +518,32 @@ class level extends Phaser.Scene
             
     }
 
-    spawnRock(pixPos)
+    squishEnemy(_enemy)
     {
-        const rock = new rockPrefab(this, pixPos.x, pixPos.y, 'rock');
-        this.rocks.push(rock);
-
-        const rockCell = this.pix2cell(pixPos.x, pixPos.y);
-        rock.spawnCell = rockCell;
-        this.rockCells.push(rockCell);
-
-        this.physics.add.collider
-        (
-            rock,
-            this.borders
-        );
-        this.physics.add.collider
-        (
-            rock,
-            this.digGround
-        );
+        _enemy.setSquished();
     }
 
-    spawnPooka(pixPos)
+    squishPlayer()
     {
-        this.enemies.push(new enemyBase(this, pixPos.x, pixPos.y, 'pooka', 'pookaInflate', 'pookaWalking', 'pookaGhosting', 4, 200));
+        this.player.setSquished();
     }
-    
-    spawnFygar(pixPos)
+
+    cellHasRock(_cellPos)
     {
-        this.enemies.push(new fygarPrefab(this, pixPos.x, pixPos.y, 'fygar', 'fygarInflate', 'fygarWalking', 'fygarGhosting', 3, 300));
+        for (var i = 0; i < this.rockCells.length; ++i)
+        {
+            const itRockCell = this.rockCells[i];
+            if (itRockCell.x == _cellPos.x && itRockCell.y == _cellPos.y)
+            {
+                return true;
+            }
+        }
+        return false;
     }
-    //// CREATE end
+    // Rock (END)
 
 
+    // Enemy inflation
     inflateEnemy(_enemy)
     {
         if (!_enemy.canInflate) return;
@@ -521,47 +559,41 @@ class level extends Phaser.Scene
         }
     }
 
-    squishEnemy(_enemy)
+    notifyPlayerEnemyReleased()
     {
-        _enemy.setSquished();
+        this.player.onEnemyGotReleased();
     }
 
-    squishPlayer()
+    notifyPlayerEnemyDiedInflated()
     {
-        this.player.setSquished();
+        this.player.onEnemyDiedInflated();
     }
+    // Enemy inflation (END)
+
+
+    // Other Enemy functions
+    pauseEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].setPaused();
+        }
+    }
+
+    resumeEnemies()
+    {
+        for (var i = 0; i < this.enemies.length; ++i)
+        {
+            this.enemies[i].resetPatrol();
+        }
+    }
+    // Other Enemy functions (END)
+
 
     
     //// OTHER
-    canMoveHorizontaly(body)
-    {
-        return this.canMove(parseInt(body.y) + gamePrefs.HALF_CELL_SIZE);
-    }
 
-    canMoveVertically(body)
-    {
-        return this.canMove(parseInt(body.x) + gamePrefs.HALF_CELL_SIZE);
-    }
-
-    canMove(pixel)
-    {
-        return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
-    }
-
-    cellHasRock(_cellPos)
-    {
-        for (var i = 0; i < this.rockCells.length; ++i)
-        {
-            const itRockCell = this.rockCells[i];
-            if (itRockCell.x == _cellPos.x && itRockCell.y == _cellPos.y)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
+    // Digging 
     checkDigMode()
     {
         if (Phaser.Input.Keyboard.JustDown(this.digModeKey))
@@ -637,6 +669,40 @@ class level extends Phaser.Scene
         
     }
 
+    removeGroundCell(cellX, cellY)
+    {
+        this.levelArray[cellY][cellX] = MapContent.Empty;
+
+        const pixPos = this.cell2pix(cellX, cellY);
+
+        shapeMask.fillRect(pixPos.x - game.HALF_CELL_SIZE -1, pixPos.y - game.HALF_CELL_SIZE-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
+    }
+    // Digging (END)
+
+
+    // Movement
+    canMoveHorizontaly(body)
+    {
+        return this.canMove(parseInt(body.y) + gamePrefs.HALF_CELL_SIZE);
+    }
+
+    canMoveVertically(body)
+    {
+        return this.canMove(parseInt(body.x) + gamePrefs.HALF_CELL_SIZE);
+    }
+
+    canMove(pixel)
+    {
+        return (pixel % gamePrefs.CELL_SIZE) == gamePrefs.HALF_CELL_SIZE;
+    }
+
+    canMoveToCell(cellX, cellY)
+    {
+        if (cellX < 0 || cellX >= this.levelArray.width || cellY < 0 || cellY >= this.levelArray.height) return false;
+        return this.isEmptyCell(cellX, cellY);
+    }
+
+
     pix2cell(pixelX, pixelY)
     {
         return new Phaser.Math.Vector2(parseInt(pixelX/gamePrefs.CELL_SIZE), 
@@ -649,7 +715,6 @@ class level extends Phaser.Scene
                                        (cellY * gamePrefs.CELL_SIZE) + gamePrefs.HALF_CELL_SIZE);
     }
 
-
     isGroundCell(cellX, cellY)
     {
         return this.levelArray[cellY][cellX] == MapContent.Ground;
@@ -659,32 +724,9 @@ class level extends Phaser.Scene
     {
         return this.levelArray[cellY][cellX] == MapContent.Empty;
     }
+    // Movement (END)
 
-    canMoveToCell(cellX, cellY)
-    {
-        if (cellX < 0 || cellX >= this.levelArray.width || cellY < 0 || cellY >= this.levelArray.height) return false;
-        return this.isEmptyCell(cellX, cellY);
-    }
-
-    removeGroundCell(cellX, cellY)
-    {
-        this.levelArray[cellY][cellX] = MapContent.Empty;
-
-        const pixPos = this.cell2pix(cellX, cellY);
-
-        shapeMask.fillRect(pixPos.x - game.HALF_CELL_SIZE -1, pixPos.y - game.HALF_CELL_SIZE-1, gamePrefs.CELL_SIZE, gamePrefs.CELL_SIZE);
-    }
-
-    notifyPlayerEnemyReleased()
-    {
-        this.player.onEnemyGotReleased();
-    }
-
-    notifyPlayerEnemyDiedInflated()
-    {
-        this.player.onEnemyDiedInflated();
-    }
-
+    // Game State and Scene Management
     onPlayerLostALive()
     {     
         this.playerMoveAxisFunction = this.setPlayerAnimationInputs;
@@ -725,25 +767,10 @@ class level extends Phaser.Scene
         this.scene.start('menu');
     }
 
-    pauseEnemies()
-    {
-        for (var i = 0; i < this.enemies.length; ++i)
-        {
-            this.enemies[i].setPaused();
-        }
-    }
-
-    resumeEnemies()
-    {
-        for (var i = 0; i < this.enemies.length; ++i)
-        {
-            this.enemies[i].resetPatrol();
-        }
-    }
-
     isSceneOver()
     {
         return this.sceneIsOver;
     }
+    // Game State and Scene Management (END)
 
 }
