@@ -206,6 +206,6 @@ class loadingScene extends Phaser.Scene
 
     changeScene()
     {
-        this.scene.start('menu', { digMode: DigMode.SPRITE_MASK });
+        this.scene.start('credits', { digMode: DigMode.SPRITE_MASK });
     }
 }

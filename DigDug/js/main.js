@@ -73,7 +73,7 @@ var config =
     type: Phaser.AUTO,
     width: gamePrefs.CELL_SIZE * 20, // window.innerWidth
     height: gamePrefs.CELL_SIZE * 18, // window.innerHeight
-    scene:[loadingScene, menu, level1, level2, level3, level4, level5], // levels/screens/scenes array
+    scene:[loadingScene, menu, level1, level2, level3, level4, level5, credits], // levels/screens/scenes array
     render:
     {
         pixelArt: true
