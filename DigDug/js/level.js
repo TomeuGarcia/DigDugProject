@@ -297,6 +297,23 @@ class level extends Phaser.Scene
 
         this.scoreCountText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, gamePrefs.CELL_SIZE * 5.5, 'gameFont', this.playerScoreCount, 8)
                                             .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+
+        this.RoundText = this.add.bitmapText(config.width - gamePrefs.CELL_SIZE, config.height- gamePrefs.CELL_SIZE *4, 'gameFont', 'ROUND', 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+
+        this.RoundNumerText = this.add.bitmapText(config.width - gamePrefs.HALF_CELL_SIZE, config.height- gamePrefs.CELL_SIZE*3, 'gameFont', parseInt(this.levelNumber), 8)
+                                            .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(1, 0);
+
+        this.playerStartText = this.add.bitmapText(config.width/2- gamePrefs.CELL_SIZE *2, config.height/2 + gamePrefs.HALF_CELL_SIZE, 'gameFont', 'PLAYER 1', 8)
+        .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+
+        this.readyText = this.add.bitmapText(config.width/2 - gamePrefs.CELL_SIZE*2, config.height/2 + gamePrefs.HALF_CELL_SIZE*4, 'gameFont', 'ready!', 8)
+        .setTint(uiPrefs.TEXT_COLOR_WHITE).setOrigin(0.5, 0);
+
+        //this.playerStartText.visible = false;
+
+        //this.readyText.visible = false;
+
     }
 
     initFruits()
@@ -327,12 +344,23 @@ class level extends Phaser.Scene
 
         this.pauseEnemies();
 
-        this.time.delayedCall(1500, this.finishAnimation, [], this);        
+        this.time.delayedCall(1500, this.finishAnimation, [], this);  
+        //show text   
+   
     }
     finishAnimation()
     {
         this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
         this.resumeEnemies();
+        //hide text
+
+        this.playerStartText.visible = false;
+       
+
+        console.log(this.playerStartText);
+        this.readyText.visible = false;
+      
+
     }
 
 
@@ -462,7 +490,7 @@ class level extends Phaser.Scene
 
         if (this.levelNumber == gamePrefs.LAST_LEVEL_NUMBER)
         {
-            this.scene.start('menu');
+            this.scene.start('credits');
         }
         else
         {
