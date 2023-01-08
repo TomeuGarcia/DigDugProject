@@ -46,6 +46,11 @@ class level1 extends level
         this.player.flipX = true;
 
         this.time.delayedCall(400, this.animMoveLeft, [], this);
+
+        this.playerStartText.visible = false;
+        this.readyText.visible = false;
+        
+        
     }
 
     animMoveLeft()
@@ -73,9 +78,13 @@ class level1 extends level
         this.player.rotation = 0;
         this.player.playerMovement = PlayerMovement.LEFT
 
-        this.time.delayedCall(500, this.finishAnimation, [], this);
+        this.time.delayedCall(1000, this.finishAnimation, [], this);
+
+        this.playerStartText.visible = true;
+        this.readyText.visible = true;
+       
     }
- 
+     
     finishAnimation() // override
     {        
         this.startMusic.stop();
@@ -86,6 +95,9 @@ class level1 extends level
 
         this.playerMoveAxisFunction = this.setPlayerMoveAndHarpoonInputs;
         this.resumeEnemies();
+
+        this.playerStartText.visible = false;
+        this.readyText.visible = false;
     }
 
 
