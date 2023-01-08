@@ -51,6 +51,8 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.isDigging = false;
         this.isMovingSoundPlaying = false;
 
+        this.groundCollision = null;
+
         this.harpoonH = new harpoonHorizontalPrefab(_scene, this.body.x, this.body.y, 'harpoonH', 'maskHarpoonH');
         this.harpoonV = new harpoonVerticalPrefab(_scene, this.body.x, this.body.y, 'harpoonV', 'maskHarpoonV');
         this.alreadyUsedHarpoonInput = false;
@@ -490,6 +492,11 @@ class playerPrefab extends Phaser.GameObjects.Sprite
         this.y = this.respawnPosition.y;
 
         this.isHit = false;
+
+        if (this.groundCollision != null)
+        {
+            this.removeGroundCollision();
+        }
     }
 
     // == SQUISHED ==
@@ -552,8 +559,9 @@ class playerPrefab extends Phaser.GameObjects.Sprite
     }
 
     removeGroundCollision()
-    {
-        this.scene.physics.world.removeCollider(this.groundCollision);        
+    {        
+        this.scene.physics.world.removeCollider(this.groundCollision);   
+        this.groundCollision = null;     
     }
 
     // == == ==
