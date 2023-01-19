@@ -13,8 +13,7 @@ class level1 extends level
 
         this.playerWalkingHolder;
 
-        super.create();
-                
+        super.create();            
     }
 
     loadAudios()

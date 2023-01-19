@@ -52,6 +52,10 @@ class level extends Phaser.Scene
     {
         this.setPlayerInputs();
         this.checkDigMode();
+
+        //this.keyE = this.input.keyboard.addKey('E'); // ad additional key
+        //if (Phaser.Input.Keyboard.JustDown(this.keyE)) // key down once
+            //console.log("caca");
     }   
 
     //// CREATE start
@@ -246,6 +250,17 @@ class level extends Phaser.Scene
         this.playerLivesUI.setTexture('playerLives', 2-this.player.lives);    
 
         this.sceneIsOver = false;
+
+
+        this.zone = this.add.zone(30, 20, 200, 200);
+        this.physics.world.enable(this.zone, 1); // (0) DYNAMIC (1) STATIC
+        this.physics.add.overlap(
+            this.zone,
+            this.player,
+            () => console.log("trigger stay"),
+            null,
+            this
+        );
     }
 
     initPlayerCollisions()
